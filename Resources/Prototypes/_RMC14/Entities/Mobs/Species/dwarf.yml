@@ -21,5 +21,11 @@
     accent: dwarf
   - type: Speech
     speechSounds: Bass
+  - type: HumanoidAppearance
+    species: Dwarf
+    hideLayersOnEquip:
+    - UndergarmentTop
+    - Hair
+    - Snout
   - type: FixedIdentity
     name: cm-chatsan-replacement-dwarf

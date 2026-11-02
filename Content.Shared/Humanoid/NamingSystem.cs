@@ -12,7 +12,7 @@ namespace Content.Shared.Humanoid
     /// </summary>
     public sealed class NamingSystem : EntitySystem
     {
-        private static readonly ProtoId<SpeciesPrototype> FallbackSpecies = "Human";
+        private static readonly ProtoId<SpeciesPrototype> FallbackSpecies = "Dwarf";
 
         [Dependency] private readonly IRobustRandom _random = default!;
         [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
