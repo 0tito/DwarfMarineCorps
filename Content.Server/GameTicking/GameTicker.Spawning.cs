@@ -197,7 +197,7 @@ namespace Content.Server.GameTicking
                     var speciesPrototypes = _prototypeManager.EnumeratePrototypes<SpeciesPrototype>();
                     foreach (var proto in speciesPrototypes)
                     {
-                        if (proto.RoundStart)
+                        if (proto.RoundStart && SpeciesRestrictions.IsAllowed(proto))
                             roundStart.Add(proto.ID);
                     }
 
@@ -209,6 +209,12 @@ namespace Content.Server.GameTicking
                 {
                     var weights = _prototypeManager.Index<WeightedRandomSpeciesPrototype>(weightId);
                     speciesId = weights.Pick(_robustRandom);
+                }
+
+                if (!_prototypeManager.TryIndex<SpeciesPrototype>(speciesId, out var species) ||
+                    !SpeciesRestrictions.IsAllowed(species))
+                {
+                    speciesId = SpeciesRestrictions.AllowedSpecies.Id;
                 }
 
                 character = HumanoidCharacterProfile.RandomWithSpecies(speciesId);

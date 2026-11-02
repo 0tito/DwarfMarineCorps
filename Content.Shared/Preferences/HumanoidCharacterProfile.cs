@@ -277,7 +277,8 @@ namespace Content.Shared.Preferences
 
             var species = random.Pick(prototypeManager
                 .EnumeratePrototypes<SpeciesPrototype>()
-                .Where(x => ignoredSpecies == null ? x.RoundStart : x.RoundStart && !ignoredSpecies.Contains(x.ID))
+                .Where(x => x.RoundStart && SpeciesRestrictions.IsAllowed(x) &&
+                            (ignoredSpecies == null || !ignoredSpecies.Contains(x.ID)))
                 .ToArray()
             ).ID;
 
@@ -286,18 +287,20 @@ namespace Content.Shared.Preferences
 
         public static HumanoidCharacterProfile RandomWithSpecies(string? species = null)
         {
-            species ??= SharedHumanoidAppearanceSystem.DefaultSpecies;
+            species ??= SpeciesRestrictions.AllowedSpecies.Id;
 
             var prototypeManager = IoCManager.Resolve<IPrototypeManager>();
             var random = IoCManager.Resolve<IRobustRandom>();
 
-            var sex = Sex.Unsexed;
-            var age = 18;
-            if (prototypeManager.TryIndex<SpeciesPrototype>(species, out var speciesPrototype))
+            if (!prototypeManager.TryIndex<SpeciesPrototype>(species, out var speciesPrototype) ||
+                !SpeciesRestrictions.IsAllowed(speciesPrototype))
             {
-                sex = random.Pick(speciesPrototype.Sexes);
-                age = random.Next(speciesPrototype.MinAge, speciesPrototype.OldAge); // people don't look and keep making 119 year old characters with zero rp, cap it at middle aged
+                species = SpeciesRestrictions.AllowedSpecies.Id;
+                speciesPrototype = prototypeManager.Index<SpeciesPrototype>(species);
             }
+
+            var sex = random.Pick(speciesPrototype.Sexes);
+            var age = random.Next(speciesPrototype.MinAge, speciesPrototype.OldAge); // people don't look and keep making 119 year old characters with zero rp, cap it at middle aged
 
             var gender = Gender.Epicene;
 
@@ -584,9 +587,11 @@ namespace Content.Shared.Preferences
             var prototypeManager = collection.Resolve<IPrototypeManager>();
             var compFactory = collection.Resolve<IComponentFactory>();
 
-            if (!prototypeManager.TryIndex(Species, out var speciesPrototype) || speciesPrototype.RoundStart == false)
+            if (!prototypeManager.TryIndex(Species, out var speciesPrototype) ||
+                speciesPrototype.RoundStart == false ||
+                !SpeciesRestrictions.IsAllowed(speciesPrototype))
             {
-                Species = SharedHumanoidAppearanceSystem.DefaultSpecies;
+                Species = SpeciesRestrictions.AllowedSpecies;
                 speciesPrototype = prototypeManager.Index(Species);
             }
 

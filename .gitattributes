@@ -37,6 +37,17 @@
 Resources/Maps/**.yml merge=mapping-merge-driver
 
 ###############################################################################
+# Dwarf-only fork: prefer our species definitions when merging upstream.
+# Requires: git config merge.ours.driver true
+# New species files added upstream are not covered by this and are caught by
+# Content.IntegrationTests/Tests/PrototypeTests/DwarfOnlySpeciesTest.cs
+###############################################################################
+Resources/Prototypes/Species/**.yml merge=ours
+Resources/Prototypes/_RMC14/Species/**.yml merge=ours
+Resources/Prototypes/Guidebook/species.yml merge=ours
+Resources/ServerInfo/Guidebook/Mobs/Species.xml merge=ours
+
+###############################################################################
 # behavior for image files
 #
 # image files are treated as binary by default.
