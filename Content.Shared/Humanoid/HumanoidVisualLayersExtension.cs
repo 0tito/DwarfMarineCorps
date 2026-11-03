@@ -130,6 +130,8 @@ namespace Content.Shared.Humanoid
                     }
 
                     break;
+                case BodyPartType.Groin:
+                    break;
             }
 
             return null;

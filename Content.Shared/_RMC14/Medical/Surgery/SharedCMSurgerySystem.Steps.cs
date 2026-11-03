@@ -295,6 +295,7 @@ public abstract partial class SharedCMSurgerySystem
             BodyPartType.Foot => SlotFlags.FEET,
             BodyPartType.Tail => SlotFlags.NONE,
             BodyPartType.Other => SlotFlags.NONE,
+            BodyPartType.Groin => SlotFlags.OUTERCLOTHING | SlotFlags.LEGS,
             _ => SlotFlags.NONE
         };
 

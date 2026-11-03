@@ -1,0 +1,63 @@
+- type: body
+  id: DMCDwarf
+  name: "DMC dwarf"
+  root: torso
+  slots:
+    torso:
+      part: DwarfMedTorso
+      connections:
+      - head
+      - right_arm
+      - left_arm
+      - groin
+      organs:
+        heart: DwarfMedHeart
+        lungs: DwarfMedLungs
+        stomach: DwarfMedStomach
+        liver: DwarfMedLiver
+
+    head:
+      part: DwarfMedHead
+      organs:
+        brain: DwarfMedBrain
+        eyes: DwarfMedEyes
+
+    right_arm:
+      part: DwarfMedRightArm
+      connections:
+      - right_hand
+
+    left_arm:
+      part: DwarfMedLeftArm
+      connections:
+      - left_hand
+
+    right_hand:
+      part: DwarfMedRightHand
+
+    left_hand:
+      part: DwarfMedLeftHand
+
+    groin:
+      part: DwarfMedGroin
+      connections:
+      - right_leg
+      - left_leg
+      organs:
+        kidneys: DwarfMedKidneys
+
+    right_leg:
+      part: DwarfMedRightLeg
+      connections:
+      - right_foot
+
+    left_leg:
+      part: DwarfMedLeftLeg
+      connections:
+      - left_foot
+
+    right_foot:
+      part: DwarfMedRightFoot
+
+    left_foot:
+      part: DwarfMedLeftFoot

@@ -1,0 +1,170 @@
+- type: entity
+  id: PartDwarf
+  parent: [BaseItem, BasePart]
+  name: "dwarf body part"
+  abstract: true
+  components:
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: Fat
+        Quantity: 3
+      - ReagentId: Blood
+        Quantity: 10
+
+- type: entity
+  id: DwarfMedTorso
+  name: "dwarf torso"
+  parent: [PartDwarf, BaseTorso]
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+    state: "torso_m"
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: Fat
+        Quantity: 10
+      - ReagentId: Blood
+        Quantity: 20
+  - type: DwarfBodyPart
+    dismemberable: false
+    dismemberThreshold: 100
+    fractureThreshold: 50
+
+- type: entity
+  id: DwarfMedHead
+  name: "dwarf head"
+  parent: [PartDwarf, BaseHead]
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+    state: "head_m"
+  - type: Extractable
+    juiceSolution:
+      reagents:
+      - ReagentId: Fat
+        Quantity: 5
+      - ReagentId: Blood
+        Quantity: 10
+  - type: DwarfBodyPart
+    dismemberable: true
+    dismemberThreshold: 50
+    fractureThreshold: 25
+
+- type: entity
+  id: DwarfMedGroin
+  name: "dwarf groin"
+  parent: [PartDwarf, BaseGroin]
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+    state: "torso_m"
+  - type: DwarfBodyPart
+    dismemberable: false
+    dismemberThreshold: 80
+    fractureThreshold: 40
+
+- type: entity
+  id: DwarfMedLeftArm
+  name: "left dwarf arm"
+  parent: [PartDwarf, BaseLeftArm]
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+    state: "l_arm"
+  - type: DwarfBodyPart
+    dismemberable: true
+    dismemberThreshold: 40
+    fractureThreshold: 20
+
+- type: entity
+  id: DwarfMedRightArm
+  name: "right dwarf arm"
+  parent: [PartDwarf, BaseRightArm]
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+    state: "r_arm"
+  - type: DwarfBodyPart
+    dismemberable: true
+    dismemberThreshold: 40
+    fractureThreshold: 20
+
+- type: entity
+  id: DwarfMedLeftHand
+  name: "left dwarf hand"
+  parent: [PartDwarf, BaseLeftHand]
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+    state: "l_hand"
+  - type: DwarfBodyPart
+    dismemberable: true
+    dismemberThreshold: 25
+    fractureThreshold: 12
+
+- type: entity
+  id: DwarfMedRightHand
+  name: "right dwarf hand"
+  parent: [PartDwarf, BaseRightHand]
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+    state: "r_hand"
+  - type: DwarfBodyPart
+    dismemberable: true
+    dismemberThreshold: 25
+    fractureThreshold: 12
+
+- type: entity
+  id: DwarfMedLeftLeg
+  name: "left dwarf leg"
+  parent: [PartDwarf, BaseLeftLeg]
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+    state: "l_leg"
+  - type: DwarfBodyPart
+    dismemberable: true
+    dismemberThreshold: 40
+    fractureThreshold: 20
+
+- type: entity
+  id: DwarfMedRightLeg
+  name: "right dwarf leg"
+  parent: [PartDwarf, BaseRightLeg]
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+    state: "r_leg"
+  - type: DwarfBodyPart
+    dismemberable: true
+    dismemberThreshold: 40
+    fractureThreshold: 20
+
+- type: entity
+  id: DwarfMedLeftFoot
+  name: "left dwarf foot"
+  parent: [PartDwarf, BaseLeftFoot]
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+    state: "l_foot"
+  - type: DwarfBodyPart
+    dismemberable: true
+    dismemberThreshold: 25
+    fractureThreshold: 12
+
+- type: entity
+  id: DwarfMedRightFoot
+  name: "right dwarf foot"
+  parent: [PartDwarf, BaseRightFoot]
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+    state: "r_foot"
+  - type: DwarfBodyPart
+    dismemberable: true
+    dismemberThreshold: 25
+    fractureThreshold: 12
