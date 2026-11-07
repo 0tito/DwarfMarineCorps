@@ -2,6 +2,7 @@ using System.Globalization;
 using Content.Client._RMC14.Medical.HUD;
 using Content.Client.Atmos.Rotting;
 using Content.Client.Message;
+using Content.Shared._DwarfMC.Medical.DwarfMed;
 using Content.Shared._RMC14.Chemistry.Reagent;
 using Content.Shared._RMC14.Marines.Skills;
 using Content.Shared._RMC14.Medical.Defibrillator;
@@ -252,6 +253,38 @@ public sealed class HealthScannerUiData
         {
             window.MedicalAdviceLabel.Visible = false;
             window.MedicalAdviceSeparator.Visible = false;
+        }
+
+        PopulateDwarfMedDebug(window, uiState);
+    }
+
+    private static void PopulateDwarfMedDebug(HealthScannerWindow window, HealthScanState uiState)
+    {
+        window.DwarfMedDebugContainer.DisposeAllChildren();
+
+        var any = uiState.Parts.Count > 0;
+        window.DwarfMedDebugLabel.Visible = any;
+        window.DwarfMedDebugSeparator.Visible = any;
+        window.DwarfMedDebugContainer.Visible = any;
+
+        if (!any)
+            return;
+
+        foreach (var part in uiState.Parts)
+        {
+            var label = new Label();
+            if (part.Severed)
+            {
+                label.Text = $"{part.SlotId}: MISSING";
+            }
+            else
+            {
+                label.Text = $"{part.SlotId}: Slash {part.SlashDamage.Int()}/{part.SlashThreshold.Int()} " +
+                             $"Brute {part.BruteDamage.Int()}/{part.BruteThreshold.Int()} " +
+                             $"Burn {part.BurnDamage.Int()}/{part.BurnThreshold.Int()}";
+            }
+
+            window.DwarfMedDebugContainer.AddChild(label);
         }
     }
 

@@ -34,6 +34,14 @@ public sealed class DwarfMedBodyCommand : ToolshedCommand
         {
             var partName = EntityManager.GetComponent<MetaDataComponent>(id).EntityName;
             builder.AppendLine($"- {partName}: {part.PartType} {part.Symmetry}");
+
+            if (EntityManager.TryGetComponent<DwarfBodyPartComponent>(id, out var bodyPart))
+            {
+                builder.AppendLine(
+                    $"  Slash {bodyPart.SlashDamage}/{bodyPart.SlashThreshold} " +
+                    $"Brute {bodyPart.BruteDamage}/{bodyPart.BruteThreshold} " +
+                    $"Burn {bodyPart.BurnDamage}/{bodyPart.BurnThreshold}");
+            }
         }
 
         var organs = bodySystem.GetBodyOrgans(target, body).ToArray();

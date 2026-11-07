@@ -10,7 +10,28 @@ public sealed partial class DwarfBodyPartComponent : Component
     public bool Dismemberable = true;
 
     [DataField, AutoNetworkedField]
-    public FixedPoint2 DismemberThreshold = 40;
+    public FixedPoint2 MaxLocalDamage = 300;
+
+    [DataField, AutoNetworkedField]
+    public FixedPoint2 SlashDamage;
+
+    [DataField, AutoNetworkedField]
+    public FixedPoint2 BruteDamage;
+
+    [DataField, AutoNetworkedField]
+    public FixedPoint2 BurnDamage;
+
+    [DataField, AutoNetworkedField]
+    public FixedPoint2 SlashThreshold = 80;
+
+    [DataField, AutoNetworkedField]
+    public FixedPoint2 BruteThreshold = 120;
+
+    [DataField, AutoNetworkedField]
+    public FixedPoint2 BurnThreshold = 300;
+
+    [DataField, AutoNetworkedField]
+    public bool DismemberAttempted;
 
     [DataField, AutoNetworkedField]
     public FixedPoint2 FractureThreshold = 20;
@@ -26,4 +47,7 @@ public sealed partial class DwarfBodyPartComponent : Component
 
     [DataField, AutoNetworkedField]
     public float InternalBleedChanceMultiplier = 1f;
+
+    [DataField, AutoNetworkedField]
+    public float StumpBleedRate = 0.3f;
 }

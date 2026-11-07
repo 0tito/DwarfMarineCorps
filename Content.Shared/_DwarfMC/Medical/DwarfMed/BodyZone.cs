@@ -1,8 +1,10 @@
+using Robust.Shared.Serialization;
+
 namespace Content.Shared._DwarfMC.Medical.DwarfMed;
 
-public enum DwarfBodyZone : byte
+[Serializable, NetSerializable]
+public enum BodyZone : byte
 {
-    Random,
     Head,
     Chest,
     Groin,

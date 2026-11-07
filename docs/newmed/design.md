@@ -1,12 +1,15 @@
-# NewMed Design Document
+# DwarfMed (NewMed) Design Document
 
-Status: Design
+Status: Phase 0 and Phase 1 complete; Phase 2 next
 Branch: `EvilMed`
 Scope: Dwarf-only per-limb medical system
 
+Naming note: `NewMed` is the design name. The implementation uses `DwarfMed`,
+`DwarfMedBaseMobSpeciesOrganic`, and the body prototype `DMCDwarf`.
+
 ## 1. Summary
 
-NewMed replaces the current body-global medical model with a per-region anatomy
+DwarfMed replaces the current body-global medical model with a per-region anatomy
 model for dwarfs.
 
 The body is divided into:
@@ -19,9 +22,10 @@ The body is divided into:
 - Left and right legs
 - Left and right feet
 
-Each part tracks local damage. Once a part passes its dismember threshold, slash
-attacks have a chance to sever it. Chest and groin cannot be severed. Severing a
-limb causes no extra damage, only stump bleeding and loss of function.
+The body always takes full damage. The targeted limb receives a percentage of
+that damage as local delimb progress. When a limb accumulator crosses its
+threshold, a delimb event is raised. Chest and groin cannot be severed. Severing
+a limb causes no extra damage, only stump bleeding and loss of function.
 
 The system also adds:
 
@@ -32,14 +36,14 @@ The system also adds:
 - New surgical procedures for bones, internal bleeding, stumps, and organs
 
 Existing global health remains the source of truth for critical and death states.
-For NewMed dwarfs, the thresholds are 100 critical and 200 dead.
+For DwarfMed dwarfs, the thresholds are 100 critical and 200 dead.
 
 ## 2. Goals
 
 - Make limb damage meaningful without requiring a full medical rewrite.
 - Make delimbing a tactical consequence rather than a damage spike.
 - Keep existing armor, chemistry, defibrillator, and mob-state systems working.
-- Keep NewMed dwarf-only and merge-friendly for upstream RMC14 updates.
+- Keep DwarfMed dwarf-only and merge-friendly for upstream RMC14 updates.
 - Provide clear diagnostics and treatment paths for every new condition.
 - Keep all tuning data-driven through YAML and CVars.
 
@@ -80,29 +84,21 @@ These existing systems are reused or extended:
 
 ### 5.1 Files and namespaces
 
-All NewMed code and data lives under the `_DwarfMC` prefix:
+All DwarfMed code and data lives under the `_DwarfMC` prefix. Phase 0 uses these
+paths; later phases extend them rather than moving them:
 
 ```text
-Content.Shared/_DwarfMC/NewMed/
-  Anatomy/
-  Bleeding/
-  Fractures/
-  Organs/
-  Surgery/
-  UI/
+Content.Shared/_DwarfMC/Medical/DwarfMed/
+Content.Server/_DwarfMC/Medical/DwarfMed/
+Content.Client/_DwarfMC/Medical/UI/
 
-Content.Server/_DwarfMC/NewMed/
-Content.Client/_DwarfMC/NewMed/
-
-Resources/Prototypes/_DwarfMC/NewMed/
-  Body/
-  Entities/Mobs/Species/
-  Organs/
-  Surgery/
-  Items/
-
-Resources/Textures/_DwarfMC/NewMed/
-Resources/Locale/en-US/_DwarfMC/newmed.ftl
+Resources/Prototypes/_DwarfMC/Body/
+  Prototypes/dwarf.yml
+  Parts/DwarfMedParts.yml
+  Organs/Organs.yml
+Resources/Prototypes/_DwarfMC/Entities/Mobs/Species/BaseDwarf.yml
+Resources/Textures/_DwarfMC/Interface/Medical/BodySelection/
+Resources/Locale/en-US/_DwarfMC/dwarfmed.ftl
 docs/newmed/
 ```
 
@@ -119,11 +115,11 @@ BaseMobSpecies
     ├── CMMobDwarf
     └── ...other humanoids
 
-DwarfNewMedBaseMobSpeciesOrganic (new, abstract, in _DwarfMC)
+DwarfMedBaseMobSpeciesOrganic (new, abstract, in _DwarfMC)
 └── CMMobDwarf (reparented)
 ```
 
-`DwarfNewMedBaseMobSpeciesOrganic` inherits `RMCBaseMobSpeciesOrganic` and
+`DwarfMedBaseMobSpeciesOrganic` inherits `RMCBaseMobSpeciesOrganic` and
 overrides:
 
 ```yaml
@@ -131,10 +127,10 @@ overrides:
   abstract: true
   save: false
   parent: RMCBaseMobSpeciesOrganic
-  id: DwarfNewMedBaseMobSpeciesOrganic
+  id: DwarfMedBaseMobSpeciesOrganic
   components:
   - type: Body
-    prototype: DwarfNewMed
+    prototype: DMCDwarf
     requiredLegs: 2
   - type: DwarfAnatomy
   - type: MobThresholds
@@ -150,7 +146,7 @@ The only upstream change needed for attachment:
 # Resources/Prototypes/_RMC14/Entities/Mobs/Species/dwarf.yml
 - type: entity
   save: false
-  parent: DwarfNewMedBaseMobSpeciesOrganic
+  parent: DwarfMedBaseMobSpeciesOrganic
   id: CMMobDwarf
 ```
 
@@ -162,8 +158,9 @@ Xenos do not inherit `RMCBaseMobSpeciesOrganic`.
 `Resources/Prototypes/_RMC14/Entities/Mobs/Xeno/base_xeno.yml` and uses its own
 `Body` prototype (`Xenonid`). Reparenting `CMMobDwarf` has no effect on xenos.
 
-No `DwarfMCBaseMobSpeciesXeno` is needed for this feature. A xeno-specific
-NewMed base would only be needed if xeno anatomy were brought into scope later.
+Xenos do use the generic `BodyZoneTargetComponent` and the body-zone selector so
+players can aim their attacks. They do not use DwarfMed anatomy, limb
+accumulators, delimbing, or organ health.
 
 ### 5.4 Upstream edits
 
@@ -175,7 +172,25 @@ The complete list of upstream edits expected for NewMed:
 4. `Content.Shared/_RMC14/Medical/Surgery/SharedCMSurgerySystem.Steps.cs`:
    slot mapping for `Groin`.
 5. `Resources/Prototypes/_RMC14/Entities/Mobs/Species/dwarf.yml`: reparent
-   `CMMobDwarf` to `DwarfNewMedBaseMobSpeciesOrganic`.
+   `CMMobDwarf` to `DwarfMedBaseMobSpeciesOrganic`.
+6. Phase 1: `Content.Server/_RMC14/Medical/Wounds/WoundsSystem.cs`: include
+   `DwarfBleedingEvent` in the bloodloss calculation so stump bleeding is not
+   overwritten by the global wound update.
+7. Phase 1: `Content.Server/Body/Systems/BrainSystem.cs`: skip mind transfer
+   when the brain's parent body part is detached, so decapitation does not turn
+   the player into a living brain item.
+8. Phase 1: `Content.Shared/Humanoid/HumanoidVisualLayersExtension.cs`: add
+   self-sublayers for hands and feet so direct hand/foot severing hides their
+   sprite layers.
+9. DwarfMed removes `MaxDamageComponent` at runtime in `DwarfMedSetupSystem`,
+   allowing post-death damage and burn delimbing to continue past the old 719
+   cap.
+10. Phase 1 scanner/records integration:
+    - `Content.Shared/_RMC14/Medical/Scanner/HealthScannerUI.cs`
+    - `Content.Shared/_RMC14/Medical/Scanner/HealthScannerSystem.cs`
+    - `Content.Server/_RMC14/RMCMedicalRecords/RMCMedicalRecordsSystem.cs`
+    - `Content.Client/_RMC14/Medical/Scanner/HealthScannerUiData.cs`
+    - `Content.Client/_RMC14/Medical/Scanner/HealthScannerWindow.xaml`
 
 Everything else is additive under `_DwarfMC`.
 
@@ -197,8 +212,8 @@ Chest (Torso, root)
         └── Right Foot
 ```
 
-The body prototype is `DwarfNewMed`, defined in `_DwarfMC`. It references new
-dwarf NewMed part prototypes that inherit the existing dwarf/human sprites and
+The body prototype is `DMCDwarf`, defined in `_DwarfMC`. It references the
+`DwarfMed*` part prototypes that inherit the existing dwarf/human sprites and
 body-part behavior.
 
 ### 6.2 Body part types
@@ -233,140 +248,172 @@ sprite is needed.
 | Chest | heart, lungs, liver, stomach |
 | Groin | kidneys |
 
-NewMed organ prototypes inherit the existing dwarf/human organ behavior and add
-`DwarfOrganHealthComponent`.
+`DwarfMed*` organ prototypes inherit the existing dwarf/human organ behavior and
+add `DwarfOrganHealthComponent`.
 
 ## 7. Damage model
 
 ### 7.1 Principles
 
-- The mob `DamageableComponent` remains the global health authority.
-- Each body part's existing `DamageableComponent` stores local brute and burn
-  damage.
-- Local damage is routed from the damage event to the selected or weighted part.
-- A reconciliation ledger keeps local and global totals consistent.
-- Delimbing does not add extra damage.
+- The body always takes the full incoming damage.
+- The targeted limb receives a percentage of that same damage as local delimb
+  progress.
+- Limbs are not extra HP. They do not absorb damage away from the body.
+- Limb accumulators are separate counters used for delimbing, not health pools.
+- Delimbing is event-driven.
+- There is no global/local damage ledger, no `SystemicBrute`, no `LostLimbBrute`,
+  and no reconciliation loop.
 
-### 7.2 Ledger
+This keeps existing body health, chemistry, armor, and crit/death behavior
+intact while making delimbing rarer than raw body damage.
 
-`DwarfAnatomyComponent` on the mob stores:
+### 7.2 Body-first, limb-share
+
+`DwarfAnatomyComponent` stores the default share:
 
 ```csharp
 public sealed partial class DwarfAnatomyComponent : Component
 {
     [DataField] public bool Enabled = true;
-
-    // Damage not attributable to an attached part.
-    [DataField] public FixedPoint2 SystemicBrute;
-    [DataField] public FixedPoint2 SystemicBurn;
-
-    // Damage that left the body with a severed limb.
-    [DataField] public FixedPoint2 LostLimbBrute;
-    [DataField] public FixedPoint2 LostLimbBurn;
-
-    [DataField] public TimeSpan ReconcileInterval = TimeSpan.FromSeconds(1);
-    [DataField] public TimeSpan ReconcileAt;
-
+    [DataField] public float LimbDamageShare = 0.5f;
     [DataField] public bool AllowDelimbing = true;
-    [DataField] public float DelimbScale = 0.75f;
-    [DataField] public float DelimbMaxChance = 0.75f;
 
     [DataField] public Dictionary<BodyPartType, float> HitWeights = new()
     {
         [BodyPartType.Head] = 10f,
         [BodyPartType.Torso] = 30f,
         [BodyPartType.Groin] = 10f,
-        [BodyPartType.Arm] = 16f,   // total for both arms
-        [BodyPartType.Hand] = 8f,   // total for both hands
-        [BodyPartType.Leg] = 20f,   // total for both legs
-        [BodyPartType.Foot] = 8f,   // total for both feet
+        [BodyPartType.Arm] = 16f,
+        [BodyPartType.Hand] = 8f,
+        [BodyPartType.Leg] = 20f,
+        [BodyPartType.Foot] = 8f,
     };
 }
 ```
 
-Invariant:
+On a hit:
+
+1. The body takes the full damage through the normal damage pipeline.
+2. The targeted part receives `incoming damage * LimbDamageShare`.
+3. The local share is split by damage family:
+   - `Slash` -> `SlashDamage`
+   - `Blunt` and `Piercing` -> `BruteDamage`
+   - `Heat`, `Shock`, `Cold`, and `Caustic` -> `BurnDamage`
+4. Accumulators are capped at `MaxLocalDamage`.
+5. If any accumulator crosses its threshold, a delimb attempt is raised.
+
+Example with `LimbDamageShare = 0.5`:
 
 ```text
-globalBrute = sum(attached part brute) + SystemicBrute + LostLimbBrute
-globalBurn  = sum(attached part burn)  + SystemicBurn  + LostLimbBurn
+1000 slash damage to the arm:
+- body takes 1000
+- arm SlashDamage gains 500
+- arm accumulator is capped at MaxLocalDamage
+- SlashThreshold is crossed
+- delimb attempt is raised
 ```
 
-On damage increase:
+```text
+50 slash damage to the arm:
+- body takes 50
+- arm SlashDamage gains 25
+- no delimb
+```
 
-- The normal damage pipeline already increases global damage.
-- `DwarfBodyPartDamageSystem` selects a part and adds the same brute/burn delta
-  to that part.
-- Both sides of the ledger increase equally.
+Spread damage does not make the body tankier because the body still takes 100%.
 
-On healing:
+### 7.3 Limb accumulators and thresholds
 
-- The global damage decreases.
-- Proactive healing reduces part damage proportionally.
-- The reconciliation pass is the safety net.
-
-On severing:
-
-- Move the severed part's local damage into `LostLimb*`.
-- Global health does not change.
-
-On reattachment (future):
-
-- Move the part's damage from `LostLimb*` back into the part.
-- Global health does not change.
-
-### 7.3 Part thresholds
-
-`DwarfBodyPartComponent` on each part stores:
+`DwarfBodyPartComponent` stores:
 
 ```csharp
 public sealed partial class DwarfBodyPartComponent : Component
 {
     [DataField] public bool Dismemberable = true;
-    [DataField] public FixedPoint2 DismemberThreshold = 40f;
+
+    [DataField] public FixedPoint2 MaxLocalDamage = 300f;
+
+    [DataField] public FixedPoint2 SlashDamage;
+    [DataField] public FixedPoint2 BruteDamage;
+    [DataField] public FixedPoint2 BurnDamage;
+
+    [DataField] public FixedPoint2 SlashThreshold = 80f;
+    [DataField] public FixedPoint2 BruteThreshold = 120f;
+    [DataField] public FixedPoint2 BurnThreshold = 300f;
+
+    [DataField] public bool DismemberAttempted;
+
     [DataField] public FixedPoint2 FractureThreshold = 20f;
     [DataField] public FixedPoint2 OrganDamageThreshold = 25f;
     [DataField] public float BleedMultiplier = 1f;
     [DataField] public float FractureChanceMultiplier = 1f;
     [DataField] public float InternalBleedChanceMultiplier = 1f;
+    [DataField] public float StumpBleedRate = 0.3f;
 }
 ```
 
-Initial values:
+Initial thresholds:
 
-| Part | Dismember X | Fracture at | Dismemberable |
-|---|---:|---:|---|
-| Head | 50 | 25 | Yes |
-| Chest | 100 | 50 | No |
-| Groin | 80 | 40 | No |
-| Arm | 40 | 20 | Yes |
-| Hand | 25 | 12 | Yes |
-| Leg | 40 | 20 | Yes |
-| Foot | 25 | 12 | Yes |
+| Part | Slash | Brute | Burn | Dismemberable |
+|---|---:|---:|---:|---|
+| Head | 300 | 500 | 1000 | Yes |
+| Chest | 100 | 150 | 300 | No |
+| Groin | 80 | 120 | 300 | No |
+| Arm | 80 | 120 | 300 | Yes |
+| Hand | 80 | 120 | 300 | Yes |
+| Leg | 80 | 120 | 300 | Yes |
+| Foot | 80 | 120 | 300 | Yes |
 
-These values are starting points and are expected to change after playtesting.
+`MaxLocalDamage` is only a counter cap. It is not limb HP and does not reduce
+body damage.
 
-### 7.4 Delimbing roll
+### 7.4 Delimb event
 
-Only `Slash` damage can delimb.
+When an accumulator crosses its threshold:
 
 ```text
-if part is not dismemberable: do not roll
-if local slash damage < part.DismemberThreshold: do not roll
-over = local damage - part.DismemberThreshold
-chance = min(DelimbMaxChance, (over / part.DismemberThreshold) * DelimbScale)
+if part is not dismemberable: no delimb
+if part.DismemberAttempted: no delimb until accumulators drop below threshold
+raise DwarfDelimbAttemptEvent with Chance = 1, Forced = true, Reason = Damage
 ```
 
-With the defaults:
+Other systems can cancel, modify, or replace the behaviour. If the attempt is
+not cancelled, it raises `DwarfSeverRequestEvent`.
 
-- At `X + 0.5X`, chance is about 37.5%.
-- At `2X`, chance is 75%.
+When the target has `OnFireComponent` and takes burn damage, the burn share is
+applied to every attached part instead of one random part. This uses
+`DwarfSeverReason.Fire`.
 
-The roll happens per slash attack, after local damage is applied. A failed roll
-does not damage the limb further beyond the attack's normal damage.
+Burn delimbing is allowed after death. Dead bodies remain damageable, so a
+corpse can still be burned or shot until a limb chars off. Fire delimbing does
+not drop a limb item; the limb is deleted and an `Ash` entity is spawned instead.
 
-### 7.5 Global thresholds
+### 7.5 Healing accumulators
 
-NewMed dwarfs use:
+Body healing remains the normal global damage healing.
+
+When a doctor has a selected body zone and heals a patient:
+
+- The body heals normally.
+- The selected part's accumulators are also reduced.
+- `LimbHealShare` controls how much of the healing also applies to the local
+  accumulators. Default: `1.0`.
+- Brute healing reduces `SlashDamage` and `BruteDamage`.
+- Burn healing reduces `BurnDamage`.
+- If multiple relevant accumulators exist, distribute the limb healing between
+  them proportionally.
+
+If the body is already at full health but the limb still has accumulator damage,
+a doctor can continue limb-only treatment on the selected zone. This is handled
+by the limb treatment path rather than by normal body damage healing.
+
+Chems currently heal the body only. Doctor-focused items can reduce limb
+accumulators through the selected zone. Later phases can extend this to
+hyposprays or automatic limb treatment.
+
+### 7.6 Global thresholds
+
+DwarfMed dwarfs use:
 
 ```yaml
 MobThresholds:
@@ -376,8 +423,8 @@ MobThresholds:
     200: Dead
 ```
 
-Damage to any part contributes to global damage, so a character can enter
-critical or die before a limb is severed.
+Damage to any part contributes to global damage because the body always takes
+the full hit.
 
 ## 8. Hit selection overlay
 
@@ -393,7 +440,7 @@ local damage, fractures, delimbing attempts, and organ damage land.
 
 ### 8.2 Client UI
 
-- New `DwarfBodyZoneSelectorControl`.
+- The existing `DwarfMedicalBodyOverlay` control and its controller.
 - Anchored bottom-right through a `UIController`; `DefaultGameScreen` is not
   edited.
 - Displays a body silhouette with clickable regions:
@@ -404,15 +451,30 @@ local damage, fractures, delimbing attempts, and organ damage land.
   - Left/right hand
   - Left/right leg
   - Left/right foot
-- Selected region is highlighted.
-- Missing parts are greyed out and disabled, with a fallback to the parent part.
-- Toggle keybind/action; optionally auto-show while holding a medical or surgical
-  item.
+- Rendering model:
+  - One `TextureRect` for `Base`.
+  - One overlay `TextureRect` per region.
+  - Only the selected region overlay is visible.
+  - Selected overlay opacity is left as authored for now; 70% tuning is deferred.
+- Current textures are raw PNGs under
+  `Resources/Textures/_DwarfMC/Interface/Medical/BodySelection/`:
+  `base.png`, region images, and matching `*_hover.png` images.
+- Keep all layer PNGs on the same canvas size; do not trim individual layers or
+  the overlays will not align.
+- Invisible `Button`s are placed over the regions for clicks.
+- All regions stay clickable. If the target lacks the selected part, the server
+  falls back to the parent part, then to weighted random selection.
+- The selector is visible for any player-controlled mob with a
+  `BodyZoneTargetComponent`, including xenos. NPCs have no client and therefore
+  no UI.
+- The default selected zone is Chest. There is no Random button or clear state.
+- The current overlay is not predicted. Clicking updates the local highlight and
+  sends the selection to the server; the server component remains authoritative.
 - Optional later: injury icons for fracture, bleeding, and organ damage.
 
 ### 8.3 Server state
 
-`DwarfBodyZoneTargetComponent` on the player stores the selected `DwarfBodyZone`.
+`BodyZoneTargetComponent` on the player stores the selected `BodyZone`.
 
 - Client sends a selection event.
 - Server validates the player is alive and NewMed-enabled.
@@ -424,15 +486,26 @@ local damage, fractures, delimbing attempts, and organ damage land.
 
 `DamageChangedEvent` carries `Origin`.
 
-- If `Origin` has `DwarfBodyZoneTargetComponent`, use that zone.
+- If `Origin` has `BodyZoneTargetComponent`, use its `SelectedZone` directly.
 - Projectiles use `ProjectileComponent.Shooter` as `Origin`, so guns work.
-- NPC and xeno attacks have no selector and use weighted random selection.
+- Player-controlled xenos also have `BodyZoneTargetComponent`, so their attacks
+  use their selected zone.
+- NPC attacks have no selector and use weighted random selection.
+- `HitWeights` are only consumed by weighted random selection. Symmetrical type
+  weights are split evenly among attached parts of that type.
+- If the selected part is missing, fall back to the parent part, then to
+  weighted random selection.
 - Special attacks can later provide an explicit zone, such as headbite.
 
 ### 8.5 Treatment targeting
 
 Medical items and splints use the user's selected zone.
 
+- Body healing remains normal.
+- If the healer has a selected zone, the selected part's accumulators are also
+  reduced.
+- If the body is at full health, limb-only treatment can still reduce the
+  selected part's accumulators.
 - If the user has no selection, choose the most damaged valid part.
 - Surgery continues to use the existing surgery UI part selection.
 
@@ -440,16 +513,29 @@ Medical items and splints use the user's selected zone.
 
 ### 9.1 Common sever path
 
-`DwarfSeverSystem.TrySeverPart` performs:
+All severing goes through `DwarfSeverSystem`, which handles
+`DwarfSeverRequestEvent`:
 
-1. Raise a cancellable `BeforeBodyPartSeveredEvent`.
-2. Recursively remove child parts through their containers, so
-   `BodyPartRemovedEvent` fires for hands, feet, and legs.
-3. Detach the limb subtree and drop it as an item.
-4. Move the part's local damage into `LostLimb*`.
-5. Add stump bleeding to the parent part or body.
-6. Add `SeveredLimbComponent` to the dropped limb.
-7. Play audio, popups, and blood effects.
+1. Raise a cancellable `BeforeDwarfPartSeveredEvent`.
+2. Verify the part is attached to the body.
+3. Remove descendant hand/foot parts so `BodyPartRemovedEvent` fires and hand
+   slots and sprite layers update.
+4. Drop each detached part separately, so an arm drops with its hand and a leg
+   drops with its foot as separate limb items.
+5. Non-fire limbs are thrown in a random direction with a fleshy delimb sound.
+   If the reason is `Fire`, delete the detached part, play the ashing sound, and
+   spawn an `Ash` entity instead of dropping a limb item.
+6. Discard the part's local accumulators with the limb. Global damage is not
+   changed by the sever itself.
+7. Add stump bleeding to the parent part.
+8. Add `DwarfSeveredLimbComponent` to each dropped limb.
+8. Ensure `WoundedComponent` exists so the bleeding update runs.
+9. Play audio, popups, and blood effects.
+
+Damage-based delimbing does not call the sever path directly. It raises
+`DwarfDelimbAttemptEvent`; after policy handlers and the chance roll, a successful
+attempt raises `DwarfSeverRequestEvent`. Surgery and scripted events can raise
+`DwarfSeverRequestEvent` directly.
 
 The existing `HandsSystem` removes hand slots when hand parts are removed. The
 existing `BodySystem` hides humanoid sprite layers when parts are removed.
@@ -461,15 +547,19 @@ existing `BodySystem` hides humanoid sprite layers when parts are removed.
 | Head | Decapitation; death; unrevivable; block brain-to-mind transfer into the severed head |
 | Chest | Cannot be severed |
 | Groin | Cannot be severed |
-| Arm | Hand detaches with the arm; hand slot and sprite removed; heavy stump bleed |
+| Arm | Hand detaches and drops separately; hand slot and sprite removed; heavy stump bleed |
 | Hand | Hand slot and sprite removed |
-| Leg | Foot detaches with the leg; movement penalty; knockdown if both legs gone |
+| Leg | Foot detaches and drops separately; movement penalty; knockdown if both legs gone |
 | Foot | Movement penalty |
 
 ### 9.3 Stump bleeding
 
 Stump bleeding is a bleeding source, not instant damage.
 
+- It is stored on the parent part's `DwarfBodyPartConditionComponent`.
+- `DwarfBleedingSystem` sums stump rates and responds to `DwarfBleedingEvent`.
+- `WoundsSystem.Update` raises `DwarfBleedingEvent` and includes its amount in
+  the mob's bloodloss so the global wound update does not overwrite it.
 - It is treated by the Seal Stump surgery.
 - It continues until sealed.
 - It can cause bloodloss critical/death if ignored.
@@ -486,8 +576,8 @@ Decapitation is the only severing case that directly causes death.
 
 ### 10.1 Trigger
 
-A fracture rolls when local brute damage crosses the part's fracture threshold.
-Chance scales with damage past the threshold.
+A fracture rolls when the part's BruteDamage accumulator crosses its fracture
+threshold. Chance scales with damage past the threshold.
 
 ### 10.2 Effects
 
@@ -600,14 +690,17 @@ public readonly record struct DwarfBodyPartScan(
     string SlotId,
     BodyPartType Type,
     BodyPartSymmetry Symmetry,
-    FixedPoint2 Brute,
-    FixedPoint2 Burn,
+    FixedPoint2 SlashDamage,
+    FixedPoint2 BruteDamage,
+    FixedPoint2 BurnDamage,
+    FixedPoint2 SlashThreshold,
+    FixedPoint2 BruteThreshold,
+    FixedPoint2 BurnThreshold,
     bool Bleeding,
     bool InternalBleeding,
     bool Fractured,
     bool Splinted,
-    bool Severed,
-    float HealthPercent);
+    bool Severed);
 
 public readonly record struct DwarfOrganScan(
     string OrganSlot,
@@ -619,7 +712,7 @@ public readonly record struct DwarfOrganScan(
 
 Detail levels:
 
-- `HealthAnalyzer`: part brute/burn and bleeding.
+- `HealthAnalyzer`: limb Slash/Brute/Burn accumulators and bleeding.
 - `BodyScan`: fractures, internal bleeding, missing limbs.
 - `Full`: organ damage.
 
@@ -710,7 +803,7 @@ Future migration:
 
 | Risk | Mitigation |
 |---|---|
-| Global/local damage drift | Ledger invariant and 1s reconcile pass |
+| Limbs becoming extra HP | Body always takes full damage; limb counters only track delimb progress |
 | Delimbing too frequent or too rare | CVars and playtesting |
 | Delimbing makes characters unplayable | No extra damage; limb loss is functional, not lethal; limb replacement later |
 | Body tree changes break tests | Update Groin mappings and run body integration tests |
@@ -719,16 +812,29 @@ Future migration:
 | Wrapped existing wound system | Keep it for v1; migrate only after part targeting is stable |
 | Xenos accidentally affected | Xeno base is separate; add explicit tests |
 | Performance from per-hit part lookup | Cache part index per body and update on add/remove |
-| Merge conflicts | New files under `_DwarfMC`; only five small upstream edits |
+| Merge conflicts | New files under `_DwarfMC`; keep upstream edits small and documented |
 
 ## 18. Tuning assumptions
 
 These are initial assumptions, not final balance:
 
-- Delimb threshold values in section 7.3.
-- `DelimbScale = 0.75`, `DelimbMaxChance = 0.75`.
+- The body always takes full damage.
+- Limb accumulators receive `LimbDamageShare` of the targeted part's damage.
+- Default `LimbDamageShare = 0.5`.
+- Default thresholds: Slash 80, Brute 120, Burn 300 for non-head parts.
+- Head thresholds are much higher: Slash 300, Brute 500, Burn 1000.
+- Delimbing is event-driven. Weapon-specific, source-specific, and scripted
+  rules should be added as `DwarfDelimbAttemptEvent` handlers rather than
+  hardcoded into the damage routing system.
+- Burn delimbing is allowed after death.
 - Fracture chance scales with damage past the fracture threshold.
 - Stump bleeding rate depends on the part type.
 - Organ damage chance scales with local damage and armor piercing.
-- Selected zone does not change raw damage.
-- Treatment uses the same selected zone.
+- Selected zone does not change raw body damage.
+- `HitWeights` are only used for weighted random selection when no player zone
+  is available, and for fallback selection.
+- The selector uses a `Base` sprite plus a per-region overlay; opacity tuning is deferred.
+- Body healing is normal. Doctor-focused healing also reduces the selected
+  part's accumulators.
+- If the body is full, limb-only treatment can still reduce accumulators.
+- Feature CVar is `dmc.dwarfmed.enabled`.

@@ -29,7 +29,9 @@
         Quantity: 20
   - type: DwarfBodyPart
     dismemberable: false
-    dismemberThreshold: 100
+    slashThreshold: 100
+    bruteThreshold: 150
+    burnThreshold: 300
     fractureThreshold: 50
 
 - type: entity
@@ -49,8 +51,12 @@
         Quantity: 10
   - type: DwarfBodyPart
     dismemberable: true
-    dismemberThreshold: 50
+    maxLocalDamage: 1000
+    slashThreshold: 300
+    bruteThreshold: 500
+    burnThreshold: 1000
     fractureThreshold: 25
+    stumpBleedRate: 1.0
 
 - type: entity
   id: DwarfMedGroin
@@ -62,7 +68,9 @@
     state: "torso_m"
   - type: DwarfBodyPart
     dismemberable: false
-    dismemberThreshold: 80
+    slashThreshold: 80
+    bruteThreshold: 120
+    burnThreshold: 300
     fractureThreshold: 40
 
 - type: entity
@@ -75,8 +83,11 @@
     state: "l_arm"
   - type: DwarfBodyPart
     dismemberable: true
-    dismemberThreshold: 40
+    slashThreshold: 80
+    bruteThreshold: 120
+    burnThreshold: 300
     fractureThreshold: 20
+    stumpBleedRate: 0.6
 
 - type: entity
   id: DwarfMedRightArm
@@ -88,8 +99,11 @@
     state: "r_arm"
   - type: DwarfBodyPart
     dismemberable: true
-    dismemberThreshold: 40
+    slashThreshold: 80
+    bruteThreshold: 120
+    burnThreshold: 300
     fractureThreshold: 20
+    stumpBleedRate: 0.6
 
 - type: entity
   id: DwarfMedLeftHand
@@ -101,8 +115,11 @@
     state: "l_hand"
   - type: DwarfBodyPart
     dismemberable: true
-    dismemberThreshold: 25
+    slashThreshold: 80
+    bruteThreshold: 120
+    burnThreshold: 300
     fractureThreshold: 12
+    stumpBleedRate: 0.3
 
 - type: entity
   id: DwarfMedRightHand
@@ -114,8 +131,11 @@
     state: "r_hand"
   - type: DwarfBodyPart
     dismemberable: true
-    dismemberThreshold: 25
+    slashThreshold: 80
+    bruteThreshold: 120
+    burnThreshold: 300
     fractureThreshold: 12
+    stumpBleedRate: 0.3
 
 - type: entity
   id: DwarfMedLeftLeg
@@ -127,8 +147,11 @@
     state: "l_leg"
   - type: DwarfBodyPart
     dismemberable: true
-    dismemberThreshold: 40
+    slashThreshold: 80
+    bruteThreshold: 120
+    burnThreshold: 300
     fractureThreshold: 20
+    stumpBleedRate: 0.6
 
 - type: entity
   id: DwarfMedRightLeg
@@ -140,8 +163,11 @@
     state: "r_leg"
   - type: DwarfBodyPart
     dismemberable: true
-    dismemberThreshold: 40
+    slashThreshold: 80
+    bruteThreshold: 120
+    burnThreshold: 300
     fractureThreshold: 20
+    stumpBleedRate: 0.6
 
 - type: entity
   id: DwarfMedLeftFoot
@@ -153,8 +179,11 @@
     state: "l_foot"
   - type: DwarfBodyPart
     dismemberable: true
-    dismemberThreshold: 25
+    slashThreshold: 80
+    bruteThreshold: 120
+    burnThreshold: 300
     fractureThreshold: 12
+    stumpBleedRate: 0.3
 
 - type: entity
   id: DwarfMedRightFoot
@@ -166,5 +195,8 @@
     state: "r_foot"
   - type: DwarfBodyPart
     dismemberable: true
-    dismemberThreshold: 25
+    slashThreshold: 80
+    bruteThreshold: 120
+    burnThreshold: 300
     fractureThreshold: 12
+    stumpBleedRate: 0.3

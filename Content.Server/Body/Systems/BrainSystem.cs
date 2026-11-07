@@ -2,15 +2,18 @@ using Content.Server.Body.Components;
 using Content.Server.Ghost.Components;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Events;
+using Content.Shared.Body.Part;
 using Content.Shared.Mind;
 using Content.Shared.Mind.Components;
 using Content.Shared.Pointing;
+using Robust.Shared.Containers;
 
 namespace Content.Server.Body.Systems
 {
     public sealed class BrainSystem : EntitySystem
     {
         [Dependency] private readonly SharedMindSystem _mindSystem = default!;
+        [Dependency] private readonly SharedContainerSystem _containers = default!;
 
         public override void Initialize()
         {
@@ -25,6 +28,13 @@ namespace Content.Server.Body.Systems
         {
             if (TerminatingOrDeleted(newEntity) || TerminatingOrDeleted(oldEntity))
                 return;
+
+            if (_containers.TryGetContainingContainer(newEntity, out var container) &&
+                TryComp<BodyPartComponent>(container.Owner, out var parentPart) &&
+                parentPart.Body == null)
+            {
+                return;
+            }
 
             EnsureComp<MindContainerComponent>(newEntity);
             EnsureComp<MindContainerComponent>(oldEntity);

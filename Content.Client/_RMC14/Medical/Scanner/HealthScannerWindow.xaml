@@ -90,5 +90,8 @@
         <BoxContainer Orientation="Vertical">
             <BoxContainer Name="AdviceContainer" Access="Public" Orientation="Vertical" />
         </BoxContainer>
+        <Label Name="DwarfMedDebugLabel" Access="Public" Text="DwarfMed Debug" Margin="0 20 0 0" Visible="False" />
+        <cc:HSeparator Name="DwarfMedDebugSeparator" Access="Public" Color="#4972A1" Margin="0 0 0 5" Visible="False" />
+        <BoxContainer Name="DwarfMedDebugContainer" Access="Public" Orientation="Vertical" Visible="False" />
     </BoxContainer>
 </scanner:HealthScannerWindow>

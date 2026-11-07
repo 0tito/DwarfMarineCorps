@@ -1,5 +1,6 @@
 using System.Linq;
 using Content.Shared._DwarfMC.Medical.DwarfMed;
+using Content.Shared._RMC14.Damage;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
@@ -29,7 +30,11 @@ public sealed class DwarfMedBodyTest
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(entMan.HasComponent<DwarfAnatomyComponent>(dwarf), Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(entMan.HasComponent<DwarfAnatomyComponent>(dwarf), Is.True);
+                Assert.That(entMan.HasComponent<MaxDamageComponent>(dwarf), Is.False);
+            });
 
             var body = entMan.GetComponent<BodyComponent>(dwarf);
             Assert.That(body.Prototype?.Id, Is.EqualTo("DMCDwarf"));

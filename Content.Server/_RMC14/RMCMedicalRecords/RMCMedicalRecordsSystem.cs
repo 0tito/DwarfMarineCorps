@@ -1,5 +1,6 @@
 using System.Linq;
 using Content.Server.StationRecords.Systems;
+using Content.Shared._DwarfMC.Medical.DwarfMed;
 using Content.Shared._RMC14.Body;
 using Content.Shared._RMC14.Chemistry.Reagent;
 using Content.Shared._RMC14.Medical.Scanner;
@@ -25,6 +26,7 @@ namespace Content.Server._RMC14.RMCMedicalRecords;
 public sealed class RMCMedicalRecordsSystem : SharedRMCMedicalRecordsSystem
 {
     [Dependency] private readonly SharedBodySystem _body = default!;
+    [Dependency] private readonly DwarfBodyPartScanSystem _dwarfBodyParts = default!;
     [Dependency] private readonly SharedRMCBloodstreamSystem _rmcBloodstream = default!;
     [Dependency] private readonly RMCPulseSystem _rmcPulse = default!;
     [Dependency] private readonly RMCReagentSystem _rmcReagent = default!;
@@ -85,7 +87,8 @@ public sealed class RMCMedicalRecordsSystem : SharedRMCMedicalRecordsSystem
             pulse,
             chemicals,
             bleeding,
-            detailLevel);
+            detailLevel,
+            _dwarfBodyParts.Build(target));
     }
 
     private List<RMCAutodocScanData> GenerateAutodocData(EntityUid target)
