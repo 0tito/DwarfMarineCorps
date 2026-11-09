@@ -17,4 +17,7 @@ public readonly record struct DwarfBodyPartScan(
     FixedPoint2 BurnThreshold,
     bool Bleeding,
     bool StumpBleeding,
-    bool Severed);
+    bool Severed,
+    bool Fractured,
+    bool Splinted,
+    bool InternalBleeding);

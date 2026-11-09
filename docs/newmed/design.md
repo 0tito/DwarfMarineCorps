@@ -1,6 +1,6 @@
 # DwarfMed (NewMed) Design Document
 
-Status: Phase 0 and Phase 1 complete; Phase 2 next
+Status: Phase 0, Phase 1, and Phase 2 complete; Phase 3 next
 Branch: `EvilMed`
 Scope: Dwarf-only per-limb medical system
 
@@ -343,8 +343,9 @@ public sealed partial class DwarfBodyPartComponent : Component
 
     [DataField] public bool DismemberAttempted;
 
-    [DataField] public FixedPoint2 FractureThreshold = 20f;
+    [DataField] public FixedPoint2 FractureScale = 100f;
     [DataField] public FixedPoint2 OrganDamageThreshold = 25f;
+    [DataField] public float InternalBleedRate = 0.2f;
     [DataField] public float BleedMultiplier = 1f;
     [DataField] public float FractureChanceMultiplier = 1f;
     [DataField] public float InternalBleedChanceMultiplier = 1f;
@@ -385,8 +386,10 @@ applied to every attached part instead of one random part. This uses
 `DwarfSeverReason.Fire`.
 
 Burn delimbing is allowed after death. Dead bodies remain damageable, so a
-corpse can still be burned or shot until a limb chars off. Fire delimbing does
-not drop a limb item; the limb is deleted and an `Ash` entity is spawned instead.
+corpse can still be burned or shot until a limb chars off. A delimb caused by
+the burn accumulator threshold uses the `Fire` reason even if the target was not
+on fire, so it does not drop a limb item; the limb is deleted and an `Ash`
+entity is spawned instead.
 
 ### 7.5 Healing accumulators
 
@@ -560,8 +563,11 @@ Stump bleeding is a bleeding source, not instant damage.
 - `DwarfBleedingSystem` sums stump rates and responds to `DwarfBleedingEvent`.
 - `WoundsSystem.Update` raises `DwarfBleedingEvent` and includes its amount in
   the mob's bloodloss so the global wound update does not overwrite it.
-- It is treated by the Seal Stump surgery.
+- Gauze and trauma kits can pack the stump, halving the rate down to a minimum
+  of `0.05`, but packing does not clear the bleeding.
+- It is removed by the Seal Stump surgery.
 - It continues until sealed.
+- On dead dwarfs it continues at half rate.
 - It can cause bloodloss critical/death if ignored.
 
 ### 9.4 Decapitation
@@ -576,8 +582,25 @@ Decapitation is the only severing case that directly causes death.
 
 ### 10.1 Trigger
 
-A fracture rolls when the part's BruteDamage accumulator crosses its fracture
-threshold. Chance scales with damage past the threshold.
+Fractures are chance-based and have no hard threshold.
+
+- Slash and brute damage both count; burn does not.
+- The roll uses the local trauma dealt by the hit and the total local trauma
+  already on the part.
+
+```text
+localTrauma = (slash + brute) * LimbDamageShare
+limbTrauma  = SlashDamage + BruteDamage
+
+impact = localTrauma / FractureScale
+load   = limbTrauma / FractureScale
+
+chance = clamp((impact^2 + impact * load)
+               * FractureChanceMultiplier
+               * fractureChanceCVar, 0, 1)
+```
+
+`FractureScale` replaces the old `FractureThreshold`.
 
 ### 10.2 Effects
 
@@ -595,6 +618,7 @@ threshold. Chance scales with damage past the threshold.
 - Splinted blocks the negative effects of the fracture.
 - Splinted does not heal the fracture.
 - Bone Repair surgery removes the fracture.
+- Open incisions add a slow bleed until the incision is closed.
 - A splint can be removed with a verb or by surgery.
 
 ## 11. Internal bleeding
@@ -744,7 +768,7 @@ Detail levels:
 | Seal Stump | Part has stump bleeding | Stop stump bleeding |
 | Organ Repair | Chest/groin/head has a damaged organ | Repair all damaged organs in the region |
 | Amputation | Arm or leg | Sever through the common sever path |
-| Limb Replacement | Parent part with a missing child | Reattach a limb (future phase) |
+| Limb Reattachment | Parent part with a missing child | Reattach a severed limb held during the step |
 
 ### 14.3 Generic surgery helpers
 
@@ -827,8 +851,14 @@ These are initial assumptions, not final balance:
   rules should be added as `DwarfDelimbAttemptEvent` handlers rather than
   hardcoded into the damage routing system.
 - Burn delimbing is allowed after death.
-- Fracture chance scales with damage past the fracture threshold.
+- Burn-threshold delimbing ashes the limb even without `OnFireComponent`.
+- Fracture chance scales with the hit's slash/brute damage and accumulated
+  limb trauma through `FractureScale`.
+- `dmc.dwarfmed.fracture_chance_multiplier` scales fracture chance globally.
+- `dmc.dwarfmed.internal_bleed_chance_multiplier` and
+  `dmc.dwarfmed.internal_bleed_rate_multiplier` scale internal bleeding.
 - Stump bleeding rate depends on the part type.
+- Field packing slows stump bleeding but only Seal Stump surgery clears it.
 - Organ damage chance scales with local damage and armor piercing.
 - Selected zone does not change raw body damage.
 - `HitWeights` are only used for weighted random selection when no player zone

@@ -1,7 +1,7 @@
 # Phase 2 Implementation Guide
 
 Phase: Fractures, splints, internal bleeding, and treatment
-Status: Next
+Status: Complete
 Branch: `EvilMed`
 Related design: [design.md](design.md)
 Related plan: [implementation-plan.md](implementation-plan.md)
@@ -11,16 +11,47 @@ Current implementation map: [current-state.md](current-state.md)
 
 Add:
 
-- Fractures from brute damage.
+- Chance-based fractures from slash and brute damage.
 - Splints.
 - Fracture movement and item-drop effects.
 - Internal bleeding from fractures and severe brute damage.
-- Bone Repair and Internal Bleeding surgery.
+- Bone Repair, Internal Bleeding, and Seal Stump surgery.
 - Scanner/analyzer flags for fracture, splint, and internal bleeding.
 - Tests for the full fracture/internal-bleeding/treatment loop.
 
 Organ damage effects remain Phase 3. Phase 2 may record organ-damage risk, but
 actual organ health/effects are not part of this phase.
+
+## Implementation notes (as built)
+
+Phase 2 was implemented with these refinements:
+
+- Fractures trigger from **slash and brute**, not brute only.
+- Fractures are chance-based with **no hard threshold**:
+  - `localTrauma = (slash + brute) * LimbDamageShare`
+  - `limbTrauma = SlashDamage + BruteDamage`
+  - `impact = localTrauma / FractureScale`
+  - `load = limbTrauma / FractureScale`
+  - `chance = clamp((impact^2 + impact * load) * FractureChanceMultiplier * cvar, 0, 1)`
+- `FractureThreshold` was replaced by `FractureScale`.
+- Added CVars:
+  - `dmc.dwarfmed.fracture_chance_multiplier`
+  - `dmc.dwarfmed.internal_bleed_chance_multiplier`
+  - `dmc.dwarfmed.internal_bleed_rate_multiplier`
+- Internal bleeding is started by severe head/chest/groin brute damage and by
+  unsplinted fracture movement.
+- Stump bleeding has a field stopgap: gauze/trauma kits halve the rate down to
+  a minimum of `0.05`, but only Seal Stump surgery clears it.
+- Seal Stump surgery was included in Phase 2.
+- `RMCFixOVein` is a `_DwarfMC` item inheriting `CMSurgicalLine` with
+  `CMFixOVeinComponent`; no upstream `CMSurgicalLine` edit was needed.
+- Surgery effect steps implement both `CMSurgeryStepEvent` and
+  `CMSurgeryStepCompleteCheckEvent`. The completion checks live in shared code
+  so the client UI does not skip them.
+- Burn-threshold delimbing ashes the limb even if the target is not on fire.
+- Direct use of a matching WoundTreater on a dwarf starts limb treatment.
+- Open incisions add a slow bleed and keep the surgery valid until closed.
+- Dead dwarfs continue DwarfMed bleeding at half rate.
 
 ## Existing files to read first
 
@@ -97,14 +128,16 @@ Trigger it from `DwarfBodyPartDamageSystem` after `BruteDamage` is increased.
 
 Rules:
 
-- Only brute damage fractures parts.
+- Slash and brute damage can fracture parts; burn cannot.
 - Skip if already fractured.
-- Require `BruteDamage >= FractureThreshold`.
-- Chance scales with damage past the threshold:
+- No hard threshold. The chance scales with the hit and accumulated trauma:
 
 ```text
-over = BruteDamage - FractureThreshold
-chance = clamp(over / FractureThreshold, 0, 1) * FractureChanceMultiplier
+impact = localTrauma / FractureScale
+load   = limbTrauma / FractureScale
+chance = clamp((impact * impact + impact * load)
+               * FractureChanceMultiplier
+               * fractureChanceCVar, 0, 1)
 ```
 
 - On success:
@@ -370,12 +403,15 @@ All new systems, conditions, effects, items, and prototypes should go under
 
 ## 12. Decisions
 
-These are the current assumptions:
+Implemented:
 
-- Fractures are chance-based, not guaranteed at threshold.
+- Fractures are chance-based from slash and brute damage.
+- The old hard fracture threshold was replaced by `FractureScale`.
 - Splinted fractures still cause a small slowdown.
 - Fractures only heal by surgery.
 - Organ damage from chest/groin/head fractures is deferred to Phase 3.
 - Armor-piercing internal bleeding is deferred until a clean AP path exists.
 - Splints are consumed on use.
-- Fix-O-Vein should live under `_DwarfMC` if practical.
+- Fix-O-Vein lives under `_DwarfMC`.
+- Stump bleeding can be slowed by field packing but only surgery clears it.
+- Seal Stump surgery is part of Phase 2.

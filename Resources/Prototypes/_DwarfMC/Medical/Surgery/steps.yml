@@ -1,0 +1,83 @@
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepBoneGel
+  name: Apply bone gel
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: CMBoneGel
+    add:
+    - type: DwarfBoneGelled
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/bone_gel.rsi
+    state: bone-gel
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepBoneSetter
+  name: Set the bone
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: CMBoneSetter
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/bonesetter.rsi
+    state: bonesetter
+  - type: DwarfSurgeryStepRepairFractureEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepStopInternalBleeding
+  name: Repair internal bleeding
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: CMFixOVein
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/medical.rsi
+    state: line_brute
+  - type: DwarfSurgeryStepStopInternalBleedingEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepSealStump
+  name: Seal the stump
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: CMFixOVein
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/medical.rsi
+    state: line_brute
+  - type: DwarfSurgeryStepSealStumpEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepCloseIncision
+  name: Close incision
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: CMCautery
+    remove:
+    - type: CMSkinRetracted
+    - type: CMBleedersClamped
+    - type: CMIncisionOpen
+    - type: DwarfBoneGelled
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/cautery.rsi
+    state: cautery
+  - type: CMSurgeryStepEmoteEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepReattachLimb
+  name: Reattach limb
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: DwarfSeveredLimb
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/retractor.rsi
+    state: retractor
+  - type: DwarfSurgeryStepReattachLimbEffect

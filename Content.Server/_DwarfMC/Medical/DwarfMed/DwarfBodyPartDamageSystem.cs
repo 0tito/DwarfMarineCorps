@@ -13,6 +13,8 @@ public sealed class DwarfBodyPartDamageSystem : EntitySystem
 {
     [Dependency] private readonly SharedBodySystem _body = default!;
     [Dependency] private readonly BodyZoneSystem _bodyZone = default!;
+    [Dependency] private readonly DwarfFractureSystem _fracture = default!;
+    [Dependency] private readonly DwarfInternalBleedingSystem _internalBleeding = default!;
     [Dependency] private readonly INetManager _net = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
 
@@ -102,17 +104,19 @@ public sealed class DwarfBodyPartDamageSystem : EntitySystem
         BodyZone zone)
     {
         var share = ent.Comp.LimbDamageShare;
+        var localSlash = slash * share;
+        var localBrute = brute * share;
         var changed = false;
 
         if (slash > FixedPoint2.Zero)
         {
-            bodyPart.SlashDamage = DwarfLimbDamage.AddCapped(bodyPart.SlashDamage, slash * share, bodyPart.MaxLocalDamage);
+            bodyPart.SlashDamage = DwarfLimbDamage.AddCapped(bodyPart.SlashDamage, localSlash, bodyPart.MaxLocalDamage);
             changed = true;
         }
 
         if (brute > FixedPoint2.Zero)
         {
-            bodyPart.BruteDamage = DwarfLimbDamage.AddCapped(bodyPart.BruteDamage, brute * share, bodyPart.MaxLocalDamage);
+            bodyPart.BruteDamage = DwarfLimbDamage.AddCapped(bodyPart.BruteDamage, localBrute, bodyPart.MaxLocalDamage);
             changed = true;
         }
 
@@ -127,6 +131,16 @@ public sealed class DwarfBodyPartDamageSystem : EntitySystem
 
         Dirty(partId, bodyPart);
 
+        if (reason != DwarfSeverReason.Fire)
+        {
+            var localTrauma = localSlash + localBrute;
+            if (localTrauma > FixedPoint2.Zero)
+                _fracture.TryFracture(ent, partId, bodyPart, localTrauma);
+
+            if (localBrute > FixedPoint2.Zero)
+                _internalBleeding.TryCauseInternalBleedingFromBrute(ent, partId, bodyPart, localBrute);
+        }
+
         if (bodyPart.DismemberAttempted ||
             !bodyPart.Dismemberable ||
             !DwarfLimbDamage.HasReachedThreshold(bodyPart))
@@ -137,11 +151,15 @@ public sealed class DwarfBodyPartDamageSystem : EntitySystem
         bodyPart.DismemberAttempted = true;
         Dirty(partId, bodyPart);
 
+        var delimbReason = reason;
+        if (reason != DwarfSeverReason.Fire && DwarfLimbDamage.IsBurnThresholdReached(bodyPart))
+            delimbReason = DwarfSeverReason.Fire;
+
         var attempt = new DwarfDelimbAttemptEvent
         {
             Body = ent.Owner,
             Part = partId,
-            Reason = reason,
+            Reason = delimbReason,
             Damage = args.DamageDelta!,
             Origin = args.Origin,
             Tool = args.Tool,
@@ -162,7 +180,7 @@ public sealed class DwarfBodyPartDamageSystem : EntitySystem
         {
             Body = ent.Owner,
             Part = partId,
-            Reason = reason,
+            Reason = delimbReason,
             Origin = args.Origin,
             Tool = args.Tool,
         };

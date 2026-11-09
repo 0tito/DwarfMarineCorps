@@ -40,7 +40,16 @@ public sealed class DwarfMedBodyCommand : ToolshedCommand
                 builder.AppendLine(
                     $"  Slash {bodyPart.SlashDamage}/{bodyPart.SlashThreshold} " +
                     $"Brute {bodyPart.BruteDamage}/{bodyPart.BruteThreshold} " +
-                    $"Burn {bodyPart.BurnDamage}/{bodyPart.BurnThreshold}");
+                    $"Burn {bodyPart.BurnDamage}/{bodyPart.BurnThreshold} " +
+                    $"Scale {bodyPart.FractureScale}");
+
+                if (EntityManager.TryGetComponent<DwarfBodyPartConditionComponent>(id, out var condition))
+                {
+                    builder.AppendLine(
+                        $"  Fractured {condition.Fractured} Splinted {condition.Splinted} " +
+                        $"InternalBleeding {condition.InternalBleeding} ({condition.InternalBleedRate}) " +
+                        $"StumpBleeding {condition.StumpBleeding} ({condition.StumpBleedRate})");
+                }
             }
         }
 

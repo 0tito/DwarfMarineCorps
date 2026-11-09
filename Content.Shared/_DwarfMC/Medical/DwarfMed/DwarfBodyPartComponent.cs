@@ -34,10 +34,13 @@ public sealed partial class DwarfBodyPartComponent : Component
     public bool DismemberAttempted;
 
     [DataField, AutoNetworkedField]
-    public FixedPoint2 FractureThreshold = 20;
+    public FixedPoint2 FractureScale = 100;
 
     [DataField, AutoNetworkedField]
     public FixedPoint2 OrganDamageThreshold = 25;
+
+    [DataField, AutoNetworkedField]
+    public float InternalBleedRate = 0.2f;
 
     [DataField, AutoNetworkedField]
     public float BleedMultiplier = 1f;

@@ -7,6 +7,8 @@ using Content.Shared.Body.Components;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Prototypes;
 using Content.Shared.FixedPoint;
+using Content.Shared.Mobs;
+using Content.Shared.Mobs.Components;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
@@ -94,7 +96,15 @@ public sealed class WoundsSystem : SharedWoundsSystem
             var dwarfBleed = new DwarfBleedingEvent(0);
             RaiseLocalEvent(uid, ref dwarfBleed);
             if (!bleedEv.Cancelled)
+            {
                 bloodloss += dwarfBleed.Amount;
+            }
+            else if (HasComp<DwarfAnatomyComponent>(uid) &&
+                     TryComp<MobStateComponent>(uid, out var mobState) &&
+                     mobState.CurrentState == MobState.Dead)
+            {
+                bloodloss += dwarfBleed.Amount * 0.5f;
+            }
 
             if (toHeal > comp.PassiveHealing)
             {

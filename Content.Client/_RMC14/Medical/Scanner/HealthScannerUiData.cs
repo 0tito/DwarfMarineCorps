@@ -279,9 +279,22 @@ public sealed class HealthScannerUiData
             }
             else
             {
+                var flags = new List<string>();
+                if (part.Fractured)
+                    flags.Add(part.Splinted ? "FRACTURED (SPLINTED)" : "FRACTURED");
+                else if (part.Splinted)
+                    flags.Add("SPLINTED");
+
+                if (part.StumpBleeding)
+                    flags.Add("STUMP BLEEDING");
+
+                if (part.InternalBleeding)
+                    flags.Add("INTERNAL BLEEDING");
+
+                var suffix = flags.Count > 0 ? $" {string.Join(" ", flags)}" : string.Empty;
                 label.Text = $"{part.SlotId}: Slash {part.SlashDamage.Int()}/{part.SlashThreshold.Int()} " +
                              $"Brute {part.BruteDamage.Int()}/{part.BruteThreshold.Int()} " +
-                             $"Burn {part.BurnDamage.Int()}/{part.BurnThreshold.Int()}";
+                             $"Burn {part.BurnDamage.Int()}/{part.BurnThreshold.Int()}{suffix}";
             }
 
             window.DwarfMedDebugContainer.AddChild(label);

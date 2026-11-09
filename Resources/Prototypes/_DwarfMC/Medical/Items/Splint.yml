@@ -1,0 +1,42 @@
+- type: entity
+  parent: CMBaseHealingItem
+  id: RMCSplint
+  name: splint
+  description: A rigid splint used to immobilize a fractured limb.
+  suffix: Ten
+  components:
+  - type: Sprite
+    state: gauze
+  - type: Item
+    heldPrefix: gauze
+  - type: DwarfSplint
+  - type: Stack
+    stackType: RMCSplint
+    count: 10
+  - type: StackPrice
+    price: 10
+
+- type: stack
+  id: RMCSplint
+  name: splint
+  icon: { sprite: "/Textures/_RMC14/Objects/Medical/medical.rsi", state: gauze }
+  spawn: RMCSplint1
+  maxCount: 10
+
+- type: entity
+  id: RMCSplint1
+  parent: RMCSplint
+  suffix: One
+  components:
+  - type: Stack
+    stackType: RMCSplint
+    count: 1
+
+- type: entity
+  id: RMCSplint10
+  parent: RMCSplint
+  suffix: Ten
+  components:
+  - type: Stack
+    stackType: RMCSplint
+    count: 10

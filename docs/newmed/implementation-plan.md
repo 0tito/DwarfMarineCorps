@@ -1,339 +1,263 @@
-# NewMed Implementation Plan
+# DwarfMed Implementation Plan
 
-Status: Ready for Phase 0
+Status: Phase 0, Phase 1, and Phase 2 complete; Phase 3 next
 Branch: `EvilMed`
 Related design: [design.md](design.md)
+Current implementation map: [current-state.md](current-state.md)
+Phase 1 implementation guide: [phase-1-guide.md](phase-1-guide.md)
+Phase 2 implementation guide: [phase-2-guide.md](phase-2-guide.md)
+
+Naming note: `NewMed` is the design name. The implementation uses `DwarfMed`,
+`DwarfMedBaseMobSpeciesOrganic`, and the body prototype `DMCDwarf`.
 
 ## 1. Working rules
 
-- Keep all new code and data under `_DwarfMC`.
-- Keep the five upstream edits listed in the design document minimal.
+- Keep new gameplay code and data under `_DwarfMC`.
+- Keep upstream edits small, additive, and documented.
 - Do not touch `RMCBaseMobSpeciesOrganic` or `CMXenoBase`.
-- Keep the feature behind a CVar during development.
+- Keep the feature behind `dmc.dwarfmed.enabled`.
 - Add tests with each phase, not only at the end.
 - Do not commit unless explicitly requested.
 
-## 2. Final file layout
+## 2. Current file layout
+
+See [current-state.md](current-state.md) for the complete actual file map and
+test status.
+
+Key prefixes:
 
 ```text
-Content.Shared/_DwarfMC/NewMed/
-  Anatomy/
-    DwarfAnatomyComponent.cs
-    DwarfBodyPartComponent.cs
-    DwarfBodyPartConditionComponent.cs
-    DwarfBodyPartDamageSystem.cs
-    DwarfBodyPartReconcileSystem.cs
-    DwarfSeverSystem.cs
-    DwarfBodyZone.cs
-    DwarfBodyZoneTargetComponent.cs
-    DwarfBodyZoneTargetSystem.cs
-    DwarfBodyPartScan.cs
-  Bleeding/
-    DwarfBleedingSourcesComponent.cs
-    DwarfBleedingSystem.cs
-  Fractures/
-    DwarfFractureSystem.cs
-    DwarfSplintComponent.cs
-    DwarfSplintSystem.cs
-  Organs/
-    DwarfOrganHealthComponent.cs
-    DwarfOrganSystem.cs
-  Surgery/
-    DwarfSurgeryEffects.cs
-    DwarfSurgeryConditions.cs
-  UI/
-    DwarfBodyZoneSelectorControl.cs
-    DwarfBodyZoneSelectorUIController.cs
-
-Content.Server/_DwarfMC/NewMed/
-  DwarfNewMedServerSystem.cs
-  DwarfBodyPartDamageServerSystem.cs
-  DwarfOrganServerSystem.cs
-  DwarfBleedingServerSystem.cs
-  DwarfSurgeryServerSystem.cs
-
-Content.Client/_DwarfMC/NewMed/
-  DwarfBodyZoneSelectorSystem.cs
-  DwarfBodyZoneSelectorWindow.cs
-  DwarfBodyZoneSelectorWindow.xaml
-
-Resources/Prototypes/_DwarfMC/NewMed/
-  Body/body_dwarf_newmed.yml
-  Body/parts.yml
-  Organs/organs.yml
-  Entities/Mobs/Species/dwarf_base.yml
-  Surgery/steps.yml
-  Surgery/surgeries.yml
-  Items/splint.yml
-  Items/fix_o_vein.yml
-
-Resources/Textures/_DwarfMC/NewMed/
-  body_zone_selector.rsi/
-
-Resources/Locale/en-US/_DwarfMC/newmed.ftl
+Content.Shared/_DwarfMC/Medical/DwarfMed/
+Content.Server/_DwarfMC/Medical/DwarfMed/
+Content.Client/_DwarfMC/Medical/UI/
+Content.IntegrationTests/_DwarfMC/DwarfMed/
+Resources/Prototypes/_DwarfMC/
+Resources/Textures/_DwarfMC/Interface/Medical/BodySelection/
 docs/newmed/
 ```
 
+Phase 2 should extend these prefixes, not restructure them.
+
 ## 3. Upstream edits
 
-These are the only expected upstream changes:
+Current and planned upstream edits:
 
 1. `Content.Shared/Body/Part/BodyPartType.cs`
-   - Append `Groin` to the enum.
+   - Append `Groin`.
 2. `Content.Shared/Humanoid/HumanoidVisualLayersExtension.cs`
-   - Add `BodyPartType.Groin`.
-   - Return no visual layer for Groin.
+   - Handle `Groin`.
+   - Add self-sublayers for `LHand`, `RHand`, `LFoot`, and `RFoot`.
 3. `Content.Client/_RMC14/Medical/Surgery/CMSurgeryBui.cs`
-   - Add a sort order for Groin.
+   - Sort order for `Groin`.
 4. `Content.Shared/_RMC14/Medical/Surgery/SharedCMSurgerySystem.Steps.cs`
-   - Map Groin to `SlotFlags.OUTERCLOTHING | SlotFlags.LEGS`.
+   - Groin slot mapping.
 5. `Resources/Prototypes/_RMC14/Entities/Mobs/Species/dwarf.yml`
-   - Reparent `CMMobDwarf` to `DwarfNewMedBaseMobSpeciesOrganic`.
+   - Reparent `CMMobDwarf` to `DwarfMedBaseMobSpeciesOrganic`.
+6. Phase 1: `Content.Server/_RMC14/Medical/Wounds/WoundsSystem.cs`
+   - Raise `DwarfBleedingEvent`.
+   - Include the event amount in bloodloss.
+   - Keep `WoundedComponent` while NewMed bleeding is active.
+7. Phase 1: `Content.Server/Body/Systems/BrainSystem.cs`
+   - Skip mind transfer when the brain's parent body part is detached.
+8. Phase 1 scanner/records integration:
+   - `Content.Shared/_RMC14/Medical/Scanner/HealthScannerUI.cs`
+   - `Content.Shared/_RMC14/Medical/Scanner/HealthScannerSystem.cs`
+   - `Content.Server/_RMC14/RMCMedicalRecords/RMCMedicalRecordsSystem.cs`
+   - `Content.Client/_RMC14/Medical/Scanner/HealthScannerUiData.cs`
+   - `Content.Client/_RMC14/Medical/Scanner/HealthScannerWindow.xaml`
 
-If a fix can be implemented in a `_DwarfMC` partial class or extension instead,
-do that and avoid an upstream edit.
+If an edit can be replaced by a `_DwarfMC` partial class or public API, do that
+instead.
 
-## 4. Phase 0 - Scaffolding and wiring
+## 4. Phase 0 - Complete
 
-### Deliverables
+### Completed
 
-- Create `docs/newmed/` documents.
-- Add `_DwarfMC` folders.
-- Add `DwarfNewMed` body prototype.
-- Add NewMed part and organ prototypes.
-- Add `DwarfNewMedBaseMobSpeciesOrganic`.
-- Reparent `CMMobDwarf`.
-- Add `BodyPartType.Groin` and required mapping edits.
-- Add base components with no gameplay effects yet:
+- Added `_DwarfMC` code, prototype, locale, and test folders.
+- Added `Groin` to `BodyPartType` and the required switch mappings.
+- Added `BaseGroin` to `Resources/Prototypes/Body/Parts/base.yml`.
+- Added the `DMCDwarf` body prototype with chest, groin, arms, hands, legs, and
+  feet.
+- Added all 11 `DwarfMed*` part prototypes.
+- Added all 7 required `DwarfMed*` organ prototypes.
+- Added `DwarfMedBaseMobSpeciesOrganic` and reparented `CMMobDwarf`.
+- Added the Phase 0 components:
   - `DwarfAnatomyComponent`
   - `DwarfBodyPartComponent`
   - `DwarfBodyPartConditionComponent`
   - `DwarfOrganHealthComponent`
-  - `DwarfBodyZoneTargetComponent`
-- Add CVar `dwarf.newmed.enabled`, defaulting to true on the EvilMed branch.
-- Add an admin command to print the dwarf body tree for verification.
+  - `BodyZone`
+  - `BodyZoneTargetComponent`
+- Added `dmc.dwarfmed.enabled`.
+- Added the `dwarfmedbody` debug command.
+- Added `DwarfMedBodyTest`.
+- Build passes.
+- `DwarfMedBodyTest` passes: 2/2.
 
-### Files
+### Phase 0 verification
 
-- `Resources/Prototypes/_DwarfMC/NewMed/Entities/Mobs/Species/dwarf_base.yml`
-- `Resources/Prototypes/_DwarfMC/NewMed/Body/body_dwarf_newmed.yml`
-- `Resources/Prototypes/_DwarfMC/NewMed/Body/parts.yml`
-- `Resources/Prototypes/_DwarfMC/NewMed/Organs/organs.yml`
-- `Content.Shared/_DwarfMC/NewMed/Anatomy/DwarfAnatomyComponent.cs`
-- `Content.Shared/_DwarfMC/NewMed/Anatomy/DwarfBodyPartComponent.cs`
-- `Content.Shared/_DwarfMC/NewMed/Organs/DwarfOrganHealthComponent.cs`
-
-### Acceptance criteria
-
-- The project builds.
-- `CMMobDwarf` spawns with `DwarfNewMed` body.
-- The body has chest, head, groin, two arms, two hands, two legs, two feet.
-- Groin has kidneys.
-- Head has brain and eyes.
-- Hands are still added and removed correctly.
-- Legs still affect movement speed.
-- `CMMobHuman` and xeno mobs are unchanged.
+- `CMMobDwarf` uses `DMCDwarf`.
+- Body has 11 parts and 7 organs.
+- Dwarf thresholds are 100 critical / 200 dead.
+- `CMMobHuman` and `CMXenoLarva` are unaffected.
 - Xenos do not have `DwarfAnatomyComponent`.
-- Dwarf critical threshold is 100 and death threshold is 200.
 
-### Tests
+## 5. Phase 1 - Body-zone damage, selection, and delimbing
 
-- Dwarf body tree integration test.
-- Non-dwarf/xeno isolation test.
-- Threshold test.
-- Existing `Content.IntegrationTests/Tests/Body` suite.
+Phase 1a and 1b are merged. Phase 1 includes the selection UI and the first
+limb-treatment hook.
 
-## 5. Phase 1a - Part damage ledger
+See [phase-1-guide.md](phase-1-guide.md) for the step-by-step implementation
+guide.
 
-### Deliverables
+### Outcome
 
-- Implement `DwarfBodyPartDamageSystem`.
-- Route brute and burn damage from `DamageChangedEvent` to a part.
-- Implement weighted random zone selection.
-- Implement selected-zone lookup from `DamageChangedEvent.Origin`.
-- Add ledger fields and reconciliation.
-- Add per-part damage to the scanner state.
-- Keep global wounds and bleeding working.
-
-### Damage flow
-
-1. `DamageableSystem` applies damage to the mob and raises
-   `DamageChangedEvent`.
-2. `DwarfBodyPartDamageSystem` checks `DwarfAnatomyComponent`.
-3. If damage increased, select a part:
-   - Use the origin's `DwarfBodyZoneTargetComponent` if present.
-   - Otherwise use weighted random.
-4. Apply brute/burn delta to the part's `DamageableComponent`.
-5. Update the ledger.
-6. If damage decreased, reduce part damage proportionally.
-7. Reconciliation runs once per second.
-
-### Acceptance criteria
-
-- Damage lands on parts.
-- Global and part damage remain consistent after damage and healing.
-- Toxin and airloss damage remain systemic.
-- Chest and groin take local damage but cannot be delimbed.
-- Human, moth, and xeno mobs are unaffected.
-- No delimbing yet.
-
-### Tests
-
-- Damage lands on the selected part.
-- Weighted random selection covers all valid parts.
-- Healing reconciles part damage.
-- Ledger remains valid after many damage/heal cycles.
-- Non-NewMed mobs do not get part damage.
-
-## 6. Phase 1b - Body-zone selector and delimbing
-
-### Deliverables
-
-- Implement bottom-right body-zone selector UI.
-- Add client-to-server selection event.
-- Add server-side validation and fallback.
-- Implement slash delimb chance.
-- Implement `DwarfSeverSystem.TrySeverPart`.
-- Add stump bleeding source.
-- Add `SeveredLimbComponent`.
-- Add selected-zone admin command for testing.
-- Add scanner data for missing limbs and part damage.
-
-### Delimbing behavior
-
-- Remove child parts first through containers.
-- Detach the limb subtree and drop it.
-- Move local damage into `LostLimb*`.
-- Add stump bleeding.
-- Do not add extra damage.
-- Head severing causes death and unrevivability.
-- Block brain-to-mind transfer for decapitation.
-- Chest and groin never sever.
-
-### Acceptance criteria
-
-- Player can select zones from the overlay.
+- The body always takes full damage.
+- The targeted part receives `LimbDamageShare` of that damage as local delimb
+  progress.
+- Limbs are not extra HP and do not make marines tankier.
+- The bottom-right selector is available for dwarfs immediately.
 - Selected zone is replicated to the server.
-- Player attacks and projectiles use the selected zone.
-- NPC/xeno attacks use weighted random.
-- Slash below the part threshold never severs.
-- Slash above the threshold rolls a scaling chance.
+- Player attacks use the selected zone, including player-controlled xenos.
+- NPC attacks use weighted random selection.
+- Limb accumulators track Slash, Brute, and Burn separately.
+- Delimbing is event-driven:
+  - `DwarfDelimbAttemptEvent` when an accumulator crosses its threshold.
+  - `DwarfSeverRequestEvent` for guaranteed severing.
+- Chest and groin never delimb.
+- Delimbing adds no direct damage, only stump bleeding and loss of function.
+- Hands lose hand slots; feet/legs apply movement penalties.
+- Head delimbing kills and prevents mind transfer into the severed head.
+- Doctor-focused healing reduces the selected part's accumulators.
+- Limb-only treatment is allowed even when the body is at full health.
+- Health analyzer shows per-part accumulators and missing limbs.
+
+**Status: Complete. 11/11 DwarfMed tests passing.**
+
+### Implemented in Phase 1
+
+- `LimbDamageShare` and `HitWeights` on `DwarfAnatomyComponent`.
+- Limb accumulators, thresholds, `MaxLocalDamage`, and `StumpBleedRate` on
+  `DwarfBodyPartComponent`.
+- `DwarfBleedingEvent`, `DwarfDelimbAttemptEvent`, `DwarfSeverRequestEvent`,
+  and `DwarfSeverReason`.
+- `BodyZoneSelectedEvent`.
+- `BodyZoneTargetSystem` using `PlayerAttachedEvent`/`PlayerDetachedEvent` so all
+  player-controlled mobs, including xenos, get `BodyZoneTargetComponent`.
+- Server systems:
+  - `DwarfBodyPartDamageSystem`
+  - `DwarfDelimbPolicySystem`
+  - `DwarfSeverSystem`
+  - `DwarfBleedingSystem`
+  - `BodyZoneTargetSystem`
+  - `DwarfLimbTreatmentSystem`
+  - `DwarfMedSetupSystem`
+- Shared systems:
+  - `DwarfMovementSystem`
+  - `SharedBodySystem.DwarfSever.cs`
+- Existing client UI wired:
+  - `DwarfMedicalBodyOverlay`
+  - `DwarfMedicalBodyOverlayUIController`
+- Existing textures used:
+  - `Resources/Textures/_DwarfMC/Interface/Medical/BodySelection/`
+- `HealthScanState` and health analyzer debug readout extended with limb
+  accumulators.
+- Phase 1 tests added.
+- Severed limbs are thrown randomly with a delimb sound.
+- Arms drop hands separately; legs drop feet separately.
+- Fire applies heat to every limb and turns fire-delimbed limbs into `Ash`.
+- `MaxDamageComponent` removed for DwarfMed dwarfs by `DwarfMedSetupSystem`.
+
+### Phase 1 acceptance criteria
+
+- Build passes.
+- Dwarf body and existing Phase 0 tests still pass.
+- Selected zone routes limb share to the correct part.
+- Weighted random selection uses `HitWeights` for NPC attacks and fallback.
+- `HitWeights` are not used when a specific zone is selected.
+- Body damage is never reduced by limb accumulators.
+- Slash/brute/burn accumulators are tracked separately.
+- Threshold crossing raises the delimb event.
+- Hand and arm severing remove the hand slot.
+- Foot loss reduces movement speed.
 - Chest and groin never sever.
-- Severing a hand removes the hand slot and hides the sprite.
-- Severing an arm removes the hand as well.
-- Severing a leg detaches the foot and slows movement.
-- Severing a foot slows movement.
-- Severing a head kills and makes the patient unrevivable.
-- Global damage does not change from severing itself.
-- Stump bleeding is present and can be treated later.
+- Delimbing adds no direct global damage.
+- Head severing kills and makes the patient unrevivable.
+- Doctor-focused healing reduces the selected limb accumulators.
+- Limb-only healing works when the body is at full health.
+- Health analyzer shows part accumulators and missing limbs.
+- Non-dwarf targets are unaffected by DwarfMed anatomy/damage routing; player
+  xenos still receive the selector.
 
-### Tests
+## 6. Phase 2 - Complete
 
-- Delimb chance boundary tests.
-- Chest/groin immunity tests.
-- Hand/arm/leg/foot/head sever tests.
-- No-extra-damage test.
-- Hand slot removal test.
-- Movement penalty test.
-- Selected zone network test.
-- Projectile zone test.
-- Decapitation mind-transfer test.
+See [phase-2-guide.md](phase-2-guide.md) for the detailed implementation guide.
 
-## 7. Phase 2 - Fractures and internal bleeding
+**Status: Complete. 38/38 DwarfMed tests passing.**
 
-### Deliverables
+### Implemented in Phase 2
 
-- Implement fracture roll and condition.
-- Implement movement and item-drop effects.
-- Add splint item and splint application.
-- Add splint removal verb.
-- Implement internal bleeding condition.
-- Implement central bleeding aggregator.
-- Refactor `WoundsSystem` to write to the aggregator instead of directly to
-  `BloodstreamComponent.BleedAmount`.
-- Add surgeries:
-  - Bone Repair.
-  - Internal Bleeding.
-  - Seal Stump.
-- Add scanner data and health analyzer advice.
-- Add body scanner record data.
+- Chance-based fractures from slash and brute limb damage.
+- `FractureScale` replaces the old hard fracture threshold.
+- Global CVar multipliers for fracture and internal-bleed chances.
+- Splint item, splint application, removal verb, and splint consumption.
+- Splinted fractures block item-drop effects and reduce movement penalties.
+- Internal bleeding from severe head/chest/groin brute damage and unsplinted
+  fracture movement.
+- Internal bleeding contributes to `DwarfBleedingEvent` and keeps
+  `WoundedComponent` alive.
+- Stump bleeding field stopgap: gauze/trauma kits reduce the rate but do not
+  clear it.
+- Bone Repair, Internal Bleeding, Seal Stump, and Limb Reattachment surgeries.
+- `RMCFixOVein` and `CMFixOVein`.
+- Scanner, health analyzer debug, and `dwarfmedbody` condition flags.
+- Burn-threshold delimbing ashes the limb even without `OnFireComponent`.
+- Direct WoundTreater use starts limb treatment when the selected zone has
+  matching limb damage.
+- Open incisions add a slow bleed and keep the surgery listed until closed.
+- Dead dwarfs continue DwarfMed bleeding at half rate.
+- Bone Repair uses separate bone gel and bone setter steps; the gel marker is
+  cleared by a DwarfMed close-incision step.
+- Limb Reattachment reattaches dropped `DwarfSeveredLimb` items to matching
+  missing child slots and stays available until the incision is closed.
+- `DwarfMedDebugCrate` with debug damage weapons, instant delimb/fracture/bleed
+  sticks, splints, healing items, and surgery tools.
 
-### Acceptance criteria
+### Phase 2 acceptance criteria
 
-- Fractures trigger at the configured threshold.
-- Splints block fracture penalties.
-- Unsplinted leg/chest/groin fractures can cause internal bleeding.
-- Internal bleeding is not stopped by gauze.
-- Internal bleeding surgery stops it.
-- Bone repair surgery removes the fracture.
-- Seal stump surgery stops stump bleeding.
+- Build passes.
+- All existing DwarfMed tests still pass.
+- Fractures trigger from slash and brute, never burn.
+- Fracture chance scales with dealt damage and accumulated limb trauma.
+- Splints apply, block item-drop effects, and reduce movement penalties.
+- Unsplinted movement can cause internal bleeding.
+- Internal bleeding contributes to bloodloss.
+- Field packing slows but does not clear stump bleeding.
+- Bone Repair clears fractures.
+- Internal Bleeding clears internal bleeding.
+- Seal Stump clears stump bleeding.
+- Scanner reports fracture/splint/internal bleeding/stump.
+- No Phase 1 behavior regresses.
 
-### Tests
+## 7. Phase 3 - Organs (next)
 
-- Fracture trigger and chance test.
-- Splint effect test.
-- Unsplinted movement internal-bleeding test.
-- Bleeding aggregator math test.
-- Surgery completion tests.
-- Scanner data test.
+- Organ damage routing and effects.
+- Organ repair surgery.
+- Heart, lung, kidney, liver, brain, and eye effects.
+- Defibrillator/CPR/unrevivable integration.
+- Scanner, records, and autodoc updates.
 
-## 8. Phase 3 - Organs
+## 8. Phase 4 - Integration and polish
 
-### Deliverables
+- Body selector injury icons.
+- Guidebook and locale.
+- Autodoc procedures and research upgrades.
+- Medical records and body scanner output.
+- Admin tools, VV, and rejuvenate handling.
+- Save/load and performance passes.
+- Balance pass.
 
-- Add `DwarfOrganHealthComponent` data to all NewMed organ prototypes.
-- Route part damage to organs.
-- Implement organ effects update loop.
-- Implement organ repair surgery.
-- Integrate heart and brain with defibrillator and unrevivable logic.
-- Add organ damage to scanner, records, and autodoc data.
-- Add heartbreak HUD support if desired.
-
-### Acceptance criteria
-
-- Heart damage causes asphyxiation/bloodloss.
-- Heart rupture blocks defibrillation.
-- Lung damage causes asphyxiation.
-- Kidney/liver damage causes toxin buildup.
-- Brain damage causes symptoms and eventually unrevivability.
-- Eye damage causes blur/blindness.
-- Organ repair surgery fixes organs.
-- Defibrillator correctly refuses heartbreak and brain-dead patients.
-
-### Tests
-
-- Organ damage routing test.
-- Heart asphyxiation test.
-- Heart defib-block test.
-- Lung asphyxiation test.
-- Kidney/liver toxin test.
-- Brain symptom test.
-- Organ repair surgery test.
-- Decapitation/brain-dead test.
-
-## 9. Phase 4 - Integration and polish
-
-### Deliverables
-
-- Add body selector injury icons.
-- Add guidebook entries and locale.
-- Add autodoc procedures and research upgrades if applicable.
-- Add medical records and body scanner output.
-- Add admin commands and VV support.
-- Handle rejuvenate by clearing all NewMed conditions.
-- Add save/load coverage.
-- Run performance checks.
-- Complete balance pass.
-
-### Acceptance criteria
-
-- New conditions are visible in all medical UIs.
-- Autodoc can perform supported procedures.
-- Rejuvenate clears fractures, bleeding, stump, and organ damage.
-- Save/load preserves part and organ state.
-- No significant per-hit performance regression.
-
-## 10. Phase 5 - Optional
+## 9. Phase 5 - Optional
 
 - Pain system.
 - Limb reattachment and prosthetics.
@@ -341,52 +265,61 @@ do that and avoid an upstream edit.
 - Shrapnel and foreign objects.
 - Eschar and severe burns.
 - Infections.
-- Advanced chemistry interactions.
 - Per-zone damage multipliers.
 
-## 11. Test matrix
+## 10. Test matrix
 
 | Area | Test |
 |---|---|
-| Scope | Dwarf gets NewMed; humans and xenos do not |
+| Scope | Dwarf gets DwarfMed anatomy; all player mobs get the body-zone selector |
 | Body | Groin, hands, legs, feet exist and behave |
 | Thresholds | Dwarf crits at 100, dies at 200 |
 | Part damage | Damage lands on selected/random part |
-| Ledger | Global/part totals stay consistent |
-| Delimb | Slash below X never severs; above X scales |
+| Body-first damage | Body always takes full damage; limb counters never reduce it |
+| Hit weights | Weighted random is used for NPC attacks and fallback; selected zone overrides weights |
+| Delimb | Accumulator below threshold never severs; threshold crossing uses the event pipeline |
+| Accumulators | Slash, Brute, and Burn track separately |
+| Healing | Doctor-focused healing reduces selected limb accumulators; limb-only healing works at full body health |
 | Delimb immunity | Chest and groin never sever |
-| Delimb cost | No extra damage from severing |
+| Delimb cost | No extra direct damage from severing |
 | Hands | Hand slot removed on hand/arm sever |
 | Movement | Foot/leg loss slows movement |
 | Head | Decapitation kills and prevents mind transfer |
 | Selector | Selection replicates and routes attacks |
-| Treatment | Selected zone is used by treatment |
-| Fracture | Trigger, penalties, splint, surgery |
-| Internal bleeding | Cause, persistence, surgery |
-| Organs | Damage, effects, repair, defib integration |
-| Records | Scanner and body scanner show new data |
-| Persistence | Save/load preserves NewMed state |
+| Stump bleeding | Severed limb adds a bleeding source |
+| Stump stopgap | Gauze/trauma kit packs reduce but do not clear stump bleeding |
+| Fractures | Slash and brute cause chance-based fractures; burn does not |
+| Splints | Splints apply, consume, remove, and block fracture effects |
+| Internal bleeding | Unsplinted movement can start internal bleeding |
+| Surgery | Bone Repair, Internal Bleeding, and Seal Stump clear their conditions |
+| Scanner | Analyzer shows part damage, conditions, and missing limbs |
+| Isolation | Non-dwarf targets are unaffected by DwarfMed damage routing; player xenos still get the selector |
 
-## 12. Verification commands
+## 11. Verification commands
 
 ```bash
-dotnet build --configuration DebugOpt --no-restore /m
-dotnet test --no-build --configuration DebugOpt Content.Tests/Content.Tests.csproj -- NUnit.ConsoleOut=0
-dotnet test --no-build --configuration DebugOpt Content.IntegrationTests/Content.IntegrationTests.csproj -- NUnit.ConsoleOut=0 NUnit.MapWarningTo=Failed
+dotnet build Content.IntegrationTests/Content.IntegrationTests.csproj --configuration DebugOpt --no-restore /m
 ```
 
-Run the YAML linter and prototype validation after adding new prototypes.
+```bash
+dotnet test --no-build --configuration DebugOpt \
+  Content.IntegrationTests/Content.IntegrationTests.csproj \
+  --filter "FullyQualifiedName~DwarfMed" \
+  -- NUnit.ConsoleOut=0
+```
 
-## 13. Rollout
+The filter must come before `--`. If it comes after `--`, VSTest runs the whole
+suite and the run can take a long time.
 
-- Keep `dwarf.newmed.enabled` on during EvilMed development.
-- Add a server-side guard in every NewMed system so the feature can be disabled
-  without removing prototypes.
-- Keep global wounds in place until the NewMed damage ledger and treatment flow
-  are proven stable.
-- Do not enable NewMed on any non-dwarf species.
+## 12. Rollout
 
-## 14. Branch policy
+- Keep `dmc.dwarfmed.enabled` enabled during EvilMed development.
+- Guard Phase 1 systems with the CVar.
+- Keep global wounds in place until the part damage and treatment paths are
+  stable.
+- Do not enable DwarfMed on any non-dwarf species.
 
-All NewMed work should be committed to the `EvilMed` branch. Do not commit unless
-explicitly requested.
+## 13. Branch policy
+
+All DwarfMed work goes on the `EvilMed` branch. Do not commit unless explicitly
+requested.

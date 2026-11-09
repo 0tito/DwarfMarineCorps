@@ -47,6 +47,11 @@ public static class DwarfLimbDamage
                part.BurnDamage >= part.BurnThreshold;
     }
 
+    public static bool IsBurnThresholdReached(DwarfBodyPartComponent part)
+    {
+        return part.BurnDamage >= part.BurnThreshold;
+    }
+
     public static void HealBrute(DwarfBodyPartComponent part, FixedPoint2 amount)
     {
         var total = part.SlashDamage + part.BruteDamage;

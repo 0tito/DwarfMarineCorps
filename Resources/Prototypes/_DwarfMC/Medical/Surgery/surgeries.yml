@@ -1,0 +1,56 @@
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryBoneRepair
+  name: Bone Repair
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepBoneGel
+    - DwarfSurgeryStepBoneSetter
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryFracturedCondition
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryInternalBleeding
+  name: Internal Bleeding
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepStopInternalBleeding
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryInternalBleedingCondition
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgerySealStump
+  name: Seal Stump
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepSealStump
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryStumpBleedingCondition
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryReattachLimb
+  name: Limb Reattachment
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepReattachLimb
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryMissingLimbCondition

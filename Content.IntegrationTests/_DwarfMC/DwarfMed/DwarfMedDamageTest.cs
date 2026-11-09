@@ -394,6 +394,61 @@ public sealed class DwarfMedDamageTest
     }
 
     [Test]
+    public async Task BurnThresholdDelimbTurnsLimbIntoAshWithoutFire()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.ResolveDependency<IEntityManager>();
+        var bodySystem = entMan.System<SharedBodySystem>();
+        var damageable = entMan.System<DamageableSystem>();
+        var map = await pair.CreateTestMap();
+
+        EntityUid dwarf = default;
+        EntityUid attacker = default;
+        EntityUid arm = default;
+        EntityUid hand = default;
+        await server.WaitAssertion(() =>
+        {
+            dwarf = entMan.SpawnEntity("CMMobDwarf", map.MapCoords);
+            attacker = entMan.SpawnEntity("CMMobHuman", map.MapCoords);
+            var target = entMan.AddComponent<BodyZoneTargetComponent>(attacker);
+            target.SelectedZone = BodyZone.LeftArm;
+
+            var body = entMan.GetComponent<BodyComponent>(dwarf);
+            arm = bodySystem
+                .GetBodyChildrenOfType(dwarf, BodyPartType.Arm, body)
+                .First(p => p.Component.Symmetry == BodyPartSymmetry.Left)
+                .Id;
+            hand = bodySystem
+                .GetBodyChildrenOfType(dwarf, BodyPartType.Hand, body)
+                .First(p => p.Component.Symmetry == BodyPartSymmetry.Left)
+                .Id;
+
+            var part = entMan.GetComponent<DwarfBodyPartComponent>(arm);
+            part.BurnThreshold = 10;
+        });
+        await server.WaitRunTicks(1);
+
+        await server.WaitAssertion(() =>
+        {
+            var heat = server.ProtoMan.Index<DamageTypePrototype>("Heat");
+            damageable.TryChangeDamage(dwarf, new DamageSpecifier(heat, 40), ignoreResistances: true, origin: attacker);
+        });
+        await server.WaitRunTicks(1);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(entMan.EntityExists(arm), Is.False);
+                Assert.That(entMan.EntityExists(hand), Is.False);
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
     public async Task FireSeverTurnsLimbIntoAsh()
     {
         await using var pair = await PoolManager.GetServerClient();

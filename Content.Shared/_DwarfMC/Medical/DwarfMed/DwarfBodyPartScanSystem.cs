@@ -32,7 +32,10 @@ public sealed class DwarfBodyPartScanSystem : EntitySystem
                     damage.BurnThreshold,
                     condition?.StumpBleeding ?? false,
                     condition?.StumpBleeding ?? false,
-                    condition?.Severed ?? false));
+                    condition?.Severed ?? false,
+                    condition?.Fractured ?? false,
+                    condition?.Splinted ?? false,
+                    condition?.InternalBleeding ?? false));
             }
             else
             {
@@ -48,7 +51,10 @@ public sealed class DwarfBodyPartScanSystem : EntitySystem
                     FixedPoint2.Zero,
                     false,
                     false,
-                    true));
+                    true,
+                    false,
+                    false,
+                    false));
             }
         }
 
