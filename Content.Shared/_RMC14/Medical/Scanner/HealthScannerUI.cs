@@ -19,7 +19,8 @@ public readonly record struct HealthScanState(
     Solution? Chemicals,
     bool Bleeding,
     HealthScanDetailLevel DetailLevel,
-    List<DwarfBodyPartScan> Parts);
+    List<DwarfBodyPartScan> Parts,
+    List<DwarfOrganScan> Organs);
 
 /// <summary>
 ///     Thin BUI wrapper around <see cref="HealthScanState"/> for the health analyzer live-update path.

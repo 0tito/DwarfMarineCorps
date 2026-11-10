@@ -10,6 +10,9 @@ public sealed partial class DwarfOrganHealthComponent : Component
     public DwarfOrganType OrganType;
 
     [DataField, AutoNetworkedField]
+    public FixedPoint2 Damage;
+
+    [DataField, AutoNetworkedField]
     public FixedPoint2 MaxDamage = 100;
 
     [DataField, AutoNetworkedField]

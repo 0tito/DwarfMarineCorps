@@ -16,6 +16,12 @@ public sealed partial class DwarfAnatomyComponent : Component
     public float LimbHealShare = 1.0f;
 
     [DataField]
+    public float OrganDamageShare = 0.5f;
+
+    [DataField]
+    public float DefibHeartDamage = 10f;
+
+    [DataField]
     public bool AllowDelimbing = true;
 
     [DataField]

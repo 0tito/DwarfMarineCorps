@@ -40,6 +40,12 @@ public sealed partial class DwarfBodyPartComponent : Component
     public FixedPoint2 OrganDamageThreshold = 25;
 
     [DataField, AutoNetworkedField]
+    public float OrganDamageChanceMultiplier = 1f;
+
+    [DataField, AutoNetworkedField]
+    public float OrganDamageRateMultiplier = 1f;
+
+    [DataField, AutoNetworkedField]
     public float InternalBleedRate = 0.2f;
 
     [DataField, AutoNetworkedField]

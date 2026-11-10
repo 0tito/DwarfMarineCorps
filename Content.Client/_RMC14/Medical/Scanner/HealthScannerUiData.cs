@@ -262,7 +262,7 @@ public sealed class HealthScannerUiData
     {
         window.DwarfMedDebugContainer.DisposeAllChildren();
 
-        var any = uiState.Parts.Count > 0;
+        var any = uiState.Parts.Count > 0 || uiState.Organs.Count > 0;
         window.DwarfMedDebugLabel.Visible = any;
         window.DwarfMedDebugSeparator.Visible = any;
         window.DwarfMedDebugContainer.Visible = any;
@@ -298,6 +298,19 @@ public sealed class HealthScannerUiData
             }
 
             window.DwarfMedDebugContainer.AddChild(label);
+        }
+
+        foreach (var organ in uiState.Organs)
+        {
+            var percent = organ.MaxDamage.Float() <= 0f
+                ? 0f
+                : organ.Damage.Float() / organ.MaxDamage.Float() * 100f;
+            var suffix = organ.Ruptured ? " RUPTURED" : string.Empty;
+            var vital = organ.Vital ? " VITAL" : string.Empty;
+            window.DwarfMedDebugContainer.AddChild(new Label
+            {
+                Text = $"{organ.OrganName}: {percent:F0}%{suffix}{vital}",
+            });
         }
     }
 

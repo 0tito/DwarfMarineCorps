@@ -15,6 +15,7 @@ public sealed class DwarfBodyPartDamageSystem : EntitySystem
     [Dependency] private readonly BodyZoneSystem _bodyZone = default!;
     [Dependency] private readonly DwarfFractureSystem _fracture = default!;
     [Dependency] private readonly DwarfInternalBleedingSystem _internalBleeding = default!;
+    [Dependency] private readonly DwarfOrganDamageSystem _organDamage = default!;
     [Dependency] private readonly INetManager _net = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
 
@@ -35,6 +36,8 @@ public sealed class DwarfBodyPartDamageSystem : EntitySystem
             HealLimb(ent, args);
             return;
         }
+
+        _organDamage.TryDamageFromToxin(ent, args);
 
         var slash = DwarfLimbDamage.GetDamage(args.DamageDelta, DwarfLimbDamage.SlashTypes);
         var brute = DwarfLimbDamage.GetDamage(args.DamageDelta, DwarfLimbDamage.BruteTypes);
@@ -139,6 +142,9 @@ public sealed class DwarfBodyPartDamageSystem : EntitySystem
 
             if (localBrute > FixedPoint2.Zero)
                 _internalBleeding.TryCauseInternalBleedingFromBrute(ent, partId, bodyPart, localBrute);
+
+            if (localTrauma > FixedPoint2.Zero)
+                _organDamage.TryDamageOrganFromTrauma(ent, partId, bodyPart, localTrauma);
         }
 
         if (bodyPart.DismemberAttempted ||

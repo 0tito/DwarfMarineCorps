@@ -7,6 +7,8 @@ namespace Content.Server._DwarfMC.Medical.DwarfMed;
 public sealed class DwarfBleedingSystem : EntitySystem
 {
     private const float IncisionBleedRate = 0.1f;
+    private const float HeartBleedRate = 0.25f;
+    private const float HeartBleedThreshold = 0.3f;
 
     [Dependency] private readonly SharedBodySystem _body = default!;
 
@@ -32,6 +34,22 @@ public sealed class DwarfBleedingSystem : EntitySystem
 
             if (condition.InternalBleeding)
                 args.Amount += condition.InternalBleedRate;
+        }
+
+        foreach (var (organId, _) in _body.GetBodyOrgans(ent.Owner))
+        {
+            if (!TryComp<DwarfOrganHealthComponent>(organId, out var organ) ||
+                organ.OrganType != DwarfOrganType.Heart ||
+                organ.MaxDamage.Float() <= 0f)
+            {
+                continue;
+            }
+
+            var ratio = organ.Damage.Float() / organ.MaxDamage.Float();
+            if (ratio <= HeartBleedThreshold)
+                continue;
+
+            args.Amount += HeartBleedRate * ratio * (organ.Ruptured ? 2f : 1f);
         }
     }
 }

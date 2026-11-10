@@ -63,7 +63,7 @@ public sealed class DwarfMedDebugTest
 
             Assert.Multiple(() =>
             {
-                Assert.That(contents, Has.Count.EqualTo(28));
+                Assert.That(contents, Has.Count.EqualTo(39));
                 Assert.That(contents, Does.Contain("DwarfDebugSlash"));
                 Assert.That(contents, Does.Contain("DwarfDebugBlunt"));
                 Assert.That(contents, Does.Contain("DwarfDebugPiercing"));
@@ -73,6 +73,17 @@ public sealed class DwarfMedDebugTest
                 Assert.That(contents, Does.Contain("DwarfDebugFracture"));
                 Assert.That(contents, Does.Contain("DwarfDebugInternalBleeding"));
                 Assert.That(contents, Does.Contain("DwarfDebugStumpBleeding"));
+                Assert.That(contents, Does.Contain("DwarfDebugOrganDamage"));
+                Assert.That(contents, Does.Contain("DwarfDebugOrganRupture"));
+                Assert.That(contents, Does.Contain("DwarfGelInserter"));
+                Assert.That(contents, Does.Contain("DwarfBoneGelVial"));
+                Assert.That(contents, Does.Contain("DwarfHeartGelVial"));
+                Assert.That(contents, Does.Contain("DwarfLungGelVial"));
+                Assert.That(contents, Does.Contain("DwarfBrainGelVial"));
+                Assert.That(contents, Does.Contain("DwarfEyeGelVial"));
+                Assert.That(contents, Does.Contain("DwarfKidneyGelVial"));
+                Assert.That(contents, Does.Contain("DwarfLiverGelVial"));
+                Assert.That(contents, Does.Contain("DwarfStomachGelVial"));
                 Assert.That(contents, Does.Contain("RMCSplint10"));
                 Assert.That(contents, Does.Contain("RMCFixOVein"));
                 Assert.That(contents, Does.Contain("CMBoneGel"));

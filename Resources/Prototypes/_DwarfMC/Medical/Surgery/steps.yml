@@ -5,12 +5,73 @@
   components:
   - type: CMSurgeryStep
     tool:
-    - type: CMBoneGel
-    add:
-    - type: DwarfBoneGelled
+    - type: DwarfGelInserter
   - type: Sprite
     sprite: _RMC14/Objects/Medical/Surgery/bone_gel.rsi
     state: bone-gel
+  - type: DwarfSurgeryStepBoneGelEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepRepairOrgan
+  name: Repair organ
+  abstract: true
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: DwarfGelInserter
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/bone_gel.rsi
+    state: bone-gel
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairHeart
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Heart
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairLungs
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Lungs
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairBrain
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Brain
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairEyes
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Eyes
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairKidneys
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Kidneys
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairLiver
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Liver
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairStomach
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Stomach
 
 - type: entity
   parent: CMSurgeryStepBase

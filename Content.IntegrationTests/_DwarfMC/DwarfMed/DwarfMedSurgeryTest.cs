@@ -10,7 +10,9 @@ using Content.Shared._RMC14.Medical.Surgery.Steps.Parts;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
+using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Damage;
+using Content.Shared.FixedPoint;
 using Content.Shared.Hands.Components;
 using NUnit.Framework;
 using Robust.Shared.GameObjects;
@@ -51,6 +53,7 @@ public sealed class DwarfMedSurgeryTest
         var entMan = server.ResolveDependency<IEntityManager>();
         var bodySystem = entMan.System<SharedBodySystem>();
         var surgerySystem = entMan.System<CMSurgerySystem>();
+        var solutionSystem = entMan.System<SharedSolutionContainerSystem>();
         var map = await pair.CreateTestMap();
 
         EntityUid dwarf = default;
@@ -62,7 +65,9 @@ public sealed class DwarfMedSurgeryTest
         {
             dwarf = entMan.SpawnEntity("CMMobDwarf", map.MapCoords);
             torso = GetTorso(entMan, bodySystem, dwarf);
-            boneGel = entMan.SpawnEntity("CMBoneGel", map.MapCoords);
+            boneGel = entMan.SpawnEntity("DwarfGelInserter", map.MapCoords);
+            Assert.That(solutionSystem.TryGetSolution(boneGel, "gel", out var gelSolution, out _), Is.True);
+            Assert.That(solutionSystem.TryAddReagent(gelSolution!.Value, "DwarfBoneGel", 5), Is.True);
             boneSetter = entMan.SpawnEntity("CMBonesetter", map.MapCoords);
             cautery = entMan.SpawnEntity("CMCautery", map.MapCoords);
             var condition = entMan.EnsureComponent<DwarfBodyPartConditionComponent>(torso);
@@ -83,9 +88,6 @@ public sealed class DwarfMedSurgeryTest
             var valid = new CMSurgeryValidEvent(dwarf, torso);
             entMan.EventBus.RaiseLocalEvent(surgery!.Value, ref valid);
             Assert.That(valid.Cancelled, Is.False);
-
-            var gelComp = entMan.GetComponent<CMSurgeryStepComponent>(gelStep!.Value);
-            Assert.That(gelComp.Add, Is.Not.Null);
 
             var gelEvent = new CMSurgeryStepEvent(dwarf, dwarf, torso, new List<EntityUid> { boneGel });
             entMan.EventBus.RaiseLocalEvent(gelStep.Value, ref gelEvent);

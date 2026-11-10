@@ -88,7 +88,8 @@ public sealed class RMCMedicalRecordsSystem : SharedRMCMedicalRecordsSystem
             chemicals,
             bleeding,
             detailLevel,
-            _dwarfBodyParts.Build(target));
+            _dwarfBodyParts.Build(target),
+            _dwarfBodyParts.BuildOrgans(target));
     }
 
     private List<RMCAutodocScanData> GenerateAutodocData(EntityUid target)
@@ -136,7 +137,16 @@ public sealed class RMCMedicalRecordsSystem : SharedRMCMedicalRecordsSystem
             }
         }
 
-        // TODO RMC-14 Internal Bleeding, Broken Bones, Organ Damage
+        var parts = _dwarfBodyParts.Build(target);
+        if (parts.Any(part => part.InternalBleeding))
+            autodocData.Add(new RMCAutodocScanData(RMCAutodocProcedures.InternalBleeding, Loc.GetString("rmc-records-autodoc-internal-bleeding")));
+
+        if (parts.Any(part => part.Fractured))
+            autodocData.Add(new RMCAutodocScanData(RMCAutodocProcedures.BrokenBone, Loc.GetString("rmc-records-autodoc-broken-bone")));
+
+        var organs = _dwarfBodyParts.BuildOrgans(target);
+        if (organs.Any(organ => organ.Damage > FixedPoint2.Zero || organ.Ruptured))
+            autodocData.Add(new RMCAutodocScanData(RMCAutodocProcedures.OrganDamage, Loc.GetString("rmc-records-autodoc-organ-damage")));
 
         if (TryComp<VictimInfectedComponent>(target, out var infected) && !infected.IsBursting)
             autodocData.Add(new RMCAutodocScanData(RMCAutodocProcedures.Larva, Loc.GetString("rmc-records-autodoc-larva")));

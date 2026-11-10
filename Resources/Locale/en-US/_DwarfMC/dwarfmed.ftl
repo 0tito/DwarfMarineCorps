@@ -42,3 +42,18 @@ dwarfmed-body-zone-left-leg = left leg
 dwarfmed-body-zone-right-leg = right leg
 dwarfmed-body-zone-left-foot = left foot
 dwarfmed-body-zone-right-foot = right foot
+
+dwarfmed-bone-gel-applied = You apply bone gel to the fracture.
+dwarfmed-bone-gel-needed = You need bone gel in the inserter.
+dwarfmed-bone-gel-wrong = The inserter does not contain bone gel. The fracture remains unset.
+dwarfmed-organ-gel-repaired = You repair the { $organ }.
+dwarfmed-organ-gel-wrong = The wrong gel damages the organ and poisons the patient!
+dwarfmed-organ-gel-needed = You need the correct organ gel in the inserter.
+dwarfmed-organ-ruptured = The { $organ } has ruptured!
+dwarfmed-defib-blocked-heart = The heart is too damaged to defibrillate.
+dwarfmed-defib-blocked-heart-examine = Their heart is too damaged to survive defibrillation.
+dwarfmed-unrevivable-brain = Their brain is dead beyond revival.
+
+rmc-records-autodoc-internal-bleeding = Internal bleeding detected
+rmc-records-autodoc-broken-bone = Bone fracture detected
+rmc-records-autodoc-organ-damage = Organ damage detected

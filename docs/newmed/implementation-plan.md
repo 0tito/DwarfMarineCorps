@@ -1,11 +1,12 @@
 # DwarfMed Implementation Plan
 
-Status: Phase 0, Phase 1, and Phase 2 complete; Phase 3 next
+Status: Phase 0 through Phase 3 complete; Phase 4 next
 Branch: `EvilMed`
 Related design: [design.md](design.md)
 Current implementation map: [current-state.md](current-state.md)
 Phase 1 implementation guide: [phase-1-guide.md](phase-1-guide.md)
 Phase 2 implementation guide: [phase-2-guide.md](phase-2-guide.md)
+Phase 3 implementation guide: [phase-3-guide.md](phase-3-guide.md)
 
 Naming note: `NewMed` is the design name. The implementation uses `DwarfMed`,
 `DwarfMedBaseMobSpeciesOrganic`, and the body prototype `DMCDwarf`.
@@ -239,13 +240,42 @@ See [phase-2-guide.md](phase-2-guide.md) for the detailed implementation guide.
 - Scanner reports fracture/splint/internal bleeding/stump.
 - No Phase 1 behavior regresses.
 
-## 7. Phase 3 - Organs (next)
+## 7. Phase 3 - Complete
 
-- Organ damage routing and effects.
-- Organ repair surgery.
-- Heart, lung, kidney, liver, brain, and eye effects.
-- Defibrillator/CPR/unrevivable integration.
-- Scanner, records, and autodoc updates.
+See [phase-3-guide.md](phase-3-guide.md) for the detailed implementation guide.
+
+**Status: Complete. 53/53 DwarfMed tests passing.**
+
+### Implemented in Phase 3
+
+- Organ damage routing from head/chest/groin only.
+- Organ damage chance/rate scaling and CVars.
+- Organ rupture state.
+- Heart, lung, kidney, liver, brain, eye, and stomach effects.
+- Defibrillation adds heart damage and heart rupture blocks defib.
+- Brain rupture/missing brain is unrevivable; repair clears DwarfMed-owned state.
+- Per-organ Repair surgeries with exact-content gel checks.
+- Gel inserter used by both Bone Repair and Organ Repair.
+- Eight gel reagents and placeholder chemistry recipes.
+- Bone Repair wrong gel consumes but does not set the bone.
+- Organ Repair wrong gel adds 5 organ damage and 5 Poison damage.
+- Scanner, medical records, autodoc, command, and debug organ data.
+- Organ debug sticks and filled gel vials in the debug crate.
+
+### Phase 3 acceptance criteria
+
+- Organ damage routes only from organ-bearing parts.
+- Organ rupture blocks defib until repaired.
+- Brain rupture/missing brain is unrevivable until repaired.
+- Eye damage causes blur/blindness and is reversed by repair.
+- Heart/lung damage produces asphyxiation.
+- Kidney/liver damage produces Poison damage.
+- Defibrillation adds heart damage.
+- Correct gels repair their matching organs.
+- Mixed/wrong gels trigger the defined behavior.
+- Bone Repair consumes gel but only sets the bone with bone gel.
+- Scanner/records/command/debug include organ data.
+- All DwarfMed tests pass.
 
 ## 8. Phase 4 - Integration and polish
 
@@ -269,31 +299,33 @@ See [phase-2-guide.md](phase-2-guide.md) for the detailed implementation guide.
 
 ## 10. Test matrix
 
-| Area | Test |
-|---|---|
-| Scope | Dwarf gets DwarfMed anatomy; all player mobs get the body-zone selector |
-| Body | Groin, hands, legs, feet exist and behave |
-| Thresholds | Dwarf crits at 100, dies at 200 |
-| Part damage | Damage lands on selected/random part |
-| Body-first damage | Body always takes full damage; limb counters never reduce it |
-| Hit weights | Weighted random is used for NPC attacks and fallback; selected zone overrides weights |
-| Delimb | Accumulator below threshold never severs; threshold crossing uses the event pipeline |
-| Accumulators | Slash, Brute, and Burn track separately |
-| Healing | Doctor-focused healing reduces selected limb accumulators; limb-only healing works at full body health |
-| Delimb immunity | Chest and groin never sever |
-| Delimb cost | No extra direct damage from severing |
-| Hands | Hand slot removed on hand/arm sever |
-| Movement | Foot/leg loss slows movement |
-| Head | Decapitation kills and prevents mind transfer |
-| Selector | Selection replicates and routes attacks |
-| Stump bleeding | Severed limb adds a bleeding source |
-| Stump stopgap | Gauze/trauma kit packs reduce but do not clear stump bleeding |
-| Fractures | Slash and brute cause chance-based fractures; burn does not |
-| Splints | Splints apply, consume, remove, and block fracture effects |
-| Internal bleeding | Unsplinted movement can start internal bleeding |
-| Surgery | Bone Repair, Internal Bleeding, and Seal Stump clear their conditions |
-| Scanner | Analyzer shows part damage, conditions, and missing limbs |
-| Isolation | Non-dwarf targets are unaffected by DwarfMed damage routing; player xenos still get the selector |
+| Area              | Test                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| Scope             | Dwarf gets DwarfMed anatomy; all player mobs get the body-zone selector                                |
+| Body              | Groin, hands, legs, feet exist and behave                                                              |
+| Thresholds        | Dwarf crits at 100, dies at 200                                                                        |
+| Part damage       | Damage lands on selected/random part                                                                   |
+| Body-first damage | Body always takes full damage; limb counters never reduce it                                           |
+| Hit weights       | Weighted random is used for NPC attacks and fallback; selected zone overrides weights                  |
+| Delimb            | Accumulator below threshold never severs; threshold crossing uses the event pipeline                   |
+| Accumulators      | Slash, Brute, and Burn track separately                                                                |
+| Healing           | Doctor-focused healing reduces selected limb accumulators; limb-only healing works at full body health |
+| Delimb immunity   | Chest and groin never sever                                                                            |
+| Delimb cost       | No extra direct damage from severing                                                                   |
+| Hands             | Hand slot removed on hand/arm sever                                                                    |
+| Movement          | Foot/leg loss slows movement                                                                           |
+| Head              | Decapitation kills and prevents mind transfer                                                          |
+| Selector          | Selection replicates and routes attacks                                                                |
+| Stump bleeding    | Severed limb adds a bleeding source                                                                    |
+| Stump stopgap     | Gauze/trauma kit packs reduce but do not clear stump bleeding                                          |
+| Fractures         | Slash and brute cause chance-based fractures; burn does not                                            |
+| Splints           | Splints apply, consume, remove, and block fracture effects                                             |
+| Internal bleeding | Unsplinted movement can start internal bleeding                                                        |
+| Surgery           | Bone Repair, Internal Bleeding, and Seal Stump clear their conditions                                  |
+| Scanner           | Analyzer shows part damage, conditions, and missing limbs                                              |
+| Organs            | Organ damage, rupture, effects, repair surgery, and gel checks                                         |
+| Defib             | Defib heart damage and heart-rupture blocking                                                          |
+| Isolation         | Non-dwarf targets are unaffected by DwarfMed damage routing; player xenos still get the selector       |
 
 ## 11. Verification commands
 

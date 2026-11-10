@@ -18,6 +18,8 @@ Naming note: `NewMed` is the design name. The implementation uses `DwarfMed`,
   event-driven delimbing, fire behavior, and test guide.
 - [Phase 2 Guide](phase-2-guide.md) - fractures, splints, internal bleeding,
   and treatment implementation guide.
+- [Phase 3 Guide](phase-3-guide.md) - organs, organ effects, gel inserter,
+  organ repair, and defibrillator integration.
 - [Current State](current-state.md) - actual implementation file map, test
   status, and starting point for a fresh session.
 
@@ -44,11 +46,15 @@ Naming note: `NewMed` is the design name. The implementation uses `DwarfMed`,
 | Internal bleeding | From severe head/chest/groin brute damage and unsplinted fracture movement; surgery-only cure |
 | Stump bleeding | Gauze/trauma kits slow it; Seal Stump surgery clears it |
 | Fire | Fire burn damage hits every limb, and fire delimbing turns the limb into `Ash` instead of dropping it |
-| CVars | `dmc.dwarfmed.enabled`, fracture/internal-bleed chance multipliers, internal-bleed rate multiplier |
+| CVars | `dmc.dwarfmed.enabled`, fracture/internal-bleed chance multipliers, internal-bleed rate multiplier, organ-damage chance/rate multipliers |
 | Wounds | Existing global `WoundedComponent` retained for v1; migration deferred |
+| Organs | Organ damage, rupture, effects, repair surgery, and per-organ gels |
+| Gels | One refillable gel inserter for bone and organ repair; exact-content checks |
+| Wrong gel | Organ repair: 5 organ damage + 5 Poison; bone repair consumes only |
+| Defib | Defibrillation adds heart damage; heart rupture blocks defib |
 | Pain | Later phase |
 | Blood types | Out of scope |
 
 ## Status
 
-Phase 0, Phase 1, and Phase 2 are complete. Phase 3 is next.
+Phase 0, Phase 1, Phase 2, and Phase 3 are complete. Phase 4 is next.

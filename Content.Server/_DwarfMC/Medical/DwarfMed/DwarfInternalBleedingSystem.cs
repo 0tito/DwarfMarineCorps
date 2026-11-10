@@ -19,6 +19,7 @@ public sealed class DwarfInternalBleedingSystem : EntitySystem
     [Dependency] private readonly SharedBodySystem _body = default!;
     [Dependency] private readonly IConfigurationManager _config = default!;
     [Dependency] private readonly DwarfFractureEffectSystem _fractureEffects = default!;
+    [Dependency] private readonly DwarfOrganDamageSystem _organDamage = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
@@ -64,8 +65,14 @@ public sealed class DwarfInternalBleedingSystem : EntitySystem
             if (!TryComp<DwarfBodyPartComponent>(partId, out var part))
                 continue;
 
-            if (CompOrNull<DwarfBodyPartConditionComponent>(partId) is not
-                { Fractured: true, Splinted: false, InternalBleeding: false })
+            var condition = CompOrNull<DwarfBodyPartConditionComponent>(partId);
+            if (condition is { InternalBleeding: true } &&
+                _random.Prob(Math.Clamp(MovementBleedChance * chanceMultiplier, 0f, 1f)))
+            {
+                _organDamage.TryDamageOrganInPart(ent.Owner, partId, 0.5f);
+            }
+
+            if (condition is not { Fractured: true, Splinted: false, InternalBleeding: false })
             {
                 continue;
             }

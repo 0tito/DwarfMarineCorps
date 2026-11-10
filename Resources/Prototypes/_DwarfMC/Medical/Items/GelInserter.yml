@@ -1,0 +1,47 @@
+- type: entity
+  parent: CMBaseToolSurgery
+  id: DwarfGelInserter
+  name: gel inserter
+  description: A refillable surgical applicator for organ and bone repair gels. The fill window changes color with its contents.
+  components:
+  - type: Sprite
+    sprite: _DwarfMC/Objects/Medical/gel_inserter.rsi
+    layers:
+    - state: gel_inserter
+      map: ["enum.SolutionContainerLayers.Base"]
+    - state: gel_fill1
+      map: ["enum.SolutionContainerLayers.Fill"]
+      visible: false
+  - type: Item
+    size: Small
+    sprite: _DwarfMC/Objects/Medical/gel_inserter.rsi
+  - type: DwarfGelInserter
+  - type: SolutionContainerManager
+    solutions:
+      gel:
+        maxVol: 5
+  - type: SolutionContainerVisuals
+    solutionName: gel
+    maxFillLevels: 3
+    fillBaseName: gel_fill
+  - type: RefillableSolution
+    solution: gel
+  - type: DrainableSolution
+    solution: gel
+  - type: DrawableSolution
+    solution: gel
+  - type: ExaminableSolution
+    solution: gel
+  - type: SolutionItemStatus
+    solution: gel
+  - type: SolutionTransfer
+    transferAmount: 5
+    maxTransferAmount: 5
+    canChangeTransferAmount: false
+    transferAmounts:
+    - 5
+  - type: Spillable
+    solution: gel
+  - type: PhysicalComposition
+    materialComposition:
+      RMCPlastic: 7500

@@ -59,7 +59,14 @@ public sealed class DwarfMedBodyCommand : ToolshedCommand
         {
             var organ = EntityManager.GetComponentOrNull<DwarfOrganHealthComponent>(id);
             var organName = organ?.OrganType.ToString() ?? Loc.GetString("dwarfmed-command-unknown-organ");
-            builder.AppendLine($"- {organName}");
+            if (organ == null)
+            {
+                builder.AppendLine($"- {organName}");
+                continue;
+            }
+
+            builder.AppendLine($"- {organName}: {organ.Damage}/{organ.MaxDamage} " +
+                               $"Ruptured {organ.Ruptured} Vital {organ.Vital}");
         }
 
         return builder.ToString();

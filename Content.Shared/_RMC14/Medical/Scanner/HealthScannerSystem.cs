@@ -185,7 +185,7 @@ public sealed class HealthScannerSystem : EntitySystem
 
         var pulse = _rmcPulse.TryGetPulseReading(target, true, out _);
         var bleeding = _rmcBloodstream.IsBleeding(target);
-        var state = new HealthScanState(GetNetEntity(target), blood, maxBlood, temperature, pulse, chemicals, bleeding, scanner.Comp.DetailLevel, _dwarfBodyParts.Build(target));
+        var state = new HealthScanState(GetNetEntity(target), blood, maxBlood, temperature, pulse, chemicals, bleeding, scanner.Comp.DetailLevel, _dwarfBodyParts.Build(target), _dwarfBodyParts.BuildOrgans(target));
 
         _ui.SetUiState(scanner.Owner, HealthScannerUIKey.Key, new HealthScannerBuiState(state));
     }

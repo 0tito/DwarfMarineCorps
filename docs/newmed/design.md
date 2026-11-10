@@ -1,6 +1,6 @@
 # DwarfMed (NewMed) Design Document
 
-Status: Phase 0, Phase 1, and Phase 2 complete; Phase 3 next
+Status: Phase 0 through Phase 3 complete; Phase 4 next
 Branch: `EvilMed`
 Scope: Dwarf-only per-limb medical system
 
@@ -185,7 +185,11 @@ The complete list of upstream edits expected for NewMed:
 9. DwarfMed removes `MaxDamageComponent` at runtime in `DwarfMedSetupSystem`,
    allowing post-death damage and burn delimbing to continue past the old 719
    cap.
-10. Phase 1 scanner/records integration:
+10. Phase 3: `Content.Shared/Body/Components/StomachComponent.cs` grants the
+    DwarfMed organ-effect system access to the digestion interval multiplier.
+11. Phase 3: `Content.Shared/_RMC14/Medical/Defibrillator/RMCDefibrillatorBlockedComponent.cs`
+    grants DwarfMed access to set the heart-rupture defib reason.
+12. Phase 1 scanner/records integration:
     - `Content.Shared/_RMC14/Medical/Scanner/HealthScannerUI.cs`
     - `Content.Shared/_RMC14/Medical/Scanner/HealthScannerSystem.cs`
     - `Content.Server/_RMC14/RMCMedicalRecords/RMCMedicalRecordsSystem.cs`
@@ -681,7 +685,7 @@ Organ damage uses the organ's `DamageableComponent` or a local damage field.
 
 | Organ | Effect |
 |---|---|
-| Heart | Asphyxiation and bloodloss scale with damage; rupture blocks defibrillation until repaired |
+| Heart | Asphyxiation and bloodloss scale with damage; bloodloss starts after 30% damage; rupture blocks defibrillation until repaired |
 | Lungs | Asphyxiation over time; rupture causes rapid suffocation and blocks anesthetic/internals |
 | Kidneys | Poison/Toxin buildup |
 | Liver | Poison buildup; slower alcohol metabolism |
@@ -695,6 +699,8 @@ Organ damage uses the organ's `DamageableComponent` or a local damage field.
 - Brain death or a missing brain makes the patient unrevivable.
 - Lung damage does not block defib but causes post-revive asphyxiation.
 - CPR continues to heal asphyxiation and extend the revive timer.
+- DwarfMed defibrillation adds heart damage (`DwarfAnatomy.DefibHeartDamage`,
+  default `10`).
 - Add a heartbreak HUD icon if the HUD is updated.
 
 ## 13. Diagnostics
@@ -756,7 +762,14 @@ Detail levels:
 - Splint (`RMCSplint`, `RMCSplint10`).
 - Fix-O-Vein (`CMFixOVein`) or a surgical-line substitute.
 - Advanced trauma kit and advanced burn kit, if not already implemented.
-- Organ repair tool component on the appropriate medical item.
+- Gel inserter (`DwarfGelInserter`), a refillable 5u surgical applicator used
+  for both Bone Repair and Organ Repair.
+- Eight gel reagents: bone, heart, lung, brain, eye, kidney, liver, and stomach.
+  Each organ repair consumes 5u of the matching gel.
+- Gel checks are exact-content checks. Mixed contents count as wrong.
+- Wrong organ gel consumes 5u and adds 5 organ damage plus 5 Poison damage.
+- Wrong bone gel consumes 5u but does not set the bone and does not damage the
+  patient.
 - Stump sealing tools.
 
 ### 14.2 New surgeries
@@ -766,7 +779,7 @@ Detail levels:
 | Bone Repair | Part is fractured | Remove fracture |
 | Internal Bleeding | Part has internal bleeding | Stop internal bleeding |
 | Seal Stump | Part has stump bleeding | Stop stump bleeding |
-| Organ Repair | Chest/groin/head has a damaged organ | Repair all damaged organs in the region |
+| Heart/Lung/Brain/Eye/Kidney/Liver/Stomach Repair | The target organ in the selected part is damaged | Apply the matching 5u gel to repair that organ |
 | Amputation | Arm or leg | Sever through the common sever path |
 | Limb Reattachment | Parent part with a missing child | Reattach a severed limb held during the step |
 
@@ -868,3 +881,7 @@ These are initial assumptions, not final balance:
   part's accumulators.
 - If the body is full, limb-only treatment can still reduce accumulators.
 - Feature CVar is `dmc.dwarfmed.enabled`.
+- Organ damage uses `OrganDamageThreshold` as a floor and scales chance/amount
+  with local trauma, accumulated limb trauma, and CVars.
+- Defibrillation adds 10 heart damage by default.
+- Gel recipes are placeholder balance.

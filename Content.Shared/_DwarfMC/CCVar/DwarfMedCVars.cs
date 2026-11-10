@@ -17,4 +17,10 @@ public sealed partial class DwarfMedCVars : CVars
 
     public static readonly CVarDef<float> InternalBleedRateMultiplier =
         CVarDef.Create("dmc.dwarfmed.internal_bleed_rate_multiplier", 1f, CVar.SERVER);
+
+    public static readonly CVarDef<float> OrganDamageChanceMultiplier =
+        CVarDef.Create("dmc.dwarfmed.organ_damage_chance_multiplier", 1f, CVar.SERVER);
+
+    public static readonly CVarDef<float> OrganDamageRateMultiplier =
+        CVarDef.Create("dmc.dwarfmed.organ_damage_rate_multiplier", 1f, CVar.SERVER);
 }

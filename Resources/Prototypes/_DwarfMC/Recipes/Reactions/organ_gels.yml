@@ -1,0 +1,96 @@
+# Placeholder recipes. Revisit in the Phase 4 balance pass.
+- type: reaction
+  id: DwarfBoneGel
+  reactants:
+    CMBicaridine:
+      amount: 1
+    RMCCarbon:
+      amount: 1
+    Water:
+      amount: 1
+  products:
+    DwarfBoneGel: 3
+
+- type: reaction
+  id: DwarfHeartGel
+  reactants:
+    CMBicaridine:
+      amount: 1
+    RMCIron:
+      amount: 1
+    RMCOxygen:
+      amount: 1
+  products:
+    DwarfHeartGel: 3
+
+- type: reaction
+  id: DwarfLungGel
+  reactants:
+    CMDexalin:
+      amount: 1
+    RMCOxygen:
+      amount: 1
+    Water:
+      amount: 1
+  products:
+    DwarfLungGel: 3
+
+- type: reaction
+  id: DwarfBrainGel
+  reactants:
+    CMInaprovaline:
+      amount: 1
+    RMCNitrogen:
+      amount: 1
+    RMCHydrogen:
+      amount: 1
+  products:
+    DwarfBrainGel: 3
+
+- type: reaction
+  id: DwarfEyeGel
+  reactants:
+    CMImidazoline:
+      amount: 1
+    Water:
+      amount: 1
+    RMCOxygen:
+      amount: 1
+  products:
+    DwarfEyeGel: 3
+
+- type: reaction
+  id: DwarfKidneyGel
+  reactants:
+    CMDylovene:
+      amount: 1
+    RMCSodium:
+      amount: 1
+    Water:
+      amount: 1
+  products:
+    DwarfKidneyGel: 3
+
+- type: reaction
+  id: DwarfLiverGel
+  reactants:
+    CMDylovene:
+      amount: 1
+    RMCCarbon:
+      amount: 1
+    Water:
+      amount: 1
+  products:
+    DwarfLiverGel: 3
+
+- type: reaction
+  id: DwarfStomachGel
+  reactants:
+    CMTricordrazine:
+      amount: 1
+    Water:
+      amount: 1
+    RMCSugar:
+      amount: 1
+  products:
+    DwarfStomachGel: 3

@@ -1,10 +1,12 @@
 using Content.Shared.Body.Part;
+using Content.Shared.Body.Systems;
 using Content.Shared.FixedPoint;
 
 namespace Content.Shared._DwarfMC.Medical.DwarfMed;
 
 public sealed class DwarfBodyPartScanSystem : EntitySystem
 {
+    [Dependency] private readonly SharedBodySystem _body = default!;
     [Dependency] private readonly BodyZoneSystem _bodyZones = default!;
 
     public List<DwarfBodyPartScan> Build(EntityUid target)
@@ -56,6 +58,30 @@ public sealed class DwarfBodyPartScanSystem : EntitySystem
                     false,
                     false));
             }
+        }
+
+        return result;
+    }
+
+    public List<DwarfOrganScan> BuildOrgans(EntityUid target)
+    {
+        var result = new List<DwarfOrganScan>();
+        if (!HasComp<DwarfAnatomyComponent>(target))
+            return result;
+
+        foreach (var (id, _) in _body.GetBodyOrgans(target))
+        {
+            if (!TryComp<DwarfOrganHealthComponent>(id, out var organ))
+                continue;
+
+            result.Add(new DwarfOrganScan(
+                organ.OrganType.ToString().ToLowerInvariant(),
+                MetaData(id).EntityName,
+                organ.OrganType,
+                organ.Damage,
+                organ.MaxDamage,
+                organ.Ruptured,
+                organ.Vital));
         }
 
         return result;
