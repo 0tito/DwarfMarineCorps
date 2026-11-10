@@ -16,4 +16,13 @@ public sealed partial class DamageOnPulledWhileCritComponent : Component
 
     [DataField, AutoNetworkedField]
     public double Every = 0.1;
+
+    [DataField, AutoNetworkedField]
+    public bool Active;
+
+    [DataField, AutoNetworkedField]
+    public bool Pulled;
+
+    [DataField, AutoNetworkedField]
+    public double Accumulator;
 }
