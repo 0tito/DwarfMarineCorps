@@ -6,6 +6,7 @@ namespace Content.Shared._DwarfMC.Medical.DwarfMed;
 [DataRecord, Serializable, NetSerializable]
 public readonly record struct DwarfOrganScan(
     string OrganSlot,
+    BodyZone Zone,
     string OrganName,
     DwarfOrganType Type,
     FixedPoint2 Damage,

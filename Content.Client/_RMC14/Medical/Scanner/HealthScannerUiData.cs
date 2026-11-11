@@ -72,6 +72,9 @@ public sealed class HealthScannerUiData
         if (_entities.GetEntity(uiState.Target) is not { Valid: true } target)
             return;
 
+        if (_lastTarget != uiState.Target)
+            window.SelectedDwarfPart = BodyZone.Chest;
+
         _lastTarget = uiState.Target;
 
         window.PatientLabel.Text = Loc.GetString("rmc-health-analyzer-patient", ("name", Identity.Name(target, _entities, _player.LocalEntity)));
@@ -255,62 +258,118 @@ public sealed class HealthScannerUiData
             window.MedicalAdviceSeparator.Visible = false;
         }
 
-        PopulateDwarfMedDebug(window, uiState);
+        PopulateDwarfMedBody(window, uiState);
     }
 
-    private static void PopulateDwarfMedDebug(HealthScannerWindow window, HealthScanState uiState)
+    private void PopulateDwarfMedBody(HealthScannerWindow window, HealthScanState uiState)
     {
-        window.DwarfMedDebugContainer.DisposeAllChildren();
-
         var any = uiState.Parts.Count > 0 || uiState.Organs.Count > 0;
-        window.DwarfMedDebugLabel.Visible = any;
-        window.DwarfMedDebugSeparator.Visible = any;
-        window.DwarfMedDebugContainer.Visible = any;
+        window.DwarfMedPartArea.Visible = any;
+        window.DwarfMedBodyColumn.Visible = any;
+        window.DwarfMedBodySeparator.Visible = any;
 
         if (!any)
-            return;
-
-        foreach (var part in uiState.Parts)
         {
-            var label = new Label();
-            if (part.Severed)
-            {
-                label.Text = $"{part.SlotId}: MISSING";
-            }
-            else
-            {
-                var flags = new List<string>();
-                if (part.Fractured)
-                    flags.Add(part.Splinted ? "FRACTURED (SPLINTED)" : "FRACTURED");
-                else if (part.Splinted)
-                    flags.Add("SPLINTED");
-
-                if (part.StumpBleeding)
-                    flags.Add("STUMP BLEEDING");
-
-                if (part.InternalBleeding)
-                    flags.Add("INTERNAL BLEEDING");
-
-                var suffix = flags.Count > 0 ? $" {string.Join(" ", flags)}" : string.Empty;
-                label.Text = $"{part.SlotId}: Slash {part.SlashDamage.Int()}/{part.SlashThreshold.Int()} " +
-                             $"Brute {part.BruteDamage.Int()}/{part.BruteThreshold.Int()} " +
-                             $"Burn {part.BurnDamage.Int()}/{part.BurnThreshold.Int()}{suffix}";
-            }
-
-            window.DwarfMedDebugContainer.AddChild(label);
+            window.DwarfMedDebugLabel.Visible = false;
+            window.DwarfMedDebugSeparator.Visible = false;
+            window.DwarfMedDebugContainer.Visible = false;
+            return;
         }
 
+        window.BodyControl.SetScan(uiState.Parts, uiState.Organs);
+        window.BodyControl.SetSelected(window.SelectedDwarfPart);
+        window.OnDwarfPartSelected = zone => PopulateDwarfMedPartStatus(window, uiState, zone);
+        PopulateDwarfMedPartStatus(window, uiState, window.SelectedDwarfPart);
+    }
+
+    private static void PopulateDwarfMedPartStatus(
+        HealthScannerWindow window,
+        HealthScanState uiState,
+        BodyZone zone)
+    {
+        window.DwarfMedDebugContainer.DisposeAllChildren();
+        window.DwarfMedDebugLabel.Visible = true;
+        window.DwarfMedDebugSeparator.Visible = true;
+        window.DwarfMedDebugContainer.Visible = true;
+        window.DwarfMedDebugLabel.Text = $"{DwarfPartStatus.GetDisplayName(zone)} Status";
+
+        DwarfBodyPartScan? part = null;
+        foreach (var candidate in uiState.Parts)
+        {
+            if (candidate.SlotId != zone.ToString())
+                continue;
+
+            part = candidate;
+            break;
+        }
+
+        if (part is not { } scan || scan.Severed)
+        {
+            window.DwarfMedDebugContainer.AddChild(new Label { Text = "MISSING" });
+        }
+        else
+        {
+            window.DwarfMedDebugContainer.AddChild(new Label
+            {
+                Text = $"Slash: {scan.SlashDamage.Int()} / {scan.SlashThreshold.Int()}",
+            });
+            window.DwarfMedDebugContainer.AddChild(new Label
+            {
+                Text = $"Brute: {scan.BruteDamage.Int()} / {scan.BruteThreshold.Int()}",
+            });
+            window.DwarfMedDebugContainer.AddChild(new Label
+            {
+                Text = $"Burn: {scan.BurnDamage.Int()} / {scan.BurnThreshold.Int()}",
+            });
+
+            var flags = new List<string>();
+            if (scan.Fractured)
+                flags.Add(scan.Splinted ? "[color=#FFB833][bold]FRACTURED (SPLINTED)[/bold][/color]" : "[color=#FF7A1A][bold]FRACTURED[/bold][/color]");
+            else if (scan.Splinted)
+                flags.Add("SPLINTED");
+
+            if (scan.StumpBleeding)
+                flags.Add("[color=#DF3E3E]STUMP BLEEDING[/color]");
+
+            if (scan.InternalBleeding)
+                flags.Add("[color=#DF3E3E]INTERNAL BLEEDING[/color]");
+
+            if (flags.Count > 0)
+            {
+                var label = new RichTextLabel();
+                label.SetMarkupPermissive(string.Join(", ", flags));
+                window.DwarfMedDebugContainer.AddChild(label);
+            }
+        }
+
+        var hasOrgans = false;
         foreach (var organ in uiState.Organs)
         {
+            if (organ.Zone != zone)
+                continue;
+
+            if (!hasOrgans)
+            {
+                window.DwarfMedDebugContainer.AddChild(new Label
+                {
+                    Text = "Organs:",
+                    Margin = new Thickness(0, 5, 0, 0),
+                });
+                hasOrgans = true;
+            }
+
             var percent = organ.MaxDamage.Float() <= 0f
                 ? 0f
                 : organ.Damage.Float() / organ.MaxDamage.Float() * 100f;
-            var suffix = organ.Ruptured ? " RUPTURED" : string.Empty;
-            var vital = organ.Vital ? " VITAL" : string.Empty;
-            window.DwarfMedDebugContainer.AddChild(new Label
-            {
-                Text = $"{organ.OrganName}: {percent:F0}%{suffix}{vital}",
-            });
+            var markup = $"{organ.OrganName}: {percent:F0}%";
+            if (organ.Ruptured)
+                markup += " [color=#DF3E3E]RUPTURED[/color]";
+            if (organ.Vital)
+                markup += " [color=#FFB833]VITAL[/color]";
+
+            var label = new RichTextLabel();
+            label.SetMarkupPermissive(markup);
+            window.DwarfMedDebugContainer.AddChild(label);
         }
     }
 

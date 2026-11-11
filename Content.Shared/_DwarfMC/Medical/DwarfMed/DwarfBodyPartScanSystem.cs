@@ -69,19 +69,26 @@ public sealed class DwarfBodyPartScanSystem : EntitySystem
         if (!HasComp<DwarfAnatomyComponent>(target))
             return result;
 
-        foreach (var (id, _) in _body.GetBodyOrgans(target))
+        foreach (var zone in Enum.GetValues<BodyZone>())
         {
-            if (!TryComp<DwarfOrganHealthComponent>(id, out var organ))
+            if (!_bodyZones.TryGetAttachedPartExact(target, zone, out var part, out var bodyPart))
                 continue;
 
-            result.Add(new DwarfOrganScan(
-                organ.OrganType.ToString().ToLowerInvariant(),
-                MetaData(id).EntityName,
-                organ.OrganType,
-                organ.Damage,
-                organ.MaxDamage,
-                organ.Ruptured,
-                organ.Vital));
+            foreach (var (id, _) in _body.GetPartOrgans(part, bodyPart))
+            {
+                if (!TryComp<DwarfOrganHealthComponent>(id, out var organ))
+                    continue;
+
+                result.Add(new DwarfOrganScan(
+                    organ.OrganType.ToString().ToLowerInvariant(),
+                    zone,
+                    MetaData(id).EntityName,
+                    organ.OrganType,
+                    organ.Damage,
+                    organ.MaxDamage,
+                    organ.Ruptured,
+                    organ.Vital));
+            }
         }
 
         return result;

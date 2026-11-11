@@ -74,13 +74,14 @@ public sealed class PartStatusUIController : UIController
         var dead = EntityManager.TryGetComponent<MobStateComponent>(player, out var mobState) &&
                    mobState.CurrentState == MobState.Dead;
         var scans = _scans.Build(player);
+        var organs = _scans.BuildOrgans(player);
         var changed = false;
         foreach (var scan in scans)
         {
             if (!Enum.TryParse<BodyZone>(scan.SlotId, out var zone))
                 continue;
 
-            var severity = DwarfPartStatus.GetSeverity(scan, dead);
+            var severity = DwarfPartStatus.GetSeverity(scan, organs, dead);
             if (_status.TryGetValue(zone, out var previous) && previous == severity)
                 continue;
 

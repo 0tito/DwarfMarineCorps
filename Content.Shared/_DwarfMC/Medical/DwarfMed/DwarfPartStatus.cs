@@ -26,6 +26,14 @@ public static class DwarfPartStatus
 {
     public static DwarfPartSeverity GetSeverity(DwarfBodyPartScan scan, bool dead = false)
     {
+        return GetSeverity(scan, null, dead);
+    }
+
+    public static DwarfPartSeverity GetSeverity(
+        DwarfBodyPartScan scan,
+        IReadOnlyList<DwarfOrganScan>? organs,
+        bool dead = false)
+    {
         if (dead)
             return DwarfPartSeverity.Dead;
 
@@ -33,6 +41,17 @@ public static class DwarfPartStatus
             return DwarfPartSeverity.Severed;
 
         var ratio = GetWorstDamageRatio(scan);
+        if (scan.Fractured)
+            ratio = MathF.Max(ratio, 0.4f);
+
+        if (organs != null && Enum.TryParse<BodyZone>(scan.SlotId, out var zone))
+            ratio = MathF.Max(ratio, GetWorstOrganDamageRatio(zone, organs));
+
+        return GetSeverity(ratio);
+    }
+
+    public static DwarfPartSeverity GetSeverity(float ratio)
+    {
         if (ratio <= 0f)
             return DwarfPartSeverity.Healthy;
 
@@ -49,6 +68,25 @@ public static class DwarfPartStatus
             return DwarfPartSeverity.HeavilyWounded;
 
         return DwarfPartSeverity.CriticallyWounded;
+    }
+
+    public static float GetWorstOrganDamageRatio(BodyZone zone, IReadOnlyList<DwarfOrganScan> organs)
+    {
+        var worst = 0f;
+
+        foreach (var organ in organs)
+        {
+            if (organ.Zone != zone)
+                continue;
+
+            if (organ.Ruptured)
+                worst = MathF.Max(worst, 1f);
+
+            if (organ.MaxDamage > FixedPoint2.Zero)
+                worst = MathF.Max(worst, organ.Damage.Float() / organ.MaxDamage.Float());
+        }
+
+        return worst;
     }
 
     public static float GetWorstDamageRatio(DwarfBodyPartScan scan)
@@ -70,5 +108,21 @@ public static class DwarfPartStatus
     public static string GetRsiName(BodyZone zone)
     {
         return zone == BodyZone.Chest ? "torso" : zone.ToString().ToLowerInvariant();
+    }
+
+    public static string GetDisplayName(BodyZone zone)
+    {
+        return zone switch
+        {
+            BodyZone.LeftArm => "Left Arm",
+            BodyZone.RightArm => "Right Arm",
+            BodyZone.LeftHand => "Left Hand",
+            BodyZone.RightHand => "Right Hand",
+            BodyZone.LeftLeg => "Left Leg",
+            BodyZone.RightLeg => "Right Leg",
+            BodyZone.LeftFoot => "Left Foot",
+            BodyZone.RightFoot => "Right Foot",
+            _ => zone.ToString(),
+        };
     }
 }
