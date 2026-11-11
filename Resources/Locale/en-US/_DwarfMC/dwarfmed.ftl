@@ -62,3 +62,6 @@ dwarfmed-organ-removed = You remove the { $organ }.
 dwarfmed-organ-inserted = You insert the { $organ }.
 dwarfmed-organ-brain-cannot-reinsert = The brain cannot be reinserted. The damage is permanent.
 dwarfmed-prosthetic-installed = You install the prosthetic.
+
+rmc-intel-tech-dwarf-prosthetics-name = Prosthetic Manufacturing
+rmc-intel-tech-dwarf-prosthetics-description = Unlocks prosthetic limb recipes on the medilathe.

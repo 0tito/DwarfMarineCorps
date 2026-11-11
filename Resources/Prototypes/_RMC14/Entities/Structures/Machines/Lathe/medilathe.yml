@@ -45,12 +45,24 @@
     producingSound: /Audio/_RMC14/Machines/print.ogg
     staticPacks:
     - RMCRecipesMedilathe
+  - type: IntelLatheRecipes
+    recipes:
+    - DwarfProstheticLeftArm
+    - DwarfProstheticRightArm
+    - DwarfProstheticLeftHand
+    - DwarfProstheticRightHand
+    - DwarfProstheticLeftLeg
+    - DwarfProstheticRightLeg
+    - DwarfProstheticLeftFoot
+    - DwarfProstheticRightFoot
   - type: MaterialStorage
     storage:
+      CMSteel: 75000
       CMGlass: 20000
       RMCPlastic: 40000
     whitelist:
       tags:
+      - Metal
       - Plastic
       - RMCGlass
   - type: Destructible

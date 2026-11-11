@@ -290,6 +290,29 @@
             sprite: _RMC14/Interface/tech_tree.rsi
             state: upgrade
       -
+        - name: rmc-intel-tech-dwarf-prosthetics-name
+          description: rmc-intel-tech-dwarf-prosthetics-description
+          cost: 3
+          events:
+          - !type:TechUnlockRecipeEvent
+            recipe: DwarfProstheticLeftArm
+          - !type:TechUnlockRecipeEvent
+            recipe: DwarfProstheticRightArm
+          - !type:TechUnlockRecipeEvent
+            recipe: DwarfProstheticLeftHand
+          - !type:TechUnlockRecipeEvent
+            recipe: DwarfProstheticRightHand
+          - !type:TechUnlockRecipeEvent
+            recipe: DwarfProstheticLeftLeg
+          - !type:TechUnlockRecipeEvent
+            recipe: DwarfProstheticRightLeg
+          - !type:TechUnlockRecipeEvent
+            recipe: DwarfProstheticLeftFoot
+          - !type:TechUnlockRecipeEvent
+            recipe: DwarfProstheticRightFoot
+          icon:
+            sprite: _RMC14/Interface/tech_tree.rsi
+            state: medic_qol
         - name: rmc-intel-tech-requisition-arc-name
           description: rmc-intel-tech-requisition-arc-description
           cost: 5
