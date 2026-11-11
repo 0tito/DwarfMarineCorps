@@ -82,7 +82,6 @@ public sealed class DwarfMedDebugTest
                 "CMScalpel",
                 "CMHemostat",
                 "CMRetractor",
-                "CMBoneGel",
                 "CMBonesetter",
                 "CMCircularSaw",
                 "CMCautery",
