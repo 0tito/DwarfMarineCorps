@@ -43,55 +43,99 @@ public sealed class DwarfMedDebugTest
     }
 
     [Test]
-    public async Task DebugCrateContainsAllTestItems()
+    public async Task DebugCratesContainThemedTestItems()
     {
         await using var pair = await PoolManager.GetServerClient();
         var server = pair.Server;
         var entMan = server.ResolveDependency<IEntityManager>();
         var map = await pair.CreateTestMap();
 
-        EntityUid crate = default;
-        await server.WaitAssertion(() => crate = entMan.SpawnEntity("DwarfMedDebugCrate", map.MapCoords));
-        await server.WaitRunTicks(1);
-
-        await server.WaitAssertion(() =>
+        var crates = new Dictionary<string, string[]>
         {
-            var storage = entMan.GetComponent<EntityStorageComponent>(crate);
-            var contents = storage.Contents.ContainedEntities
-                .Select(id => entMan.GetComponent<MetaDataComponent>(id).EntityPrototype?.ID)
-                .ToList();
+            ["DwarfMedDebugWeaponsCrate"] =
+            [
+                "DwarfDebugSlash",
+                "DwarfDebugBlunt",
+                "DwarfDebugPiercing",
+                "DwarfDebugBurn",
+                "DwarfDebugFire",
+                "DwarfDebugDelimb",
+                "DwarfDebugFracture",
+                "DwarfDebugInternalBleeding",
+                "DwarfDebugStumpBleeding",
+                "DwarfDebugOrganDamage",
+                "DwarfDebugOrganRupture",
+            ],
+            ["DwarfMedDebugSurgeryCrate"] =
+            [
+                "DwarfGelInserter",
+                "DwarfBoneGelVial",
+                "DwarfHeartGelVial",
+                "DwarfLungGelVial",
+                "DwarfBrainGelVial",
+                "DwarfEyeGelVial",
+                "DwarfKidneyGelVial",
+                "DwarfLiverGelVial",
+                "DwarfStomachGelVial",
+                "CMSurgicalLine",
+                "RMCFixOVein",
+                "CMScalpel",
+                "CMHemostat",
+                "CMRetractor",
+                "CMBoneGel",
+                "CMBonesetter",
+                "CMCircularSaw",
+                "CMCautery",
+                "RMCResearchUpgradeAutodocInternalBleeding",
+                "RMCResearchUpgradeAutodocBrokenBone",
+                "RMCResearchUpgradeAutodocOrganDamage",
+            ],
+            ["DwarfMedDebugMedicineCrate"] =
+            [
+                "RMCSplint10",
+                "CMGauze10",
+                "CMOintment10",
+                "CMTraumaKit10",
+                "CMBurnKit10",
+                "CMHealthAnalyzer",
+                "DwarfDebugHealthAnalyzer",
+                "CMDefibrillatorInfinite",
+                "CMPortableSurgicalBedSpawnFolded",
+                "CMStasisBagFolded",
+            ],
+            ["DwarfMedDebugProstheticsCrate"] =
+            [
+                "DwarfProstheticLeftArm",
+                "DwarfProstheticRightArm",
+                "DwarfProstheticLeftHand",
+                "DwarfProstheticRightHand",
+                "DwarfProstheticLeftLeg",
+                "DwarfProstheticRightLeg",
+                "DwarfProstheticLeftFoot",
+                "DwarfProstheticRightFoot",
+                "CMWelder",
+                "RMCCableCoil30",
+            ],
+        };
 
-            Assert.Multiple(() =>
+        foreach (var (crateProto, expected) in crates)
+        {
+            EntityUid crate = default;
+            await server.WaitAssertion(() => crate = entMan.SpawnEntity(crateProto, map.MapCoords));
+            await server.WaitRunTicks(1);
+
+            await server.WaitAssertion(() =>
             {
-                Assert.That(contents, Has.Count.EqualTo(39));
-                Assert.That(contents, Does.Contain("DwarfDebugSlash"));
-                Assert.That(contents, Does.Contain("DwarfDebugBlunt"));
-                Assert.That(contents, Does.Contain("DwarfDebugPiercing"));
-                Assert.That(contents, Does.Contain("DwarfDebugBurn"));
-                Assert.That(contents, Does.Contain("DwarfDebugFire"));
-                Assert.That(contents, Does.Contain("DwarfDebugDelimb"));
-                Assert.That(contents, Does.Contain("DwarfDebugFracture"));
-                Assert.That(contents, Does.Contain("DwarfDebugInternalBleeding"));
-                Assert.That(contents, Does.Contain("DwarfDebugStumpBleeding"));
-                Assert.That(contents, Does.Contain("DwarfDebugOrganDamage"));
-                Assert.That(contents, Does.Contain("DwarfDebugOrganRupture"));
-                Assert.That(contents, Does.Contain("DwarfGelInserter"));
-                Assert.That(contents, Does.Contain("DwarfBoneGelVial"));
-                Assert.That(contents, Does.Contain("DwarfHeartGelVial"));
-                Assert.That(contents, Does.Contain("DwarfLungGelVial"));
-                Assert.That(contents, Does.Contain("DwarfBrainGelVial"));
-                Assert.That(contents, Does.Contain("DwarfEyeGelVial"));
-                Assert.That(contents, Does.Contain("DwarfKidneyGelVial"));
-                Assert.That(contents, Does.Contain("DwarfLiverGelVial"));
-                Assert.That(contents, Does.Contain("DwarfStomachGelVial"));
-                Assert.That(contents, Does.Contain("RMCSplint10"));
-                Assert.That(contents, Does.Contain("RMCFixOVein"));
-                Assert.That(contents, Does.Contain("CMBoneGel"));
-                Assert.That(contents, Does.Contain("CMBonesetter"));
-                Assert.That(contents, Does.Contain("CMHealthAnalyzer"));
-                Assert.That(contents, Does.Contain("DwarfDebugHealthAnalyzer"));
+                var storage = entMan.GetComponent<EntityStorageComponent>(crate);
+                var contents = storage.Contents.ContainedEntities
+                    .Select(id => entMan.GetComponent<MetaDataComponent>(id).EntityPrototype?.ID)
+                    .ToList();
+
+                Assert.That(contents, Has.Count.EqualTo(expected.Length), crateProto);
+                foreach (var id in expected)
+                    Assert.That(contents, Does.Contain(id), crateProto);
             });
-        });
+        }
 
         await pair.CleanReturnAsync();
     }

@@ -1,0 +1,172 @@
+- type: entity
+  id: DwarfProstheticPartBase
+  parent: BaseItem
+  abstract: true
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+  - type: Icon
+    sprite: Mobs/Species/Human/parts.rsi
+  - type: Damageable
+    damageContainer: Inorganic
+  - type: BodyPart
+  - type: ContainerContainer
+    containers:
+      bodypart: !type:Container
+        ents: []
+  - type: Gibbable
+  - type: StaticPrice
+    price: 200
+  - type: Tag
+    tags:
+    - Trash
+  - type: DwarfBodyPart
+    dismemberable: true
+    slashThreshold: 80
+    bruteThreshold: 120
+    burnThreshold: 300
+    fractureScale: 100
+    stumpBleedRate: 0
+  - type: DwarfProsthetic
+
+- type: entity
+  parent: DwarfProstheticPartBase
+  id: DwarfProstheticLeftArm
+  name: left prosthetic arm
+  description: A dark metal replacement for a missing left arm.
+  components:
+  - type: BodyPart
+    partType: Arm
+    symmetry: Left
+  - type: Sprite
+    state: l_arm
+    color: "#3A3A3A"
+  - type: Icon
+    state: l_arm
+    color: "#3A3A3A"
+
+- type: entity
+  parent: DwarfProstheticPartBase
+  id: DwarfProstheticRightArm
+  name: right prosthetic arm
+  description: A dark metal replacement for a missing right arm.
+  components:
+  - type: BodyPart
+    partType: Arm
+    symmetry: Right
+  - type: Sprite
+    state: r_arm
+    color: "#3A3A3A"
+  - type: Icon
+    state: r_arm
+    color: "#3A3A3A"
+
+- type: entity
+  parent: DwarfProstheticPartBase
+  id: DwarfProstheticLeftHand
+  name: left prosthetic hand
+  description: A dark metal replacement for a missing left hand.
+  components:
+  - type: BodyPart
+    partType: Hand
+    symmetry: Left
+  - type: Sprite
+    state: l_hand
+    color: "#3A3A3A"
+  - type: Icon
+    state: l_hand
+    color: "#3A3A3A"
+  - type: DwarfBodyPart
+    fractureScale: 60
+
+- type: entity
+  parent: DwarfProstheticPartBase
+  id: DwarfProstheticRightHand
+  name: right prosthetic hand
+  description: A dark metal replacement for a missing right hand.
+  components:
+  - type: BodyPart
+    partType: Hand
+    symmetry: Right
+  - type: Sprite
+    state: r_hand
+    color: "#3A3A3A"
+  - type: Icon
+    state: r_hand
+    color: "#3A3A3A"
+  - type: DwarfBodyPart
+    fractureScale: 60
+
+- type: entity
+  parent: DwarfProstheticPartBase
+  id: DwarfProstheticLeftLeg
+  name: left prosthetic leg
+  description: A dark metal replacement for a missing left leg.
+  components:
+  - type: BodyPart
+    partType: Leg
+    symmetry: Left
+  - type: MovementBodyPart
+    walkSpeed: 2.7
+    sprintSpeed: 5
+  - type: Sprite
+    state: l_leg
+    color: "#3A3A3A"
+  - type: Icon
+    state: l_leg
+    color: "#3A3A3A"
+
+- type: entity
+  parent: DwarfProstheticPartBase
+  id: DwarfProstheticRightLeg
+  name: right prosthetic leg
+  description: A dark metal replacement for a missing right leg.
+  components:
+  - type: BodyPart
+    partType: Leg
+    symmetry: Right
+  - type: MovementBodyPart
+    walkSpeed: 2.7
+    sprintSpeed: 5
+  - type: Sprite
+    state: r_leg
+    color: "#3A3A3A"
+  - type: Icon
+    state: r_leg
+    color: "#3A3A3A"
+
+- type: entity
+  parent: DwarfProstheticPartBase
+  id: DwarfProstheticLeftFoot
+  name: left prosthetic foot
+  description: A dark metal replacement for a missing left foot.
+  components:
+  - type: BodyPart
+    partType: Foot
+    symmetry: Left
+  - type: Sprite
+    state: l_foot
+    color: "#3A3A3A"
+  - type: Icon
+    state: l_foot
+    color: "#3A3A3A"
+  - type: DwarfBodyPart
+    fractureScale: 60
+
+- type: entity
+  parent: DwarfProstheticPartBase
+  id: DwarfProstheticRightFoot
+  name: right prosthetic foot
+  description: A dark metal replacement for a missing right foot.
+  components:
+  - type: BodyPart
+    partType: Foot
+    symmetry: Right
+  - type: Sprite
+    state: r_foot
+    color: "#3A3A3A"
+  - type: Icon
+    state: r_foot
+    color: "#3A3A3A"
+  - type: DwarfBodyPart
+    fractureScale: 60

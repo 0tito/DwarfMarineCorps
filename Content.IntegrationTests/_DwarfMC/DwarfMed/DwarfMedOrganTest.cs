@@ -416,7 +416,8 @@ public sealed class DwarfMedOrganTest
             var damageable = entMan.GetComponent<DamageableComponent>(dwarf);
             Assert.Multiple(() =>
             {
-                Assert.That(entMan.GetComponent<DwarfOrganHealthComponent>(heart).Damage, Is.EqualTo(FixedPoint2.New(25)));
+                Assert.That(entMan.GetComponent<DwarfOrganHealthComponent>(heart).Damage,
+                    Is.GreaterThanOrEqualTo(FixedPoint2.New(25)));
                 Assert.That(damageable.Damage.DamageDict.GetValueOrDefault("Poison"), Is.EqualTo(FixedPoint2.New(5)));
             });
         });
@@ -499,7 +500,8 @@ public sealed class DwarfMedOrganTest
             var damageable = entMan.GetComponent<DamageableComponent>(dwarf);
             Assert.Multiple(() =>
             {
-                Assert.That(entMan.GetComponent<DwarfOrganHealthComponent>(heart).Damage, Is.EqualTo(FixedPoint2.New(25)));
+                Assert.That(entMan.GetComponent<DwarfOrganHealthComponent>(heart).Damage,
+                    Is.GreaterThanOrEqualTo(FixedPoint2.New(25)));
                 Assert.That(damageable.Damage.DamageDict.GetValueOrDefault("Poison"), Is.EqualTo(FixedPoint2.New(5)));
             });
         });

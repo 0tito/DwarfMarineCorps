@@ -42,8 +42,12 @@ public sealed class DwarfFractureSystem : EntitySystem
         FixedPoint2 localTrauma,
         float? chanceOverride = null)
     {
-        if (!ent.Comp.Enabled || localTrauma <= FixedPoint2.Zero)
+        if (!ent.Comp.Enabled ||
+            localTrauma <= FixedPoint2.Zero ||
+            HasComp<DwarfProstheticComponent>(partId))
+        {
             return false;
+        }
 
         var condition = EnsureComp<DwarfBodyPartConditionComponent>(partId);
         if (condition.Fractured)

@@ -57,3 +57,8 @@ dwarfmed-unrevivable-brain = Their brain is dead beyond revival.
 rmc-records-autodoc-internal-bleeding = Internal bleeding detected
 rmc-records-autodoc-broken-bone = Bone fracture detected
 rmc-records-autodoc-organ-damage = Organ damage detected
+
+dwarfmed-organ-removed = You remove the { $organ }.
+dwarfmed-organ-inserted = You insert the { $organ }.
+dwarfmed-organ-brain-cannot-reinsert = The brain cannot be reinserted. The damage is permanent.
+dwarfmed-prosthetic-installed = You install the prosthetic.

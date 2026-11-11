@@ -1,5 +1,6 @@
 using Content.Shared._DwarfMC.Medical.DwarfMed;
 using Content.Shared._RMC14.Medical.Wounds;
+using Content.Shared._RMC14.Repairable;
 using Content.Shared.DoAfter;
 using Content.Shared.FixedPoint;
 using Content.Shared.Interaction;
@@ -19,6 +20,7 @@ public sealed class DwarfLimbTreatmentSystem : EntitySystem
     [Dependency] private readonly SharedAudioSystem _audio = default!;
     [Dependency] private readonly SharedDoAfterSystem _doAfter = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
+    [Dependency] private readonly RMCRepairableSystem _repairable = default!;
     [Dependency] private readonly SharedStackSystem _stacks = default!;
 
     public override void Initialize()
@@ -29,6 +31,7 @@ public sealed class DwarfLimbTreatmentSystem : EntitySystem
         SubscribeLocalEvent<DwarfAnatomyComponent, InteractUsingEvent>(OnInteractUsing);
         SubscribeLocalEvent<DwarfAnatomyComponent, DwarfLimbTreatmentDoAfterEvent>(OnDoAfter);
         SubscribeLocalEvent<DwarfAnatomyComponent, DwarfStumpPackingDoAfterEvent>(OnStumpPackingDoAfter);
+        SubscribeLocalEvent<DwarfAnatomyComponent, DwarfProstheticRepairDoAfterEvent>(OnProstheticRepairDoAfter);
     }
 
     private void OnGetVerbs(Entity<DwarfAnatomyComponent> ent, ref GetVerbsEvent<InteractionVerb> args)
@@ -37,6 +40,12 @@ public sealed class DwarfLimbTreatmentSystem : EntitySystem
             !TryComp<BodyZoneTargetComponent>(args.User, out var target) ||
             !_bodyZone.TryGetPartForZone(args.Target, target.SelectedZone, out var part, weights: ent.Comp.HitWeights))
         {
+            return;
+        }
+
+        if (HasComp<DwarfProstheticComponent>(part))
+        {
+            AddProstheticVerbs(ent, ref args, part);
             return;
         }
 
@@ -102,13 +111,21 @@ public sealed class DwarfLimbTreatmentSystem : EntitySystem
     private void OnInteractUsing(Entity<DwarfAnatomyComponent> ent, ref InteractUsingEvent args)
     {
         if (args.Handled ||
-            !TryComp<WoundTreaterComponent>(args.Used, out var treater) ||
             !TryComp<BodyZoneTargetComponent>(args.User, out var target) ||
             !_bodyZone.TryGetPartForZone(args.Target, target.SelectedZone, out var part, weights: ent.Comp.HitWeights) ||
             !TryComp<DwarfBodyPartComponent>(part, out var bodyPart))
         {
             return;
         }
+
+        if (HasComp<DwarfProstheticComponent>(part))
+        {
+            TryStartProstheticRepair(ent, ref args, part);
+            return;
+        }
+
+        if (!TryComp<WoundTreaterComponent>(args.Used, out var treater))
+            return;
 
         var brute = treater.Wound switch
         {
@@ -129,6 +146,131 @@ public sealed class DwarfLimbTreatmentSystem : EntitySystem
 
         StartTreatment(args.User, args.Target, args.Used, target.SelectedZone, isBrute);
         args.Handled = true;
+    }
+
+    private void AddProstheticVerbs(
+        Entity<DwarfAnatomyComponent> ent,
+        ref GetVerbsEvent<InteractionVerb> args,
+        EntityUid part)
+    {
+        if (args.Using is not { } used ||
+            !TryComp<DwarfBodyPartComponent>(part, out var bodyPart))
+        {
+            return;
+        }
+
+        if (!TryComp<BodyZoneTargetComponent>(args.User, out var target))
+            return;
+
+        var user = args.User;
+        var patient = args.Target;
+        var zone = target.SelectedZone;
+
+        if (HasComp<BlowtorchComponent>(used) &&
+            bodyPart.SlashDamage + bodyPart.BruteDamage > FixedPoint2.Zero)
+        {
+            args.Verbs.Add(new InteractionVerb
+            {
+                Text = $"Repair {zone} prosthetic",
+                Act = () => StartProstheticRepair(user, patient, used, zone, true),
+            });
+        }
+
+        if (HasComp<RMCCableCoilComponent>(used) && bodyPart.BurnDamage > FixedPoint2.Zero)
+        {
+            args.Verbs.Add(new InteractionVerb
+            {
+                Text = $"Repair {zone} prosthetic wiring",
+                Act = () => StartProstheticRepair(user, patient, used, zone, false),
+            });
+        }
+    }
+
+    private void TryStartProstheticRepair(
+        Entity<DwarfAnatomyComponent> ent,
+        ref InteractUsingEvent args,
+        EntityUid part)
+    {
+        if (args.Handled ||
+            !TryComp<DwarfBodyPartComponent>(part, out var bodyPart) ||
+            !TryComp<BodyZoneTargetComponent>(args.User, out var target))
+        {
+            return;
+        }
+
+        var brute = HasComp<BlowtorchComponent>(args.Used);
+        var burn = HasComp<RMCCableCoilComponent>(args.Used);
+        if (!brute && !burn)
+            return;
+
+        var hasDamage = brute
+            ? bodyPart.SlashDamage + bodyPart.BruteDamage > FixedPoint2.Zero
+            : bodyPart.BurnDamage > FixedPoint2.Zero;
+
+        if (!hasDamage)
+            return;
+
+        StartProstheticRepair(args.User, args.Target, args.Used, target.SelectedZone, brute);
+        args.Handled = true;
+    }
+
+    private void StartProstheticRepair(EntityUid user, EntityUid target, EntityUid used, BodyZone zone, bool brute)
+    {
+        if (brute && !_repairable.UseFuel(used, user, 1, true))
+            return;
+
+        if (!brute && (!TryComp<StackComponent>(used, out var stack) || stack.Count <= 0))
+        {
+            _popup.PopupEntity("The cable coil is empty.", user, user, PopupType.SmallCaution);
+            return;
+        }
+
+        var ev = new DwarfProstheticRepairDoAfterEvent(zone, brute);
+        var doAfter = new DoAfterArgs(EntityManager, user, 2, ev, target, target, used)
+        {
+            BreakOnMove = true,
+            NeedHand = true,
+            CancelDuplicate = true,
+            DuplicateCondition = DuplicateConditions.SameEvent,
+            MovementThreshold = 0.5f,
+        };
+
+        _doAfter.TryStartDoAfter(doAfter);
+    }
+
+    private void OnProstheticRepairDoAfter(Entity<DwarfAnatomyComponent> ent, ref DwarfProstheticRepairDoAfterEvent args)
+    {
+        if (args.Cancelled ||
+            args.Handled ||
+            args.Target is not { } target ||
+            args.Used is not { } used ||
+            !_bodyZone.TryGetPartForZone(target, args.Zone, out var part, weights: ent.Comp.HitWeights) ||
+            !TryComp<DwarfProstheticComponent>(part, out _) ||
+            !TryComp<DwarfBodyPartComponent>(part, out var bodyPart))
+        {
+            return;
+        }
+
+        args.Handled = true;
+
+        if (args.Brute)
+        {
+            if (!_repairable.UseFuel(used, args.User, 1))
+                return;
+
+            DwarfLimbDamage.HealBrute(bodyPart, FixedPoint2.New(10) * ent.Comp.LimbHealShare);
+        }
+        else
+        {
+            if (!TryComp<StackComponent>(used, out var stack) || !_stacks.Use(used, 1, stack))
+                return;
+
+            DwarfLimbDamage.HealBurn(bodyPart, FixedPoint2.New(10) * ent.Comp.LimbHealShare);
+        }
+
+        DwarfLimbDamage.ResetAttemptIfHealed(bodyPart);
+        Dirty(part, bodyPart);
+        _popup.PopupEntity($"Repaired the {args.Zone} prosthetic.", target, args.User);
     }
 
     private void StartTreatment(EntityUid user, EntityUid target, EntityUid used, BodyZone zone, bool brute)

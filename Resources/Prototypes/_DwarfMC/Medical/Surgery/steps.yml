@@ -125,6 +125,13 @@
     - type: CMBleedersClamped
     - type: CMIncisionOpen
     - type: DwarfBoneGelled
+    - type: DwarfProstheticInstalled
+    - type: DwarfLimbReattached
+    - type: DwarfInternalBleedingRepaired
+    - type: DwarfStumpSealed
+    - type: DwarfOrganRepaired
+    - type: DwarfOrganRemoved
+    - type: DwarfOrganInserted
   - type: Sprite
     sprite: _RMC14/Objects/Medical/Surgery/cautery.rsi
     state: cautery
@@ -142,3 +149,146 @@
     sprite: _RMC14/Objects/Medical/Surgery/retractor.rsi
     state: retractor
   - type: DwarfSurgeryStepReattachLimbEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepRemoveOrgan
+  name: Remove organ
+  abstract: true
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: CMHemostat
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/hemostat.rsi
+    state: hemostat
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveHeart
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Heart
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveLungs
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Lungs
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveBrain
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Brain
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveEyes
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Eyes
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveKidneys
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Kidneys
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveLiver
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Liver
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveStomach
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Stomach
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepInsertOrgan
+  name: Insert organ
+  abstract: true
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: DwarfOrganHealth
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/hemostat.rsi
+    state: hemostat
+
+- type: entity
+  parent: DwarfSurgeryStepInsertOrgan
+  id: DwarfSurgeryStepInsertHeart
+  components:
+  - type: DwarfSurgeryStepInsertOrganEffect
+    organType: Heart
+
+- type: entity
+  parent: DwarfSurgeryStepInsertOrgan
+  id: DwarfSurgeryStepInsertLungs
+  components:
+  - type: DwarfSurgeryStepInsertOrganEffect
+    organType: Lungs
+
+- type: entity
+  parent: DwarfSurgeryStepInsertOrgan
+  id: DwarfSurgeryStepInsertEyes
+  components:
+  - type: DwarfSurgeryStepInsertOrganEffect
+    organType: Eyes
+
+- type: entity
+  parent: DwarfSurgeryStepInsertOrgan
+  id: DwarfSurgeryStepInsertKidneys
+  components:
+  - type: DwarfSurgeryStepInsertOrganEffect
+    organType: Kidneys
+
+- type: entity
+  parent: DwarfSurgeryStepInsertOrgan
+  id: DwarfSurgeryStepInsertLiver
+  components:
+  - type: DwarfSurgeryStepInsertOrganEffect
+    organType: Liver
+
+- type: entity
+  parent: DwarfSurgeryStepInsertOrgan
+  id: DwarfSurgeryStepInsertStomach
+  components:
+  - type: DwarfSurgeryStepInsertOrganEffect
+    organType: Stomach
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepAmputate
+  name: Amputate limb
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: CMBoneSaw
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/saw.rsi
+    state: saw
+  - type: DwarfSurgeryStepAmputateEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepInstallProsthetic
+  name: Install prosthetic
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: DwarfProsthetic
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/retractor.rsi
+    state: retractor
+  - type: DwarfSurgeryStepInstallProstheticEffect

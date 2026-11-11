@@ -6,6 +6,7 @@ using Content.Shared._RMC14.Medical.Surgery.Conditions;
 using Content.Shared._RMC14.Medical.Surgery.Steps;
 using Content.Shared._RMC14.Medical.Surgery.Steps.Parts;
 using Content.Shared._RMC14.Medical.Wounds;
+using Content.Shared.Body.Organ;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
 using Content.Shared.Chemistry.Components;
@@ -31,6 +32,7 @@ public sealed class DwarfSurgerySystem : EntitySystem
     [Dependency] private readonly SharedPopupSystem _popup = default!;
     [Dependency] private readonly RMCReagentSystem _reagents = default!;
     [Dependency] private readonly SharedSolutionContainerSystem _solution = default!;
+    [Dependency] private readonly SharedTransformSystem _transform = default!;
 
     public override void Initialize()
     {
@@ -52,11 +54,23 @@ public sealed class DwarfSurgerySystem : EntitySystem
 
         SubscribeLocalEvent<DwarfSurgeryMissingLimbConditionComponent, CMSurgeryValidEvent>(OnMissingLimbValid);
         SubscribeLocalEvent<DwarfSurgeryOrganDamageConditionComponent, CMSurgeryValidEvent>(OnOrganDamageValid);
+        SubscribeLocalEvent<DwarfSurgeryOrganPresentConditionComponent, CMSurgeryValidEvent>(OnOrganPresentValid);
+        SubscribeLocalEvent<DwarfSurgeryOrganMissingConditionComponent, CMSurgeryValidEvent>(OnOrganMissingValid);
+        SubscribeLocalEvent<DwarfSurgeryProstheticSlotConditionComponent, CMSurgeryValidEvent>(OnProstheticSlotValid);
+        SubscribeLocalEvent<DwarfSurgeryAmputatableConditionComponent, CMSurgeryValidEvent>(OnAmputatableValid);
 
         SubscribeLocalEvent<DwarfSurgeryStepRepairOrgansEffectComponent, CMSurgeryStepEvent>(OnRepairOrgans);
         SubscribeLocalEvent<DwarfSurgeryStepRepairOrgansEffectComponent, CMSurgeryStepCompleteCheckEvent>(OnRepairOrgansCheck);
         SubscribeLocalEvent<DwarfSurgeryStepBoneGelEffectComponent, CMSurgeryStepEvent>(OnApplyBoneGel);
         SubscribeLocalEvent<DwarfSurgeryStepBoneGelEffectComponent, CMSurgeryStepCompleteCheckEvent>(OnApplyBoneGelCheck);
+        SubscribeLocalEvent<DwarfSurgeryStepRemoveOrganEffectComponent, CMSurgeryStepEvent>(OnRemoveOrgan);
+        SubscribeLocalEvent<DwarfSurgeryStepRemoveOrganEffectComponent, CMSurgeryStepCompleteCheckEvent>(OnRemoveOrganCheck);
+        SubscribeLocalEvent<DwarfSurgeryStepInsertOrganEffectComponent, CMSurgeryStepEvent>(OnInsertOrgan);
+        SubscribeLocalEvent<DwarfSurgeryStepInsertOrganEffectComponent, CMSurgeryStepCompleteCheckEvent>(OnInsertOrganCheck);
+        SubscribeLocalEvent<DwarfSurgeryStepAmputateEffectComponent, CMSurgeryStepEvent>(OnAmputate);
+        SubscribeLocalEvent<DwarfSurgeryStepAmputateEffectComponent, CMSurgeryStepCompleteCheckEvent>(OnAmputateCheck);
+        SubscribeLocalEvent<DwarfSurgeryStepInstallProstheticEffectComponent, CMSurgeryStepEvent>(OnInstallProsthetic);
+        SubscribeLocalEvent<DwarfSurgeryStepInstallProstheticEffectComponent, CMSurgeryStepCompleteCheckEvent>(OnInstallProstheticCheck);
 
         SubscribeLocalEvent<CMIncisionOpenComponent, ComponentStartup>(OnIncisionOpened);
     }
@@ -75,9 +89,10 @@ public sealed class DwarfSurgerySystem : EntitySystem
 
     private void OnFracturedValid(Entity<DwarfSurgeryFracturedConditionComponent> ent, ref CMSurgeryValidEvent args)
     {
+        var fractured = CompOrNull<DwarfBodyPartConditionComponent>(args.Part) is { Fractured: true };
         if (!HasComp<DwarfAnatomyComponent>(args.Body) ||
-            (!HasComp<CMIncisionOpenComponent>(args.Part) &&
-             CompOrNull<DwarfBodyPartConditionComponent>(args.Part) is not { Fractured: true }))
+            (!fractured &&
+             !(HasComp<CMIncisionOpenComponent>(args.Part) && HasComp<DwarfBoneGelledComponent>(args.Part))))
         {
             args.Cancelled = true;
         }
@@ -85,9 +100,11 @@ public sealed class DwarfSurgerySystem : EntitySystem
 
     private void OnInternalBleedingValid(Entity<DwarfSurgeryInternalBleedingConditionComponent> ent, ref CMSurgeryValidEvent args)
     {
+        var bleeding = CompOrNull<DwarfBodyPartConditionComponent>(args.Part) is { InternalBleeding: true };
         if (!HasComp<DwarfAnatomyComponent>(args.Body) ||
-            (!HasComp<CMIncisionOpenComponent>(args.Part) &&
-             CompOrNull<DwarfBodyPartConditionComponent>(args.Part) is not { InternalBleeding: true }))
+            (!bleeding &&
+             !(HasComp<CMIncisionOpenComponent>(args.Part) &&
+               HasComp<DwarfInternalBleedingRepairedComponent>(args.Part))))
         {
             args.Cancelled = true;
         }
@@ -95,9 +112,10 @@ public sealed class DwarfSurgerySystem : EntitySystem
 
     private void OnStumpBleedingValid(Entity<DwarfSurgeryStumpBleedingConditionComponent> ent, ref CMSurgeryValidEvent args)
     {
+        var bleeding = CompOrNull<DwarfBodyPartConditionComponent>(args.Part) is { StumpBleeding: true };
         if (!HasComp<DwarfAnatomyComponent>(args.Body) ||
-            (!HasComp<CMIncisionOpenComponent>(args.Part) &&
-             CompOrNull<DwarfBodyPartConditionComponent>(args.Part) is not { StumpBleeding: true }))
+            (!bleeding &&
+             !(HasComp<CMIncisionOpenComponent>(args.Part) && HasComp<DwarfStumpSealedComponent>(args.Part))))
         {
             args.Cancelled = true;
         }
@@ -106,7 +124,60 @@ public sealed class DwarfSurgerySystem : EntitySystem
     private void OnOrganDamageValid(Entity<DwarfSurgeryOrganDamageConditionComponent> ent, ref CMSurgeryValidEvent args)
     {
         if (!HasComp<DwarfAnatomyComponent>(args.Body) ||
-            (!HasComp<CMIncisionOpenComponent>(args.Part) && GetDamagedOrgans(args.Part, ent.Comp.OrganType).Count == 0))
+            ent.Comp.OrganType is not { } type ||
+            !HasOrganSlot(args.Part, type) ||
+            (GetDamagedOrgans(args.Part, type).Count == 0 &&
+             !(HasComp<CMIncisionOpenComponent>(args.Part) &&
+               HasOrganMarker<DwarfOrganRepairedComponent>(args.Part, type, static comp => comp.Repaired))))
+        {
+            args.Cancelled = true;
+        }
+    }
+
+    private void OnOrganPresentValid(Entity<DwarfSurgeryOrganPresentConditionComponent> ent, ref CMSurgeryValidEvent args)
+    {
+        if (!HasComp<DwarfAnatomyComponent>(args.Body) ||
+            ent.Comp.OrganType is not { } type ||
+            !HasOrganSlot(args.Part, type) ||
+            (!TryGetOrganInPart(args.Part, type, out _, out _) &&
+             !(HasComp<CMIncisionOpenComponent>(args.Part) &&
+               HasOrganMarker<DwarfOrganRemovedComponent>(args.Part, type, static comp => comp.Removed))))
+        {
+            args.Cancelled = true;
+        }
+    }
+
+    private void OnOrganMissingValid(Entity<DwarfSurgeryOrganMissingConditionComponent> ent, ref CMSurgeryValidEvent args)
+    {
+        if (!HasComp<DwarfAnatomyComponent>(args.Body) ||
+            ent.Comp.OrganType is not { } type ||
+            !HasOrganSlot(args.Part, type) ||
+            (!HasMissingOrgan(args.Part, type) &&
+             !(HasComp<CMIncisionOpenComponent>(args.Part) &&
+               HasOrganMarker<DwarfOrganInsertedComponent>(args.Part, type, static comp => comp.Inserted))))
+        {
+            args.Cancelled = true;
+        }
+    }
+
+    private void OnProstheticSlotValid(Entity<DwarfSurgeryProstheticSlotConditionComponent> ent, ref CMSurgeryValidEvent args)
+    {
+        if (!HasComp<DwarfAnatomyComponent>(args.Body) ||
+            !TryComp<BodyPartComponent>(args.Part, out var part) ||
+            (!HasMissingChild(args.Part, part) &&
+             !(HasComp<CMIncisionOpenComponent>(args.Part) && HasComp<DwarfProstheticInstalledComponent>(args.Part))))
+        {
+            args.Cancelled = true;
+        }
+    }
+
+    private void OnAmputatableValid(Entity<DwarfSurgeryAmputatableConditionComponent> ent, ref CMSurgeryValidEvent args)
+    {
+        if (!HasComp<DwarfAnatomyComponent>(args.Body) ||
+            !TryComp<BodyPartComponent>(args.Part, out var part) ||
+            part.Body != args.Body ||
+            part.PartType is not (BodyPartType.Arm or BodyPartType.Leg or BodyPartType.Hand or BodyPartType.Foot) ||
+            CompOrNull<DwarfBodyPartComponent>(args.Part) is not { Dismemberable: true })
         {
             args.Cancelled = true;
         }
@@ -165,6 +236,7 @@ public sealed class DwarfSurgerySystem : EntitySystem
 
             _solution.RemoveReagent(solutionEnt, required.Id, inserter.ReagentPerUse);
             RepairOrgan(args.Body, organId, organ);
+            AddOrganMarker<DwarfOrganRepairedComponent>(args.Part, organ.OrganType, static comp => comp.Repaired);
             _popup.PopupEntity(
                 Loc.GetString("dwarfmed-organ-gel-repaired", ("organ", _reagents.Index(required).LocalizedName)),
                 args.Body,
@@ -198,11 +270,159 @@ public sealed class DwarfSurgerySystem : EntitySystem
             args.Cancelled = true;
     }
 
+    private void OnRemoveOrgan(Entity<DwarfSurgeryStepRemoveOrganEffectComponent> ent, ref CMSurgeryStepEvent args)
+    {
+        if (!_net.IsServer ||
+            !HasComp<DwarfAnatomyComponent>(args.Body) ||
+            ent.Comp.OrganType is not { } type)
+        {
+            return;
+        }
+
+        if (!TryGetOrganInPart(args.Part, type, out var organId, out _))
+            return;
+
+        EnsureComp<DwarfExtractedOrganComponent>(organId);
+
+        if (!_body.RemoveOrgan(organId))
+            return;
+
+        _transform.DropNextTo(organId, args.Body);
+        AddOrganMarker<DwarfOrganRemovedComponent>(args.Part, type, static comp => comp.Removed);
+        _popup.PopupEntity(
+            Loc.GetString("dwarfmed-organ-removed", ("organ", type.ToString().ToLowerInvariant())),
+            args.Body,
+            args.User,
+            PopupType.Medium);
+    }
+
+    private void OnRemoveOrganCheck(Entity<DwarfSurgeryStepRemoveOrganEffectComponent> ent, ref CMSurgeryStepCompleteCheckEvent args)
+    {
+        if (ent.Comp.OrganType is not { } type || TryGetOrganInPart(args.Part, type, out _, out _))
+            args.Cancelled = true;
+    }
+
+    private void OnInsertOrgan(Entity<DwarfSurgeryStepInsertOrganEffectComponent> ent, ref CMSurgeryStepEvent args)
+    {
+        if (!_net.IsServer ||
+            !HasComp<DwarfAnatomyComponent>(args.Body) ||
+            ent.Comp.OrganType is not { } type)
+        {
+            return;
+        }
+
+        if (type == DwarfOrganType.Brain)
+        {
+            _popup.PopupEntity(Loc.GetString("dwarfmed-organ-brain-cannot-reinsert"), args.Body, args.User, PopupType.MediumCaution);
+            return;
+        }
+
+        if (TryGetOrganInPart(args.Part, type, out _, out _) ||
+            !DwarfOrganSlots.TryGetSlotId(type, out var slotId) ||
+            !TryGetHeldOrgan(args.Tools, type, out var organId, out _) ||
+            !HasComp<OrganComponent>(organId))
+        {
+            return;
+        }
+
+        _hands.TryDrop(args.User, organId, checkActionBlocker: false);
+
+        if (!_body.InsertOrgan(args.Part, organId, slotId))
+            return;
+
+        RemComp<DwarfExtractedOrganComponent>(organId);
+        AddOrganMarker<DwarfOrganInsertedComponent>(args.Part, type, static comp => comp.Inserted);
+        _popup.PopupEntity(
+            Loc.GetString("dwarfmed-organ-inserted", ("organ", type.ToString().ToLowerInvariant())),
+            args.Body,
+            args.User,
+            PopupType.Medium);
+    }
+
+    private void OnInsertOrganCheck(Entity<DwarfSurgeryStepInsertOrganEffectComponent> ent, ref CMSurgeryStepCompleteCheckEvent args)
+    {
+        if (ent.Comp.OrganType is not { } type || !TryGetOrganInPart(args.Part, type, out _, out _))
+            args.Cancelled = true;
+    }
+
+    private void OnAmputate(Entity<DwarfSurgeryStepAmputateEffectComponent> ent, ref CMSurgeryStepEvent args)
+    {
+        if (!_net.IsServer ||
+            !HasComp<DwarfAnatomyComponent>(args.Body) ||
+            !TryComp<BodyPartComponent>(args.Part, out var part) ||
+            part.Body != args.Body)
+        {
+            return;
+        }
+
+        var request = new DwarfSeverRequestEvent
+        {
+            Body = args.Body,
+            Part = args.Part,
+            Reason = DwarfSeverReason.Surgery,
+            Tool = args.Tools.FirstOrDefault(),
+        };
+
+        RaiseLocalEvent(args.Body, ref request);
+    }
+
+    private void OnAmputateCheck(Entity<DwarfSurgeryStepAmputateEffectComponent> ent, ref CMSurgeryStepCompleteCheckEvent args)
+    {
+        if (TryComp<BodyPartComponent>(args.Part, out var part) && part.Body == args.Body)
+            args.Cancelled = true;
+    }
+
+    private void OnInstallProsthetic(Entity<DwarfSurgeryStepInstallProstheticEffectComponent> ent, ref CMSurgeryStepEvent args)
+    {
+        if (!_net.IsServer ||
+            !HasComp<DwarfAnatomyComponent>(args.Body) ||
+            !TryComp<BodyPartComponent>(args.Part, out var parentPart))
+        {
+            return;
+        }
+
+        foreach (var tool in args.Tools)
+        {
+            if (!HasComp<DwarfProstheticComponent>(tool) ||
+                !TryComp<BodyPartComponent>(tool, out var limbPart) ||
+                !TryFindMissingSlot(args.Part, parentPart, limbPart, out var slot))
+            {
+                continue;
+            }
+
+            _hands.TryDrop(args.User, tool, checkActionBlocker: false);
+
+            if (!_body.AttachPart(args.Part, slot, tool))
+                continue;
+
+            RemComp<DwarfSeveredLimbComponent>(tool);
+            EnsureComp<DwarfProstheticInstalledComponent>(args.Part);
+
+            if (TryComp<DwarfBodyPartConditionComponent>(args.Part, out var condition) &&
+                condition.StumpBleeding)
+            {
+                condition.StumpBleeding = false;
+                condition.StumpBleedRate = 0;
+                Dirty(args.Part, condition);
+            }
+
+            _popup.PopupEntity(Loc.GetString("dwarfmed-prosthetic-installed"), args.Body, args.User, PopupType.Medium);
+            return;
+        }
+    }
+
+    private void OnInstallProstheticCheck(Entity<DwarfSurgeryStepInstallProstheticEffectComponent> ent, ref CMSurgeryStepCompleteCheckEvent args)
+    {
+        if (!HasComp<DwarfProstheticInstalledComponent>(args.Part))
+            args.Cancelled = true;
+    }
+
     private void OnMissingLimbValid(Entity<DwarfSurgeryMissingLimbConditionComponent> ent, ref CMSurgeryValidEvent args)
     {
         if (!HasComp<DwarfAnatomyComponent>(args.Body) ||
-            (!HasComp<CMIncisionOpenComponent>(args.Part) &&
-             (!TryComp<BodyPartComponent>(args.Part, out var part) || !HasMissingChild(args.Part, part))))
+            !TryComp<BodyPartComponent>(args.Part, out var part) ||
+            (!HasMissingChild(args.Part, part) &&
+             !(HasComp<CMIncisionOpenComponent>(args.Part) && HasComp<DwarfLimbReattachedComponent>(args.Part))))
         {
             args.Cancelled = true;
         }
@@ -234,6 +454,7 @@ public sealed class DwarfSurgerySystem : EntitySystem
         condition.InternalBleeding = false;
         condition.InternalBleedRate = 0;
         Dirty(args.Part, condition);
+        EnsureComp<DwarfInternalBleedingRepairedComponent>(args.Part);
     }
 
     private void OnSealStump(Entity<DwarfSurgeryStepSealStumpEffectComponent> ent, ref CMSurgeryStepEvent args)
@@ -248,6 +469,7 @@ public sealed class DwarfSurgerySystem : EntitySystem
         condition.StumpBleeding = false;
         condition.StumpBleedRate = 0;
         Dirty(args.Part, condition);
+        EnsureComp<DwarfStumpSealedComponent>(args.Part);
     }
 
     private void OnReattachLimb(Entity<DwarfSurgeryStepReattachLimbEffectComponent> ent, ref CMSurgeryStepEvent args)
@@ -275,6 +497,7 @@ public sealed class DwarfSurgerySystem : EntitySystem
                 continue;
 
             RemComp<DwarfSeveredLimbComponent>(tool);
+            EnsureComp<DwarfLimbReattachedComponent>(args.Part);
 
             if (TryComp<DwarfBodyPartConditionComponent>(args.Part, out var condition) &&
                 condition.StumpBleeding)
@@ -341,6 +564,82 @@ public sealed class DwarfSurgerySystem : EntitySystem
         }
 
         slot = default;
+        return false;
+    }
+
+    private bool HasOrganSlot(EntityUid partId, DwarfOrganType type)
+    {
+        return DwarfOrganSlots.TryGetSlotId(type, out var slotId) &&
+               _body.CanInsertOrgan(partId, slotId);
+    }
+
+    private bool HasOrganMarker<T>(EntityUid partId, DwarfOrganType type, Func<T, HashSet<DwarfOrganType>> selector)
+        where T : Component
+    {
+        return TryComp<T>(partId, out var comp) && selector(comp).Contains(type);
+    }
+
+    private void AddOrganMarker<T>(EntityUid partId, DwarfOrganType type, Func<T, HashSet<DwarfOrganType>> selector)
+        where T : Component, new()
+    {
+        var comp = EnsureComp<T>(partId);
+        if (!selector(comp).Add(type))
+            return;
+
+        Dirty(partId, comp);
+    }
+
+    private bool HasMissingOrgan(EntityUid partId, DwarfOrganType type)
+    {
+        if (!HasComp<BodyPartComponent>(partId) ||
+            !DwarfOrganSlots.TryGetSlotId(type, out var slotId) ||
+            !_body.CanInsertOrgan(partId, slotId))
+        {
+            return false;
+        }
+
+        return !TryGetOrganInPart(partId, type, out _, out _);
+    }
+
+    private bool TryGetOrganInPart(
+        EntityUid partId,
+        DwarfOrganType type,
+        out EntityUid organId,
+        out DwarfOrganHealthComponent organ)
+    {
+        foreach (var (id, _) in _body.GetPartOrgans(partId))
+        {
+            if (!TryComp<DwarfOrganHealthComponent>(id, out var comp) || comp.OrganType != type)
+                continue;
+
+            organId = id;
+            organ = comp;
+            return true;
+        }
+
+        organId = default;
+        organ = default!;
+        return false;
+    }
+
+    private bool TryGetHeldOrgan(
+        List<EntityUid> tools,
+        DwarfOrganType type,
+        out EntityUid organId,
+        out DwarfOrganHealthComponent organ)
+    {
+        foreach (var tool in tools)
+        {
+            if (!TryComp<DwarfOrganHealthComponent>(tool, out var comp) || comp.OrganType != type)
+                continue;
+
+            organId = tool;
+            organ = comp;
+            return true;
+        }
+
+        organId = default;
+        organ = default!;
         return false;
     }
 
@@ -438,7 +737,7 @@ public sealed class DwarfSurgerySystem : EntitySystem
         return true;
     }
 
-    private void RepairOrgan(EntityUid body, EntityUid organId, DwarfOrganHealthComponent organ)
+    public void RepairOrgan(EntityUid body, EntityUid organId, DwarfOrganHealthComponent organ)
     {
         organ.Damage = FixedPoint2.Zero;
         organ.Ruptured = false;

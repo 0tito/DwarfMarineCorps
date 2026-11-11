@@ -57,8 +57,9 @@ public sealed class DwarfSeverSystem : EntitySystem
             return;
 
         args.Handled = true;
+        var prosthetic = HasComp<DwarfProstheticComponent>(args.Part);
 
-        if (parent is { } parentPart)
+        if (!prosthetic && parent is { } parentPart)
         {
             var condition = EnsureComp<DwarfBodyPartConditionComponent>(parentPart);
             condition.StumpBleeding = true;
@@ -94,7 +95,8 @@ public sealed class DwarfSeverSystem : EntitySystem
         if (args.Reason != DwarfSeverReason.Fire)
             _audio.PlayPvs(DelimbSound, ent.Owner);
 
-        EnsureComp<WoundedComponent>(ent.Owner);
+        if (!prosthetic)
+            EnsureComp<WoundedComponent>(ent.Owner);
 
         if (zone == BodyZone.Head)
             _unrevivable.MakeUnrevivable(ent.Owner);

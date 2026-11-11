@@ -89,7 +89,7 @@ public sealed class DwarfInternalBleedingSystem : EntitySystem
         DwarfBodyPartComponent part,
         FixedPoint2 bruteDamage)
     {
-        if (bruteDamage <= FixedPoint2.Zero)
+        if (bruteDamage <= FixedPoint2.Zero || HasComp<DwarfProstheticComponent>(partId))
             return false;
 
         if (!TryComp<BodyPartComponent>(partId, out var bodyPart) ||
@@ -117,7 +117,7 @@ public sealed class DwarfInternalBleedingSystem : EntitySystem
         DwarfBodyPartComponent part,
         float chance)
     {
-        if (!ent.Comp.Enabled)
+        if (!ent.Comp.Enabled || HasComp<DwarfProstheticComponent>(partId))
             return false;
 
         var condition = EnsureComp<DwarfBodyPartConditionComponent>(partId);

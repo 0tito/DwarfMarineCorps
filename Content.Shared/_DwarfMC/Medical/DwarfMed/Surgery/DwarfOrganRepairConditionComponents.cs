@@ -19,3 +19,31 @@ public sealed partial class DwarfSurgeryStepRepairOrgansEffectComponent : Compon
 
 [RegisterComponent, NetworkedComponent]
 public sealed partial class DwarfSurgeryStepBoneGelEffectComponent : Component;
+
+[RegisterComponent, NetworkedComponent]
+public sealed partial class DwarfSurgeryOrganPresentConditionComponent : Component
+{
+    [DataField]
+    public DwarfOrganType? OrganType;
+}
+
+[RegisterComponent, NetworkedComponent]
+public sealed partial class DwarfSurgeryOrganMissingConditionComponent : Component
+{
+    [DataField]
+    public DwarfOrganType? OrganType;
+}
+
+[RegisterComponent, NetworkedComponent]
+public sealed partial class DwarfSurgeryStepRemoveOrganEffectComponent : Component
+{
+    [DataField]
+    public DwarfOrganType? OrganType;
+}
+
+[RegisterComponent, NetworkedComponent]
+public sealed partial class DwarfSurgeryStepInsertOrganEffectComponent : Component
+{
+    [DataField]
+    public DwarfOrganType? OrganType;
+}

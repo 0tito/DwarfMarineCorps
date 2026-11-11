@@ -1,5 +1,6 @@
 using Content.Server.Body.Components;
 using Content.Server.Ghost.Components;
+using Content.Shared._DwarfMC.Medical.DwarfMed;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Events;
 using Content.Shared.Body.Part;
@@ -27,6 +28,9 @@ namespace Content.Server.Body.Systems
         private void HandleMind(EntityUid newEntity, EntityUid oldEntity)
         {
             if (TerminatingOrDeleted(newEntity) || TerminatingOrDeleted(oldEntity))
+                return;
+
+            if (HasComp<DwarfExtractedOrganComponent>(newEntity))
                 return;
 
             if (_containers.TryGetContainingContainer(newEntity, out var container) &&

@@ -24,6 +24,8 @@ public sealed class DwarfOrganEffectSystem : EntitySystem
 {
     private const float AsphyxiationPerDamage = 0.02f;
     private const float ToxinPerDamage = 0.02f;
+    private const float MissingKidneyToxinPerTick = 1f;
+    private const float MissingLiverToxinPerTick = 1f;
 
     [Dependency] private readonly BlindableSystem _blindable = default!;
     [Dependency] private readonly SharedBodySystem _body = default!;
@@ -124,16 +126,27 @@ public sealed class DwarfOrganEffectSystem : EntitySystem
                 organs[organ.OrganType] = (id, organ);
         }
 
-        if (organs.Count == 0)
-            return;
-
         var dead = _mobState.IsDead(body);
 
         if (organs.TryGetValue(DwarfOrganType.Heart, out var heart))
+        {
             UpdateHeart(body, heart.Id, heart.Comp, dead);
+        }
+        else
+        {
+            EnsureDefibBlock(body);
+            if (!dead)
+                ApplyDamage(body, "Asphyxiation", 1f);
+        }
 
         if (organs.TryGetValue(DwarfOrganType.Lungs, out var lungs))
+        {
             UpdateLungs(body, lungs.Id, lungs.Comp, dead);
+        }
+        else if (!dead)
+        {
+            ApplyDamage(body, "Asphyxiation", 2f);
+        }
 
         if (organs.TryGetValue(DwarfOrganType.Brain, out var brain))
             UpdateBrain(body, brain.Id, brain.Comp, dead);
@@ -142,14 +155,26 @@ public sealed class DwarfOrganEffectSystem : EntitySystem
 
         if (organs.TryGetValue(DwarfOrganType.Eyes, out var eyes))
             UpdateEyes(body, eyes.Id, eyes.Comp, dead);
+        else
+            ApplyMissingEyes(body);
 
         if (organs.TryGetValue(DwarfOrganType.Kidneys, out var kidneys))
+        {
             UpdateToxin(body, kidneys.Id, kidneys.Comp, dead);
+        }
+        else if (!dead)
+        {
+            ApplyDamage(body, "Poison", MissingKidneyToxinPerTick);
+        }
 
         if (organs.TryGetValue(DwarfOrganType.Liver, out var liver))
         {
             UpdateToxin(body, liver.Id, liver.Comp, dead);
             UpdateLiverMetabolism(liver.Id, liver.Comp);
+        }
+        else if (!dead)
+        {
+            ApplyDamage(body, "Poison", MissingLiverToxinPerTick);
         }
 
         if (organs.TryGetValue(DwarfOrganType.Stomach, out var stomach))
@@ -160,6 +185,8 @@ public sealed class DwarfOrganEffectSystem : EntitySystem
     {
         if (organ.Ruptured)
             EnsureDefibBlock(body);
+        else
+            ClearDefibBlock(body);
 
         if (dead)
             return;
@@ -218,6 +245,20 @@ public sealed class DwarfOrganEffectSystem : EntitySystem
 
         _blindable.AdjustEyeDamage(new Entity<BlindableComponent?>(body, blindable), delta);
         state.AppliedEyeDamage = target;
+    }
+
+    private void ApplyMissingEyes(EntityUid body)
+    {
+        var state = EnsureComp<DwarfOrganEffectStateComponent>(body);
+        if (!TryComp<BlindableComponent>(body, out var blindable))
+            return;
+
+        var delta = blindable.MaxDamage - state.AppliedEyeDamage;
+        if (delta == 0)
+            return;
+
+        _blindable.AdjustEyeDamage(new Entity<BlindableComponent?>(body, blindable), delta);
+        state.AppliedEyeDamage = blindable.MaxDamage;
     }
 
     private void UpdateToxin(EntityUid body, EntityUid organId, DwarfOrganHealthComponent organ, bool dead)

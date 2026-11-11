@@ -13,3 +13,9 @@ public sealed partial class DwarfSurgeryStepSealStumpEffectComponent : Component
 
 [RegisterComponent, NetworkedComponent]
 public sealed partial class DwarfSurgeryStepReattachLimbEffectComponent : Component;
+
+[RegisterComponent, NetworkedComponent]
+public sealed partial class DwarfSurgeryStepAmputateEffectComponent : Component;
+
+[RegisterComponent, NetworkedComponent]
+public sealed partial class DwarfSurgeryStepInstallProstheticEffectComponent : Component;

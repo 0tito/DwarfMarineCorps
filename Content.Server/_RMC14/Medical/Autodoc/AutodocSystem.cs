@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Server._DwarfMC.Medical.DwarfMed;
 using Content.Shared._RMC14.Body;
 using Content.Shared._RMC14.Damage;
 using Content.Shared._RMC14.Medical.Autodoc;
@@ -30,6 +31,7 @@ public sealed class AutodocSystem : SharedAutodocSystem
     [Dependency] private readonly AudioSystem _audio = default!;
     [Dependency] private readonly SharedBodySystem _body = default!;
     [Dependency] private readonly DamageableSystem _damageable = default!;
+    [Dependency] private readonly DwarfAutodocSystem _dwarfAutodoc = default!;
     [Dependency] private readonly MobStateSystem _mobState = default!;
     [Dependency] private readonly MobThresholdSystem _mobThreshold = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
@@ -394,6 +396,7 @@ public sealed class AutodocSystem : SharedAutodocSystem
                 RemCompDeferred<CMBleedersClampedComponent>(part.Id);
                 RemCompDeferred<CMSkinRetractedComponent>(part.Id);
                 RemCompDeferred<CMRibcageOpenComponent>(part.Id);
+                _dwarfAutodoc.CloseDwarfIncision(part.Id);
                 closedAny = true;
             }
         }
@@ -574,10 +577,18 @@ public sealed class AutodocSystem : SharedAutodocSystem
             var anyTreatmentRemaining = false;
             if (autodoc.HealingBrute)
             {
-                if (damageable != null && damageable.DamagePerGroup.GetValueOrDefault(BruteGroup) > 0)
+                var hasBodyDamage = damageable != null &&
+                                    damageable.DamagePerGroup.GetValueOrDefault(BruteGroup) > 0;
+                var hasLimbDamage = _dwarfAutodoc.HasLimbDamage(occupant, true);
+                if (hasBodyDamage || hasLimbDamage)
                 {
-                    var healing = _rmcDamageable.DistributeHealingCached(occupant, BruteGroup, autodoc.BruteHealAmount);
-                    _damageable.TryChangeDamage(occupant, healing, true, false);
+                    if (hasBodyDamage)
+                    {
+                        var healing = _rmcDamageable.DistributeHealingCached(occupant, BruteGroup, autodoc.BruteHealAmount);
+                        _damageable.TryChangeDamage(occupant, healing, true, false);
+                    }
+
+                    _dwarfAutodoc.HealLimbAccumulators(occupant, true, autodoc.BruteHealAmount);
                     anyTreatmentRemaining = true;
                 }
                 else
@@ -589,10 +600,18 @@ public sealed class AutodocSystem : SharedAutodocSystem
 
             if (autodoc.HealingBurn)
             {
-                if (damageable != null && damageable.DamagePerGroup.GetValueOrDefault(BurnGroup) > 0)
+                var hasBodyDamage = damageable != null &&
+                                    damageable.DamagePerGroup.GetValueOrDefault(BurnGroup) > 0;
+                var hasLimbDamage = _dwarfAutodoc.HasLimbDamage(occupant, false);
+                if (hasBodyDamage || hasLimbDamage)
                 {
-                    var healing = _rmcDamageable.DistributeHealingCached(occupant, BurnGroup, autodoc.BurnHealAmount);
-                    _damageable.TryChangeDamage(occupant, healing, true, false);
+                    if (hasBodyDamage)
+                    {
+                        var healing = _rmcDamageable.DistributeHealingCached(occupant, BurnGroup, autodoc.BurnHealAmount);
+                        _damageable.TryChangeDamage(occupant, healing, true, false);
+                    }
+
+                    _dwarfAutodoc.HealLimbAccumulators(occupant, false, autodoc.BurnHealAmount);
                     anyTreatmentRemaining = true;
                 }
                 else
@@ -695,16 +714,19 @@ public sealed class AutodocSystem : SharedAutodocSystem
                             Dirty(uid, autodoc);
                             break;
                         case AutodocSurgeryType.InternalBleeding:
+                            _dwarfAutodoc.TryCompleteDwarfProcedure(uid, occupant, autodoc.CurrentSurgeryType);
                             autodoc.InternalBleeding = false;
                             autodoc.CurrentSurgeryType = AutodocSurgeryType.None;
                             Dirty(uid, autodoc);
                             break;
                         case AutodocSurgeryType.BrokenBone:
+                            _dwarfAutodoc.TryCompleteDwarfProcedure(uid, occupant, autodoc.CurrentSurgeryType);
                             autodoc.BrokenBone = false;
                             autodoc.CurrentSurgeryType = AutodocSurgeryType.None;
                             Dirty(uid, autodoc);
                             break;
                         case AutodocSurgeryType.OrganDamage:
+                            _dwarfAutodoc.TryCompleteDwarfProcedure(uid, occupant, autodoc.CurrentSurgeryType);
                             autodoc.OrganDamage = false;
                             autodoc.CurrentSurgeryType = AutodocSurgeryType.None;
                             Dirty(uid, autodoc);
