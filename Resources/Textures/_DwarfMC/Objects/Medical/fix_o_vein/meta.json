@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "license": "MIT",
+  "copyright": "Made by 0tito",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "fix_o_vein"
+    }
+  ]
+}

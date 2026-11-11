@@ -1,0 +1,383 @@
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryBoneRepair
+  name: Bone Repair
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepBoneGel
+    - DwarfSurgeryStepBoneSetter
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryFracturedCondition
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryInternalBleeding
+  name: Internal Bleeding
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepStopInternalBleeding
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryInternalBleedingCondition
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgerySealStump
+  name: Seal Stump
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepSealStump
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryStumpBleedingCondition
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryReattachLimb
+  name: Limb Reattachment
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepReattachLimb
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryMissingLimbCondition
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryHeartRepair
+  name: Heart Repair
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRepairHeart
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganDamageCondition
+    organType: Heart
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryLungRepair
+  name: Lung Repair
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRepairLungs
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganDamageCondition
+    organType: Lungs
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryBrainRepair
+  name: Brain Repair
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRepairBrain
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganDamageCondition
+    organType: Brain
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryEyeRepair
+  name: Eye Repair
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRepairEyes
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganDamageCondition
+    organType: Eyes
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryKidneyRepair
+  name: Kidney Repair
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRepairKidneys
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganDamageCondition
+    organType: Kidneys
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryLiverRepair
+  name: Liver Repair
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRepairLiver
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganDamageCondition
+    organType: Liver
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryStomachRepair
+  name: Stomach Repair
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRepairStomach
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganDamageCondition
+    organType: Stomach
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryHeartRemoval
+  name: Heart Removal
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRemoveHeart
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganPresentCondition
+    organType: Heart
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryLungRemoval
+  name: Lung Removal
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRemoveLungs
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganPresentCondition
+    organType: Lungs
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryBrainRemoval
+  name: Brain Removal
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRemoveBrain
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganPresentCondition
+    organType: Brain
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryEyeRemoval
+  name: Eye Removal
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRemoveEyes
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganPresentCondition
+    organType: Eyes
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryKidneyRemoval
+  name: Kidney Removal
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRemoveKidneys
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganPresentCondition
+    organType: Kidneys
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryLiverRemoval
+  name: Liver Removal
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRemoveLiver
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganPresentCondition
+    organType: Liver
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryStomachRemoval
+  name: Stomach Removal
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepRemoveStomach
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganPresentCondition
+    organType: Stomach
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryHeartInsertion
+  name: Heart Insertion
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepInsertHeart
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganMissingCondition
+    organType: Heart
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryLungInsertion
+  name: Lung Insertion
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepInsertLungs
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganMissingCondition
+    organType: Lungs
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryEyeInsertion
+  name: Eye Insertion
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepInsertEyes
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganMissingCondition
+    organType: Eyes
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryKidneyInsertion
+  name: Kidney Insertion
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepInsertKidneys
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganMissingCondition
+    organType: Kidneys
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryLiverInsertion
+  name: Liver Insertion
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepInsertLiver
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganMissingCondition
+    organType: Liver
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryStomachInsertion
+  name: Stomach Insertion
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepInsertStomach
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryOrganMissingCondition
+    organType: Stomach
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryAmputation
+  name: Amputation
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepAmputate
+  - type: DwarfSurgeryAmputatableCondition
+
+- type: entity
+  parent: CMSurgeryBase
+  id: DwarfSurgeryInstallProsthetic
+  name: Install Prosthetic
+  components:
+  - type: CMSurgery
+    steps:
+    - CMSurgeryStepOpenIncisionScalpel
+    - CMSurgeryStepClampBleeders
+    - CMSurgeryStepRetractSkin
+    - DwarfSurgeryStepInstallProsthetic
+    - DwarfSurgeryStepCloseIncision
+  - type: DwarfSurgeryProstheticSlotCondition

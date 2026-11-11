@@ -1,0 +1,294 @@
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepBoneGel
+  name: Apply bone gel
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: DwarfGelInserter
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/bone_gel.rsi
+    state: bone-gel
+  - type: DwarfSurgeryStepBoneGelEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepRepairOrgan
+  name: Repair organ
+  abstract: true
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: DwarfGelInserter
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/bone_gel.rsi
+    state: bone-gel
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairHeart
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Heart
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairLungs
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Lungs
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairBrain
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Brain
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairEyes
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Eyes
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairKidneys
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Kidneys
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairLiver
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Liver
+
+- type: entity
+  parent: DwarfSurgeryStepRepairOrgan
+  id: DwarfSurgeryStepRepairStomach
+  components:
+  - type: DwarfSurgeryStepRepairOrgansEffect
+    organType: Stomach
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepBoneSetter
+  name: Set the bone
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: CMBoneSetter
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/bonesetter.rsi
+    state: bonesetter
+  - type: DwarfSurgeryStepRepairFractureEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepStopInternalBleeding
+  name: Repair internal bleeding
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: CMFixOVein
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/medical.rsi
+    state: line_brute
+  - type: DwarfSurgeryStepStopInternalBleedingEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepSealStump
+  name: Seal the stump
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: CMFixOVein
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/medical.rsi
+    state: line_brute
+  - type: DwarfSurgeryStepSealStumpEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepCloseIncision
+  name: Close incision
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: CMCautery
+    remove:
+    - type: CMSkinRetracted
+    - type: CMBleedersClamped
+    - type: CMIncisionOpen
+    - type: DwarfBoneGelled
+    - type: DwarfProstheticInstalled
+    - type: DwarfLimbReattached
+    - type: DwarfInternalBleedingRepaired
+    - type: DwarfStumpSealed
+    - type: DwarfOrganRepaired
+    - type: DwarfOrganRemoved
+    - type: DwarfOrganInserted
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/cautery.rsi
+    state: cautery
+  - type: CMSurgeryStepEmoteEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepReattachLimb
+  name: Reattach limb
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: DwarfSeveredLimb
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/retractor.rsi
+    state: retractor
+  - type: DwarfSurgeryStepReattachLimbEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepRemoveOrgan
+  name: Remove organ
+  abstract: true
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: CMHemostat
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/hemostat.rsi
+    state: hemostat
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveHeart
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Heart
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveLungs
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Lungs
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveBrain
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Brain
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveEyes
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Eyes
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveKidneys
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Kidneys
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveLiver
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Liver
+
+- type: entity
+  parent: DwarfSurgeryStepRemoveOrgan
+  id: DwarfSurgeryStepRemoveStomach
+  components:
+  - type: DwarfSurgeryStepRemoveOrganEffect
+    organType: Stomach
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepInsertOrgan
+  name: Insert organ
+  abstract: true
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: DwarfOrganHealth
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/hemostat.rsi
+    state: hemostat
+
+- type: entity
+  parent: DwarfSurgeryStepInsertOrgan
+  id: DwarfSurgeryStepInsertHeart
+  components:
+  - type: DwarfSurgeryStepInsertOrganEffect
+    organType: Heart
+
+- type: entity
+  parent: DwarfSurgeryStepInsertOrgan
+  id: DwarfSurgeryStepInsertLungs
+  components:
+  - type: DwarfSurgeryStepInsertOrganEffect
+    organType: Lungs
+
+- type: entity
+  parent: DwarfSurgeryStepInsertOrgan
+  id: DwarfSurgeryStepInsertEyes
+  components:
+  - type: DwarfSurgeryStepInsertOrganEffect
+    organType: Eyes
+
+- type: entity
+  parent: DwarfSurgeryStepInsertOrgan
+  id: DwarfSurgeryStepInsertKidneys
+  components:
+  - type: DwarfSurgeryStepInsertOrganEffect
+    organType: Kidneys
+
+- type: entity
+  parent: DwarfSurgeryStepInsertOrgan
+  id: DwarfSurgeryStepInsertLiver
+  components:
+  - type: DwarfSurgeryStepInsertOrganEffect
+    organType: Liver
+
+- type: entity
+  parent: DwarfSurgeryStepInsertOrgan
+  id: DwarfSurgeryStepInsertStomach
+  components:
+  - type: DwarfSurgeryStepInsertOrganEffect
+    organType: Stomach
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepAmputate
+  name: Amputate limb
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: CMBoneSaw
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/saw.rsi
+    state: saw
+  - type: DwarfSurgeryStepAmputateEffect
+
+- type: entity
+  parent: CMSurgeryStepBase
+  id: DwarfSurgeryStepInstallProsthetic
+  name: Install prosthetic
+  components:
+  - type: CMSurgeryStep
+    tool:
+    - type: DwarfProsthetic
+  - type: Sprite
+    sprite: _RMC14/Objects/Medical/Surgery/retractor.rsi
+    state: retractor
+  - type: DwarfSurgeryStepInstallProstheticEffect

@@ -125,10 +125,8 @@ public abstract class SharedRMCDamageableSystem : EntitySystem
             ]);
 
         SubscribeLocalEvent<DamageOnPulledWhileCritComponent, MobStateChangedEvent>(OnDamageOnPulledMobState);
-
-        SubscribeLocalEvent<ActiveDamageOnPulledWhileCritComponent, MoveEvent>(OnActiveDamageOnPulledMove);
-        SubscribeLocalEvent<ActiveDamageOnPulledWhileCritComponent, MobStateChangedEvent>(OnActiveDamageOnPulledMobState);
-        SubscribeLocalEvent<ActiveDamageOnPulledWhileCritComponent, XenoTargetDevouredAttemptEvent>(OnActiveDamageOnPulledDevoured);
+        SubscribeLocalEvent<DamageOnPulledWhileCritComponent, MoveEvent>(OnDamageOnPulledMove);
+        SubscribeLocalEvent<DamageOnPulledWhileCritComponent, XenoTargetDevouredAttemptEvent>(OnDamageOnPulledDevoured);
 
         SubscribeLocalEvent<DamageReceivedModifierWhenUnanchoredComponent, DamageModifyEvent>(
             OnDamageReceivedModifierWhenUnanchoredModify,
@@ -279,20 +277,28 @@ public abstract class SharedRMCDamageableSystem : EntitySystem
     private void OnDamageOnPulledMobState(Entity<DamageOnPulledWhileCritComponent> ent, ref MobStateChangedEvent args)
     {
         if (args.NewMobState != MobState.Critical)
+        {
+            if (!ent.Comp.Active)
+                return;
+
+            ent.Comp.Active = false;
+            ent.Comp.Pulled = false;
+            Dirty(ent);
+            return;
+        }
+
+        if (ent.Comp.Active)
             return;
 
-        if (EnsureComp(ent, out ActiveDamageOnPulledWhileCritComponent active))
-            return;
-
-        active.Damage = ent.Comp.Damage;
-        active.PullerWhitelist = ent.Comp.PullerWhitelist;
-        active.Every = ent.Comp.Every;
-        Dirty(ent, active);
+        ent.Comp.Active = true;
+        ent.Comp.Pulled = false;
+        ent.Comp.Accumulator = 0;
+        Dirty(ent);
     }
 
-    private void OnActiveDamageOnPulledMove(Entity<ActiveDamageOnPulledWhileCritComponent> ent, ref MoveEvent args)
+    private void OnDamageOnPulledMove(Entity<DamageOnPulledWhileCritComponent> ent, ref MoveEvent args)
     {
-        if (ent.Comp.Damage == null)
+        if (!ent.Comp.Active || ent.Comp.Damage == null)
             return;
 
         if (!_rmcPulling.IsBeingPulled(ent.Owner, out var user) ||
@@ -317,14 +323,11 @@ public abstract class SharedRMCDamageableSystem : EntitySystem
         Dirty(ent);
     }
 
-    private void OnActiveDamageOnPulledMobState(Entity<ActiveDamageOnPulledWhileCritComponent> ent, ref MobStateChangedEvent args)
+    private void OnDamageOnPulledDevoured(Entity<DamageOnPulledWhileCritComponent> ent, ref XenoTargetDevouredAttemptEvent args)
     {
-        if (args.NewMobState != MobState.Critical)
-            RemCompDeferred<ActiveDamageOnPulledWhileCritComponent>(ent);
-    }
+        if (!ent.Comp.Active)
+            return;
 
-    private void OnActiveDamageOnPulledDevoured(Entity<ActiveDamageOnPulledWhileCritComponent> ent, ref XenoTargetDevouredAttemptEvent args)
-    {
         DoLethalDamage(ent.Owner);
         args.Cancelled = true;
     }
@@ -570,10 +573,10 @@ public abstract class SharedRMCDamageableSystem : EntitySystem
             }
         }
 
-        var pulledQuery = EntityQueryEnumerator<ActiveDamageOnPulledWhileCritComponent>();
+        var pulledQuery = EntityQueryEnumerator<DamageOnPulledWhileCritComponent>();
         while (pulledQuery.MoveNext(out var uid, out var comp))
         {
-            if (comp.Accumulator >= comp.Every)
+            if (comp.Active && comp.Accumulator >= comp.Every)
             {
                 var (div, rem) = (comp.Accumulator / comp.Every, comp.Accumulator % comp.Every);
                 if (comp.Damage != null)

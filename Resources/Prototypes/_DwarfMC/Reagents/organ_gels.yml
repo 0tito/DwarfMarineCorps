@@ -1,0 +1,63 @@
+- type: reagent
+  parent: CMReagentMedicine
+  id: DwarfBoneGel
+  name: reagent-name-dwarf-bone-gel
+  desc: reagent-desc-dwarf-bone-gel
+  physicalDesc: reagent-physical-desc-gloopy
+  color: "#e8dfc8"
+
+- type: reagent
+  parent: CMReagentMedicine
+  id: DwarfHeartGel
+  name: reagent-name-dwarf-heart-gel
+  desc: reagent-desc-dwarf-heart-gel
+  physicalDesc: reagent-physical-desc-gloopy
+  color: "#c73535"
+
+- type: reagent
+  parent: CMReagentMedicine
+  id: DwarfLungGel
+  name: reagent-name-dwarf-lung-gel
+  desc: reagent-desc-dwarf-lung-gel
+  physicalDesc: reagent-physical-desc-gloopy
+  color: "#74b8d8"
+
+- type: reagent
+  parent: CMReagentMedicine
+  id: DwarfBrainGel
+  name: reagent-name-dwarf-brain-gel
+  desc: reagent-desc-dwarf-brain-gel
+  physicalDesc: reagent-physical-desc-gloopy
+  color: "#d58adf"
+
+- type: reagent
+  parent: CMReagentMedicine
+  id: DwarfEyeGel
+  name: reagent-name-dwarf-eye-gel
+  desc: reagent-desc-dwarf-eye-gel
+  physicalDesc: reagent-physical-desc-gloopy
+  color: "#7bc98a"
+
+- type: reagent
+  parent: CMReagentMedicine
+  id: DwarfKidneyGel
+  name: reagent-name-dwarf-kidney-gel
+  desc: reagent-desc-dwarf-kidney-gel
+  physicalDesc: reagent-physical-desc-gloopy
+  color: "#b8845a"
+
+- type: reagent
+  parent: CMReagentMedicine
+  id: DwarfLiverGel
+  name: reagent-name-dwarf-liver-gel
+  desc: reagent-desc-dwarf-liver-gel
+  physicalDesc: reagent-physical-desc-gloopy
+  color: "#a66a3f"
+
+- type: reagent
+  parent: CMReagentMedicine
+  id: DwarfStomachGel
+  name: reagent-name-dwarf-stomach-gel
+  desc: reagent-desc-dwarf-stomach-gel
+  physicalDesc: reagent-physical-desc-gloopy
+  color: "#d8a75a"

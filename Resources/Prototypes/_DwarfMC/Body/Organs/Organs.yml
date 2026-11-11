@@ -1,0 +1,73 @@
+- type: entity
+  id: DwarfMedBrain
+  parent: OrganHumanBrain
+  name: dwarf brain
+  components:
+  - type: DwarfOrganHealth
+    organType: Brain
+    maxDamage: 100
+    ruptureThreshold: 100
+    vital: true
+
+- type: entity
+  id: DwarfMedEyes
+  parent: OrganHumanEyes
+  name: dwarf eyes
+  components:
+  - type: DwarfOrganHealth
+    organType: Eyes
+    maxDamage: 50
+    ruptureThreshold: 50
+    vital: false
+
+- type: entity
+  id: DwarfMedHeart
+  parent: OrganDwarfHeart
+  components:
+  - type: DwarfOrganHealth
+    organType: Heart
+    maxDamage: 100
+    ruptureThreshold: 100
+    vital: true
+
+- type: entity
+  id: DwarfMedLungs
+  parent: OrganHumanLungs
+  name: dwarf lungs
+  components:
+  - type: DwarfOrganHealth
+    organType: Lungs
+    maxDamage: 100
+    ruptureThreshold: 100
+    vital: true
+
+- type: entity
+  id: DwarfMedStomach
+  parent: OrganDwarfStomach
+  components:
+  - type: DwarfOrganHealth
+    organType: Stomach
+    maxDamage: 80
+    ruptureThreshold: 80
+    vital: false
+
+- type: entity
+  id: DwarfMedLiver
+  parent: OrganDwarfLiver
+  components:
+  - type: DwarfOrganHealth
+    organType: Liver
+    maxDamage: 80
+    ruptureThreshold: 80
+    vital: false
+
+- type: entity
+  id: DwarfMedKidneys
+  parent: OrganHumanKidneys
+  name: dwarf kidneys
+  components:
+  - type: DwarfOrganHealth
+    organType: Kidneys
+    maxDamage: 80
+    ruptureThreshold: 80
+    vital: false

@@ -1,0 +1,7 @@
+- type: entity
+  parent: CMSurgicalLine
+  id: RMCFixOVein
+  name: Fix-O-Vein
+  description: A surgical tool used to repair internal bleeding.
+  components:
+  - type: CMFixOVein

@@ -24,8 +24,6 @@ public abstract class SharedDeafnessSystem : EntitySystem
 
         SubscribeLocalEvent<DeafenWhileCritComponent, StatusEffectEndedEvent>(OnCanHear);
         SubscribeLocalEvent<DeafenWhileCritComponent, MobStateChangedEvent>(OnDeafenWhileCritMobState);
-
-        SubscribeLocalEvent<ActiveDeafenWhileCritComponent, MobStateChangedEvent>(OnActiveDeafenWhileCritMobState);
     }
 
     private void OnCanHear(Entity<DeafenWhileCritComponent> ent, ref StatusEffectEndedEvent args)
@@ -39,15 +37,21 @@ public abstract class SharedDeafnessSystem : EntitySystem
     private void OnDeafenWhileCritMobState(Entity<DeafenWhileCritComponent> ent, ref MobStateChangedEvent args)
     {
         if (args.NewMobState != MobState.Critical)
+        {
+            if (!ent.Comp.Active)
+                return;
+
+            ent.Comp.Active = false;
+            Dirty(ent);
+            return;
+        }
+
+        if (ent.Comp.Active)
             return;
 
-        EnsureComp<ActiveDeafenWhileCritComponent>(ent);
-    }
-
-    private void OnActiveDeafenWhileCritMobState(Entity<ActiveDeafenWhileCritComponent> ent, ref MobStateChangedEvent args)
-    {
-        if (args.NewMobState != MobState.Critical)
-            RemCompDeferred<ActiveDeafenWhileCritComponent>(ent);
+        ent.Comp.Active = true;
+        ent.Comp.AddAt = TimeSpan.Zero;
+        Dirty(ent);
     }
 
     public bool TryDeafen(EntityUid uid, TimeSpan time, bool refresh = false, StatusEffectsComponent? status = null, bool ignoreProtection = false)
@@ -102,10 +106,10 @@ public abstract class SharedDeafnessSystem : EntitySystem
 
         var time = _timing.CurTime;
 
-        var activeQuery = EntityQueryEnumerator<ActiveDeafenWhileCritComponent, StatusEffectsComponent>();
+        var activeQuery = EntityQueryEnumerator<DeafenWhileCritComponent, StatusEffectsComponent>();
         while (activeQuery.MoveNext(out var uid, out var comp, out var status))
         {
-            if (comp.AddAt < time)
+            if (comp.Active && comp.AddAt < time)
             {
                 comp.AddAt = time + comp.Every;
                 TryDeafen(uid, comp.Add, true, status, ignoreProtection: true);

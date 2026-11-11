@@ -1,0 +1,119 @@
+- type: entity
+  parent: RMCVial
+  id: DwarfBoneGelVial
+  name: bone gel vial
+  description: A vial of bone gel.
+  suffix: Filled, Bone Gel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      beaker:
+        maxVol: 30
+        reagents:
+        - ReagentId: DwarfBoneGel
+          Quantity: 30
+
+- type: entity
+  parent: RMCVial
+  id: DwarfHeartGelVial
+  name: heart gel vial
+  description: A vial of heart repair gel.
+  suffix: Filled, Heart Gel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      beaker:
+        maxVol: 30
+        reagents:
+        - ReagentId: DwarfHeartGel
+          Quantity: 30
+
+- type: entity
+  parent: RMCVial
+  id: DwarfLungGelVial
+  name: lung gel vial
+  description: A vial of lung repair gel.
+  suffix: Filled, Lung Gel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      beaker:
+        maxVol: 30
+        reagents:
+        - ReagentId: DwarfLungGel
+          Quantity: 30
+
+- type: entity
+  parent: RMCVial
+  id: DwarfBrainGelVial
+  name: brain gel vial
+  description: A vial of brain repair gel.
+  suffix: Filled, Brain Gel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      beaker:
+        maxVol: 30
+        reagents:
+        - ReagentId: DwarfBrainGel
+          Quantity: 30
+
+- type: entity
+  parent: RMCVial
+  id: DwarfEyeGelVial
+  name: eye gel vial
+  description: A vial of eye repair gel.
+  suffix: Filled, Eye Gel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      beaker:
+        maxVol: 30
+        reagents:
+        - ReagentId: DwarfEyeGel
+          Quantity: 30
+
+- type: entity
+  parent: RMCVial
+  id: DwarfKidneyGelVial
+  name: kidney gel vial
+  description: A vial of kidney repair gel.
+  suffix: Filled, Kidney Gel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      beaker:
+        maxVol: 30
+        reagents:
+        - ReagentId: DwarfKidneyGel
+          Quantity: 30
+
+- type: entity
+  parent: RMCVial
+  id: DwarfLiverGelVial
+  name: liver gel vial
+  description: A vial of liver repair gel.
+  suffix: Filled, Liver Gel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      beaker:
+        maxVol: 30
+        reagents:
+        - ReagentId: DwarfLiverGel
+          Quantity: 30
+
+- type: entity
+  parent: RMCVial
+  id: DwarfStomachGelVial
+  name: stomach gel vial
+  description: A vial of stomach repair gel.
+  suffix: Filled, Stomach Gel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      beaker:
+        maxVol: 30
+        reagents:
+        - ReagentId: DwarfStomachGel
+          Quantity: 30

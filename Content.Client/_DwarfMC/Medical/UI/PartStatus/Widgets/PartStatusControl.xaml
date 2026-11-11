@@ -1,0 +1,60 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<!-- Adapted from Goob-Station's _Shitmed PartStatus UI. -->
+
+<widgets:PartStatusControl
+    xmlns="https://spacestation14.io"
+    xmlns:widgets="clr-namespace:Content.Client._DwarfMC.Medical.UI.PartStatus.Widgets"
+    Name="PartStatusIndicator"
+    MinSize="64 64"
+    Visible="False"
+    VerticalAlignment="Center"
+    HorizontalAlignment="Center">
+    <Control>
+        <PanelContainer>
+            <TextureRect
+                Name="DollHead"
+                Stretch="KeepAspectCentered"
+                SetSize="64 64"/>
+            <TextureRect
+                Name="DollTorso"
+                Stretch="KeepAspectCentered"
+                SetSize="64 64"/>
+            <TextureRect
+                Name="DollGroin"
+                Stretch="KeepAspectCentered"
+                SetSize="64 64"/>
+            <TextureRect
+                Name="DollLeftArm"
+                Stretch="KeepAspectCentered"
+                SetSize="64 64"/>
+            <TextureRect
+                Name="DollLeftHand"
+                Stretch="KeepAspectCentered"
+                SetSize="64 64"/>
+            <TextureRect
+                Name="DollRightArm"
+                Stretch="KeepAspectCentered"
+                SetSize="64 64"/>
+            <TextureRect
+                Name="DollRightHand"
+                Stretch="KeepAspectCentered"
+                SetSize="64 64"/>
+            <TextureRect
+                Name="DollLeftLeg"
+                Stretch="KeepAspectCentered"
+                SetSize="64 64"/>
+            <TextureRect
+                Name="DollLeftFoot"
+                Stretch="KeepAspectCentered"
+                SetSize="64 64"/>
+            <TextureRect
+                Name="DollRightLeg"
+                Stretch="KeepAspectCentered"
+                SetSize="64 64"/>
+            <TextureRect
+                Name="DollRightFoot"
+                Stretch="KeepAspectCentered"
+                SetSize="64 64"/>
+        </PanelContainer>
+    </Control>
+</widgets:PartStatusControl>

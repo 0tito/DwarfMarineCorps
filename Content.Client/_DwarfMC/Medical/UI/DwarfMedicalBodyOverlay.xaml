@@ -1,0 +1,58 @@
+<widgets:DwarfMedicalBodyOverlay
+    xmlns="https://spacestation14.io"
+    xmlns:widgets="clr-namespace:Content.Client._DwarfMC.Medical.UI"
+    MinSize="192 192">
+    <Control SetSize="192 192">
+        <TextureRect
+            Name="BaseBody"
+            TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/base.png"
+            SetSize="192 192"
+            Stretch="Scale"
+            MouseFilter="Ignore"/>
+
+        <TextureButton Name="ChestButton" SetSize="54 54" Margin="72 78 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextureRect Name="ChestHover" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/chest_hover.png" Stretch="Scale" Visible="False"/>
+            <TextureRect Name="ChestSelected" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/chest.png" Stretch="Scale" Visible="False"/>
+        </TextureButton>
+        <TextureButton Name="GroinButton" SetSize="54 30" Margin="72 126 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextureRect Name="GroinHover" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/groin_hover.png" Stretch="Scale" Visible="False"/>
+            <TextureRect Name="GroinSelected" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/groin.png" Stretch="Scale" Visible="False"/>
+        </TextureButton>
+        <TextureButton Name="RightArmButton" SetSize="30 54" Margin="48 78 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextureRect Name="RightArmHover" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/right_arm_hover.png" Stretch="Scale" Visible="False"/>
+            <TextureRect Name="RightArmSelected" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/right_arm.png" Stretch="Scale" Visible="False"/>
+        </TextureButton>
+        <TextureButton Name="LeftArmButton" SetSize="30 54" Margin="120 78 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextureRect Name="LeftArmHover" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/left_arm_hover.png" Stretch="Scale" Visible="False"/>
+            <TextureRect Name="LeftArmSelected" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/left_arm.png" Stretch="Scale" Visible="False"/>
+        </TextureButton>
+        <TextureButton Name="RightLegButton" SetSize="24 42" Margin="72 144 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextureRect Name="RightLegHover" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/right_leg_hover.png" Stretch="Scale" Visible="False"/>
+            <TextureRect Name="RightLegSelected" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/right_leg.png" Stretch="Scale" Visible="False"/>
+        </TextureButton>
+        <TextureButton Name="LeftLegButton" SetSize="24 42" Margin="102 144 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextureRect Name="LeftLegHover" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/left_leg_hover.png" Stretch="Scale" Visible="False"/>
+            <TextureRect Name="LeftLegSelected" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/left_leg.png" Stretch="Scale" Visible="False"/>
+        </TextureButton>
+        <TextureButton Name="RightHandButton" SetSize="24 24" Margin="48 126 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextureRect Name="RightHandHover" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/right_hand_hover.png" Stretch="Scale" Visible="False"/>
+            <TextureRect Name="RightHandSelected" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/right_hand.png" Stretch="Scale" Visible="False"/>
+        </TextureButton>
+        <TextureButton Name="LeftHandButton" SetSize="24 24" Margin="126 126 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextureRect Name="LeftHandHover" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/left_hand_hover.png" Stretch="Scale" Visible="False"/>
+            <TextureRect Name="LeftHandSelected" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/left_hand.png" Stretch="Scale" Visible="False"/>
+        </TextureButton>
+        <TextureButton Name="RightFootButton" SetSize="36 18" Margin="60 174 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextureRect Name="RightFootHover" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/right_foot_hover.png" Stretch="Scale" Visible="False"/>
+            <TextureRect Name="RightFootSelected" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/right_foot.png" Stretch="Scale" Visible="False"/>
+        </TextureButton>
+        <TextureButton Name="LeftFootButton" SetSize="36 18" Margin="102 174 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextureRect Name="LeftFootHover" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/left_foot_hover.png" Stretch="Scale" Visible="False"/>
+            <TextureRect Name="LeftFootSelected" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/left_foot.png" Stretch="Scale" Visible="False"/>
+        </TextureButton>
+        <TextureButton Name="HeadButton" SetSize="54 48" Margin="72 36 0 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TextureRect Name="HeadHover" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/head_hover.png" Stretch="Scale" Visible="False"/>
+            <TextureRect Name="HeadSelected" TexturePath="/Textures/_DwarfMC/Interface/Medical/BodySelection/head.png" Stretch="Scale" Visible="False"/>
+        </TextureButton>
+    </Control>
+</widgets:DwarfMedicalBodyOverlay>

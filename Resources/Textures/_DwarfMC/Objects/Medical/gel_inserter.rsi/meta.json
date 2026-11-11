@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "license": "MIT",
+  "copyright": "Made by 0tito",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "gel_inserter"
+    },
+    {
+      "name": "gel_filled1"
+    }
+  ]
+}

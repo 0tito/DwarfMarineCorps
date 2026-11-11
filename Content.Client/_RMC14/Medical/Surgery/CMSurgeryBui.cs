@@ -138,6 +138,7 @@ public sealed class CMSurgeryBui : BoundUserInterface
                     BodyPartType.Foot => 6,
                     BodyPartType.Tail => 7,
                     BodyPartType.Other => 8,
+                    BodyPartType.Groin => 9,
                     _ => 0
                 };
             }

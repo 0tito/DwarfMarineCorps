@@ -1,0 +1,63 @@
+- type: latheRecipe
+  id: DwarfProstheticLeftArm
+  result: DwarfProstheticLeftArm
+  completetime: 4
+  materials:
+    CMSteel: 75000 # 20 sheets
+    RMCPlastic: 20000 # 10 sheets
+
+- type: latheRecipe
+  id: DwarfProstheticRightArm
+  result: DwarfProstheticRightArm
+  completetime: 4
+  materials:
+    CMSteel: 75000 # 20 sheets
+    RMCPlastic: 20000 # 10 sheets
+
+- type: latheRecipe
+  id: DwarfProstheticLeftHand
+  result: DwarfProstheticLeftHand
+  completetime: 4
+  materials:
+    CMSteel: 75000 # 20 sheets
+    RMCPlastic: 20000 # 10 sheets
+
+- type: latheRecipe
+  id: DwarfProstheticRightHand
+  result: DwarfProstheticRightHand
+  completetime: 4
+  materials:
+    CMSteel: 75000 # 20 sheets
+    RMCPlastic: 20000 # 10 sheets
+
+- type: latheRecipe
+  id: DwarfProstheticLeftLeg
+  result: DwarfProstheticLeftLeg
+  completetime: 4
+  materials:
+    CMSteel: 75000 # 20 sheets
+    RMCPlastic: 20000 # 10 sheets
+
+- type: latheRecipe
+  id: DwarfProstheticRightLeg
+  result: DwarfProstheticRightLeg
+  completetime: 4
+  materials:
+    CMSteel: 75000 # 20 sheets
+    RMCPlastic: 20000 # 10 sheets
+
+- type: latheRecipe
+  id: DwarfProstheticLeftFoot
+  result: DwarfProstheticLeftFoot
+  completetime: 4
+  materials:
+    CMSteel: 75000 # 20 sheets
+    RMCPlastic: 20000 # 10 sheets
+
+- type: latheRecipe
+  id: DwarfProstheticRightFoot
+  result: DwarfProstheticRightFoot
+  completetime: 4
+  materials:
+    CMSteel: 75000 # 20 sheets
+    RMCPlastic: 20000 # 10 sheets

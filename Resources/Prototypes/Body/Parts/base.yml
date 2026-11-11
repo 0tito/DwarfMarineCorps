@@ -30,6 +30,15 @@
     partType: Torso
 
 - type: entity
+  id: BaseGroin
+  parent: BasePart
+  name: "groin"
+  abstract: true
+  components:
+  - type: BodyPart
+    partType: Groin
+
+- type: entity
   id: BaseHead
   name: "head"
   parent: BasePart

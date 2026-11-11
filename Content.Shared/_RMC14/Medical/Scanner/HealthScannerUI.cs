@@ -1,4 +1,5 @@
-﻿using Content.Shared.Chemistry.Components;
+﻿using Content.Shared._DwarfMC.Medical.DwarfMed;
+using Content.Shared.Chemistry.Components;
 using Content.Shared.FixedPoint;
 using Robust.Shared.Serialization;
 
@@ -17,7 +18,9 @@ public readonly record struct HealthScanState(
     string Pulse,
     Solution? Chemicals,
     bool Bleeding,
-    HealthScanDetailLevel DetailLevel);
+    HealthScanDetailLevel DetailLevel,
+    List<DwarfBodyPartScan> Parts,
+    List<DwarfOrganScan> Organs);
 
 /// <summary>
 ///     Thin BUI wrapper around <see cref="HealthScanState"/> for the health analyzer live-update path.
