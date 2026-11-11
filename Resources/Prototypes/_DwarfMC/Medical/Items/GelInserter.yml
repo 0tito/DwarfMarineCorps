@@ -9,12 +9,13 @@
     layers:
     - state: gel_inserter
       map: ["enum.SolutionContainerLayers.Base"]
-    - state: gel_fill1
+    - state: gel_filled1
       map: ["enum.SolutionContainerLayers.Fill"]
       visible: false
   - type: Item
     size: Small
     sprite: _DwarfMC/Objects/Medical/gel_inserter.rsi
+  - type: Appearance
   - type: DwarfGelInserter
   - type: SolutionContainerManager
     solutions:
@@ -22,8 +23,9 @@
         maxVol: 5
   - type: SolutionContainerVisuals
     solutionName: gel
-    maxFillLevels: 3
-    fillBaseName: gel_fill
+    maxFillLevels: 1
+    fillBaseName: gel_filled
+    changeColor: true
   - type: RefillableSolution
     solution: gel
   - type: DrainableSolution

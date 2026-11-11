@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "license": "CC-BY-SA-3.0",
-  "copyright": "Base and fill states adapted from cmss13 bone gel sprites under CC-BY-SA-3.0. Placeholder fill states to be replaced with custom organ gel windows.",
+  "license": "MIT",
+  "copyright": "Made by 0tito",
   "size": {
     "x": 32,
     "y": 32
@@ -11,13 +11,7 @@
       "name": "gel_inserter"
     },
     {
-      "name": "gel_fill1"
-    },
-    {
-      "name": "gel_fill2"
-    },
-    {
-      "name": "gel_fill3"
+      "name": "gel_filled1"
     }
   ]
 }
