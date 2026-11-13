@@ -723,6 +723,8 @@
     state: 76
   - type: Icon
     state: 76
+  - type: Occluder
+    enabled: false
 
 - type: entity
   parent: RMCBaseSPPSOFDropshipWall
@@ -743,3 +745,5 @@
     state: 78
   - type: Icon
     state: 78
+  - type: Occluder
+    enabled: false
