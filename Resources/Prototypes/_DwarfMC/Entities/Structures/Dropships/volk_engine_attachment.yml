@@ -1,0 +1,19 @@
+- type: entity
+  parent: RMCEngineAttachmentPoint
+  id: RMCVolkEngineAttachmentPoint
+  name: volk engine attachment point
+  suffix: Volk
+  components:
+  - type: Sprite
+    sprite: _DwarfMC/Objects/Dropship/volk_engine.rsi
+    offset: 0, -0.5
+    layers:
+    - state: volk_engine_attatchment
+      map: [ "enum.DropshipPointVisualsLayers.AttachedUtility" ]
+      rotation: 180
+      visible: false
+    - state: volk_engine_attatchment
+      map: [ "enum.DropshipPointVisualsLayers.AttachmentBase" ]
+  - type: Icon
+    sprite: _DwarfMC/Objects/Dropship/volk_engine.rsi
+    state: volk_engine_attatchment

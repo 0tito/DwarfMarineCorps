@@ -1,0 +1,12 @@
+- type: entity
+  parent: RMCCLFDropshipWall93b
+  id: RMCCLFDropshipWall93bAlamo
+  name: camera controls
+  suffix: Volk, Alamo Cameras
+  components:
+  - type: RMCCameraComputer
+    protoIds:
+    - RMCMonitorCameraAlamo
+    - RMCFlareCAS
+    - RMCAirFlareCAS
+    - RMCLaserDesignatorTarget

@@ -1,0 +1,111 @@
+- type: entity
+  parent: RMCBaseSPPSOFDropshipWallAlt
+  id: RMCSPPSOFAltWeaponPoint21
+  name: port wing weapon attach point
+  description: A place where heavy equipment can be installed with a powerloader.
+  suffix: Volk, Port Wing
+  components:
+  - type: Sprite
+    layers:
+    - state: "21"
+    - map: [ "enum.DropshipWeaponPointLayers.Layer" ]
+      offset: 0.5, 0.5
+  - type: Icon
+    state: "21"
+  - type: Occluder
+    enabled: false
+  - type: InteractionOutline
+  - type: Clickable
+  - type: DropshipWeaponPoint
+    dirOffset: Clockwise
+    location: PortWing
+  - type: Appearance
+  - type: Tag
+    tags:
+    - RMCDropshipWeaponPoint
+  - type: Corrodible
+    isCorrodible: true
+
+- type: entity
+  parent: RMCBaseSPPSOFDropshipWallAlt
+  id: RMCSPPSOFAltWeaponPoint24
+  name: starboard wing weapon attach point
+  description: A place where heavy equipment can be installed with a powerloader.
+  suffix: Volk, Starboard Wing
+  components:
+  - type: Sprite
+    layers:
+    - state: "24"
+    - map: [ "enum.DropshipWeaponPointLayers.Layer" ]
+      offset: 0.5, 0.5
+  - type: Icon
+    state: "24"
+  - type: Occluder
+    enabled: false
+  - type: InteractionOutline
+  - type: Clickable
+  - type: DropshipWeaponPoint
+    dirOffset: CounterClockwise
+    location: StarboardWing
+  - type: Appearance
+  - type: Tag
+    tags:
+    - RMCDropshipWeaponPoint
+  - type: Corrodible
+    isCorrodible: true
+
+- type: entity
+  parent: RMCBaseSPPSOFDropshipWallAlt
+  id: RMCSPPSOFAltWeaponPoint68
+  name: port fore weapon attach point
+  description: A place where heavy equipment can be installed with a powerloader.
+  suffix: Volk, Port Fore
+  components:
+  - type: Sprite
+    layers:
+    - state: "68"
+    - map: [ "enum.DropshipWeaponPointLayers.Layer" ]
+      offset: 0.5, 0
+  - type: Icon
+    state: "68"
+  - type: Occluder
+    enabled: false
+  - type: InteractionOutline
+  - type: Clickable
+  - type: DropshipWeaponPoint
+    dirOffset: Flip
+    location: PortFore
+  - type: Appearance
+  - type: Tag
+    tags:
+    - RMCDropshipWeaponPoint
+  - type: Corrodible
+    isCorrodible: true
+
+- type: entity
+  parent: RMCBaseSPPSOFDropshipWallAlt
+  id: RMCSPPSOFAltWeaponPoint72
+  name: starboard fore weapon attach point
+  description: A place where heavy equipment can be installed with a powerloader.
+  suffix: Volk, Starboard Fore
+  components:
+  - type: Sprite
+    layers:
+    - state: "72"
+    - map: [ "enum.DropshipWeaponPointLayers.Layer" ]
+      offset: 0.5, 0
+  - type: Icon
+    state: "72"
+  - type: Occluder
+    enabled: false
+  - type: InteractionOutline
+  - type: Clickable
+  - type: DropshipWeaponPoint
+    dirOffset: Flip
+    location: StarboardFore
+  - type: Appearance
+  - type: Tag
+    tags:
+    - RMCDropshipWeaponPoint
+  - type: Corrodible
+    isCorrodible: true

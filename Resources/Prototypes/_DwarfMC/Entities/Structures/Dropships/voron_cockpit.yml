@@ -1,0 +1,8 @@
+- type: entity
+  parent: CMSPPSOFCockpit
+  id: RMCVoronCockpit
+  name: voron crew hatch
+  suffix: Voron
+  components:
+  - type: AccessReader
+    access: [["CMAccessDropship"]]

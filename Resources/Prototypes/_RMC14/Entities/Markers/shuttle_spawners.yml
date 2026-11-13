@@ -26,7 +26,7 @@
   suffix: PVE Normandy
   components:
   - type: GridSpawner
-    spawn: "/Maps/_RMC14/Shuttles/dropship_normandy_pve.yml"
+    spawn: "/Maps/_DwarfMC/Shuttles/anvil.yml"
 
 - type: entity
   parent: RMCSpawnerShuttle

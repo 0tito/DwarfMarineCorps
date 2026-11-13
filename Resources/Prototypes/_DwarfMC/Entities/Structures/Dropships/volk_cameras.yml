@@ -1,0 +1,17 @@
+- type: entity
+  parent: RMCMonitorCameraAlamo
+  id: RMCVolkCameraAlamo
+  name: volk camera
+  suffix: Hammer
+  components:
+  - type: ApcPowerReceiver
+    needsPower: false
+
+- type: entity
+  parent: RMCMonitorCameraNormandy
+  id: RMCVolkCameraNormandy
+  name: volk camera
+  suffix: Anvil
+  components:
+  - type: ApcPowerReceiver
+    needsPower: false

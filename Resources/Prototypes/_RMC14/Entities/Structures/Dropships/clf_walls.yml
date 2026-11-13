@@ -1346,29 +1346,70 @@
 - type: entity
   parent: RMCCLFDropshipWallBrokenDropshipConsole1
   id: RMCCLFDropshipWall93a
+  name: weapons controls
+  description: A computer to manage equipment, weapons and simulations installed on the dropship.
   components:
   - type: Sprite
     state: 93a
   - type: Icon
     state: 93a
+  - type: ActivatableUI
+    key: enum.DropshipTerminalWeaponsUi.Key
+  - type: AccessReader
+    access: [ [ "CMAccessSquadLeaderPrep" ], [ "CMAccessDropship" ] ]
+  - type: ActivatableUIRequiresAccess
+  - type: UserInterface
+    interfaces:
+      enum.DropshipTerminalWeaponsUi.Key:
+        type: DropshipWeaponsBui
+  - type: DropshipTerminalWeapons
+  - type: TacticalMapComputer
 
 - type: entity
   parent: RMCCLFDropshipWallBrokenDropshipConsole1
   id: RMCCLFDropshipWall93
+  name: dropship navigation computer
+  description: A flight computer that can be used for autopilot or long-range flights.
   components:
   - type: Sprite
     state: 93
   - type: Icon
     state: 93
+  - type: DropshipNavigationComputer
+  - type: ActivatableUI
+    key: enum.DropshipNavigationUiKey.Key
+  - type: AccessReader
+    access: [ [ "CMAccessSquadLeaderPrep" ], [ "CMAccessDropship" ], [ "CMAccessXeno" ] ]
+  - type: ActivatableUIRequiresAccess
+  - type: UserInterface
+    interfaces:
+      enum.DropshipNavigationUiKey.Key:
+        type: DropshipNavigationBui
+      enum.DropshipHijackerUiKey.Key:
+        type: DropshipHijackerBui
 
 - type: entity
   parent: RMCCLFDropshipWallBrokenDropshipConsole1
   id: RMCCLFDropshipWall93b
+  name: camera controls
+  description: A computer to monitor cameras linked to the dropship.
   components:
   - type: Sprite
     state: 93b
   - type: Icon
     state: 93b
+  - type: UserInterface
+    interfaces:
+      enum.RMCCameraUiKey.Key:
+        type: RMCCameraBui
+  - type: RMCCameraComputer
+    protoIds:
+    - RMCMonitorCameraNormandy
+    - RMCFlareCAS
+    - RMCAirFlareCAS
+    - RMCLaserDesignatorTarget
+  - type: ActivatableUI
+    key: enum.RMCCameraUiKey.Key
 
 - type: entity
   parent: RMCBaseCLFDropshipWall
