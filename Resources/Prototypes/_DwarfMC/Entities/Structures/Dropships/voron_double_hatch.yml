@@ -1,0 +1,8 @@
+- type: entity
+  parent: RMCDropshipDoorPortBase
+  id: RMCVoronDoubleHatch
+  name: voron double hatch
+  suffix: Voron
+  components:
+  - type: Sprite
+    sprite: _DwarfMC/Structures/Dropships/Airlocks/voron_double_hatch.rsi

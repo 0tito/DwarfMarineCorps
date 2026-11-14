@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Taken from cmss13 dropship side doors; retextured for DwarfMarineCorps",
+  "size": {
+    "x": 32,
+    "y": 64
+  },
+  "states": [
+    {
+      "name": "door_closed"
+    },
+    {
+      "name": "door_opening",
+      "delays": [
+        [
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ]
+      ]
+    },
+    {
+      "name": "door_deny"
+    },
+    {
+      "name": "door_locked"
+    },
+    {
+      "name": "door_open"
+    },
+    {
+      "name": "door_closing",
+      "delays": [
+        [
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ]
+      ]
+    },
+    {
+      "name": "unlit"
+    },
+    {
+      "name": "panel_open"
+    },
+    {
+      "name": "door_spark"
+    }
+  ]
+}

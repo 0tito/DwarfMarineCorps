@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "license": "MIT",
+  "copyright": "Made by 0tito",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "wall"
+    },
+    {
+      "name": "front_1"
+    },
+    {
+      "name": "front_2"
+    },
+    {
+      "name": "front_3"
+    }
+  ]
+}

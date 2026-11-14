@@ -1,0 +1,55 @@
+- type: entity
+  abstract: true
+  parent: CMBaseWallInvincible
+  id: RMCBaseVoronWall
+  name: voron wall
+  components:
+  - type: Corrodible
+    isCorrodible: false
+  - type: Sprite
+    sprite: _DwarfMC/Structures/Dropships/voron_walls.rsi
+  - type: Icon
+    sprite: _DwarfMC/Structures/Dropships/voron_walls.rsi
+  - type: Clickable
+
+- type: entity
+  parent: RMCBaseVoronWall
+  id: RMCVoronWall
+  components:
+  - type: Sprite
+    state: wall
+  - type: Icon
+    state: wall
+
+- type: entity
+  parent: RMCBaseVoronWall
+  id: RMCVoronWallFront1
+  components:
+  - type: Sprite
+    state: front_1
+  - type: Icon
+    state: front_1
+  - type: Occluder
+    enabled: false
+
+- type: entity
+  parent: RMCBaseVoronWall
+  id: RMCVoronWallFront2
+  components:
+  - type: Sprite
+    state: front_2
+  - type: Icon
+    state: front_2
+  - type: Occluder
+    enabled: false
+
+- type: entity
+  parent: RMCBaseVoronWall
+  id: RMCVoronWallFront3
+  components:
+  - type: Sprite
+    state: front_3
+  - type: Icon
+    state: front_3
+  - type: Occluder
+    enabled: false

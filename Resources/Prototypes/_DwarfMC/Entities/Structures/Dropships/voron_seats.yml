@@ -1,0 +1,7 @@
+- type: entity
+  parent: CMSeatPilot
+  id: RMCVoronSeat
+  name: voron passenger seat
+  suffix: Voron
+  placement:
+    mode: SnapgridCenter
