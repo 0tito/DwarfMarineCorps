@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Server.Explosion.EntitySystems;
 using Content.Shared._DwarfMC.Medical.DwarfMed;
 using Content.Shared._RMC14.Atmos;
 using Content.Shared.Body.Components;
@@ -10,6 +11,8 @@ using Content.Shared.FixedPoint;
 using Content.Shared.Hands.Components;
 using Content.Shared.Humanoid;
 using NUnit.Framework;
+using Robust.Client.GameObjects;
+using Robust.Server.Player;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 
@@ -493,6 +496,223 @@ public sealed class DwarfMedDamageTest
             {
                 Assert.That(entMan.EntityExists(arm), Is.False);
                 Assert.That(entMan.EntityExists(hand), Is.False);
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task ExplosionDamagesEveryLimbZone()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.ResolveDependency<IEntityManager>();
+        var bodySystem = entMan.System<SharedBodySystem>();
+        var explosionSystem = entMan.System<ExplosionSystem>();
+        var map = await pair.CreateTestMap();
+
+        EntityUid dwarf = default;
+        await server.WaitAssertion(() => dwarf = entMan.SpawnEntity("CMMobDwarf", map.MapCoords));
+        await server.WaitRunTicks(1);
+        await server.WaitAssertion(() => explosionSystem.QueueExplosion(
+            dwarf,
+            "RMC",
+            50f,
+            5f,
+            10f,
+            tileBreakScale: 0f,
+            canCreateVacuum: false));
+        await server.WaitRunTicks(10);
+
+        await server.WaitAssertion(() =>
+        {
+            var parts = bodySystem.GetBodyChildren(dwarf).ToArray();
+            Assert.That(parts, Is.Not.Empty);
+
+            foreach (var (partId, _) in parts)
+            {
+                Assert.That(entMan.TryGetComponent<DwarfBodyPartComponent>(partId, out var part), Is.True);
+                Assert.That(
+                    part!.SlashDamage + part.BruteDamage + part.BurnDamage,
+                    Is.GreaterThan(FixedPoint2.Zero),
+                    $"Part {partId} did not receive explosion damage");
+            }
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task ExplosionDamagesOrgansThroughLimbTrauma()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.ResolveDependency<IEntityManager>();
+        var bodySystem = entMan.System<SharedBodySystem>();
+        var explosionSystem = entMan.System<ExplosionSystem>();
+        var map = await pair.CreateTestMap();
+
+        EntityUid dwarf = default;
+        await server.WaitAssertion(() =>
+        {
+            dwarf = entMan.SpawnEntity("CMMobDwarf", map.MapCoords);
+
+            foreach (var (partId, _) in bodySystem.GetBodyChildren(dwarf))
+            {
+                if (!entMan.TryGetComponent<DwarfBodyPartComponent>(partId, out var part))
+                    continue;
+
+                part.OrganDamageThreshold = 1;
+                part.OrganDamageChanceMultiplier = 1000;
+                part.OrganDamageRateMultiplier = 100;
+            }
+        });
+        await server.WaitRunTicks(1);
+        await server.WaitAssertion(() => explosionSystem.QueueExplosion(
+            dwarf,
+            "RMC",
+            50f,
+            5f,
+            10f,
+            tileBreakScale: 0f,
+            canCreateVacuum: false));
+        await server.WaitRunTicks(10);
+
+        await server.WaitAssertion(() =>
+        {
+            var damaged = bodySystem
+                .GetBodyOrgans(dwarf)
+                .Any(organ =>
+                    entMan.TryGetComponent<DwarfOrganHealthComponent>(organ.Id, out var health) &&
+                    (health.Damage > FixedPoint2.Zero || health.Ruptured));
+
+            Assert.That(damaged, Is.True);
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task DelimbingHidesClientSpriteLayers()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings { Connected = true });
+        var server = pair.Server;
+        var client = pair.Client;
+        var serverEntMan = server.ResolveDependency<IEntityManager>();
+        var clientEntMan = client.ResolveDependency<IEntityManager>();
+        var bodySystem = serverEntMan.System<SharedBodySystem>();
+        var damageable = serverEntMan.System<DamageableSystem>();
+        var map = await pair.CreateTestMap();
+
+        EntityUid dwarf = default;
+        EntityUid attacker = default;
+        EntityUid arm = default;
+        await server.WaitAssertion(() =>
+        {
+            dwarf = serverEntMan.SpawnEntity("CMMobDwarf", map.MapCoords);
+            attacker = serverEntMan.SpawnEntity("CMMobHuman", map.MapCoords);
+            serverEntMan.AddComponent<BodyZoneTargetComponent>(attacker).SelectedZone = BodyZone.LeftArm;
+
+            var body = serverEntMan.GetComponent<BodyComponent>(dwarf);
+            arm = bodySystem
+                .GetBodyChildrenOfType(dwarf, BodyPartType.Arm, body)
+                .First(p => p.Component.Symmetry == BodyPartSymmetry.Left)
+                .Id;
+
+            serverEntMan.GetComponent<DwarfBodyPartComponent>(arm).SlashThreshold = 10;
+        });
+        await pair.RunTicksSync(5);
+
+        await server.WaitAssertion(() =>
+        {
+            var slash = new DamageSpecifier(server.ProtoMan.Index<DamageTypePrototype>("Slash"), 20);
+            damageable.TryChangeDamage(dwarf, slash, ignoreResistances: true, origin: attacker);
+        });
+        await pair.RunTicksSync(5);
+
+        var clientDwarf = clientEntMan.GetEntity(serverEntMan.GetNetEntity(dwarf));
+        await client.WaitAssertion(() =>
+        {
+            var humanoid = clientEntMan.GetComponent<HumanoidAppearanceComponent>(clientDwarf);
+            var sprite = clientEntMan.GetComponent<SpriteComponent>(clientDwarf);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(humanoid.PermanentlyHidden, Does.Contain(HumanoidVisualLayers.LArm));
+                Assert.That(humanoid.PermanentlyHidden, Does.Contain(HumanoidVisualLayers.LHand));
+                Assert.That(sprite.LayerMapTryGet(HumanoidVisualLayers.LArm, out var armLayer), Is.True);
+                Assert.That(sprite[armLayer].Visible, Is.False, "Left arm sprite layer is still visible");
+                Assert.That(sprite.LayerMapTryGet(HumanoidVisualLayers.LHand, out var handLayer), Is.True);
+                Assert.That(sprite[handLayer].Visible, Is.False, "Left hand sprite layer is still visible");
+            });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task LocalPlayerDelimbingHidesClientSpriteLayers()
+    {
+        await using var pair = await PoolManager.GetServerClient(new PoolSettings
+        {
+            Connected = true,
+            DummyTicker = false,
+            Destructive = true,
+        });
+        var server = pair.Server;
+        var client = pair.Client;
+        var serverEntMan = server.ResolveDependency<IEntityManager>();
+        var clientEntMan = client.ResolveDependency<IEntityManager>();
+        var playerManager = server.ResolveDependency<IPlayerManager>();
+        var bodySystem = serverEntMan.System<SharedBodySystem>();
+        var map = await pair.CreateTestMap();
+
+        EntityUid dwarf = default;
+        EntityUid arm = default;
+        await server.WaitAssertion(() =>
+        {
+            var session = playerManager.Sessions.Single();
+            dwarf = serverEntMan.SpawnEntity("CMMobDwarf", map.MapCoords);
+            playerManager.SetAttachedEntity(session, dwarf);
+
+            var body = serverEntMan.GetComponent<BodyComponent>(dwarf);
+            arm = bodySystem
+                .GetBodyChildrenOfType(dwarf, BodyPartType.Arm, body)
+                .First(p => p.Component.Symmetry == BodyPartSymmetry.Left)
+                .Id;
+        });
+        await pair.RunTicksSync(10);
+
+        await server.WaitAssertion(() =>
+        {
+            var request = new DwarfSeverRequestEvent
+            {
+                Body = dwarf,
+                Part = arm,
+                Reason = DwarfSeverReason.Damage,
+            };
+            serverEntMan.EventBus.RaiseLocalEvent(dwarf, ref request);
+        });
+        await pair.RunTicksSync(10);
+
+        await client.WaitAssertion(() =>
+        {
+            var local = client.Session!.AttachedEntity;
+            Assert.That(local, Is.Not.Null);
+            Assert.That(local, Is.EqualTo(clientEntMan.GetEntity(serverEntMan.GetNetEntity(dwarf))));
+
+            var humanoid = clientEntMan.GetComponent<HumanoidAppearanceComponent>(local!.Value);
+            var sprite = clientEntMan.GetComponent<SpriteComponent>(local.Value);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(humanoid.PermanentlyHidden, Does.Contain(HumanoidVisualLayers.LArm));
+                Assert.That(humanoid.PermanentlyHidden, Does.Contain(HumanoidVisualLayers.LHand));
+                Assert.That(sprite.LayerMapTryGet(HumanoidVisualLayers.LArm, out var armLayer), Is.True);
+                Assert.That(sprite[armLayer].Visible, Is.False, "Local left arm sprite layer is still visible");
+                Assert.That(sprite.LayerMapTryGet(HumanoidVisualLayers.LHand, out var handLayer), Is.True);
+                Assert.That(sprite[handLayer].Visible, Is.False, "Local left hand sprite layer is still visible");
             });
         });
 

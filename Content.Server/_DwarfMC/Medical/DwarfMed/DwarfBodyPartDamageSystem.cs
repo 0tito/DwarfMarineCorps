@@ -1,8 +1,10 @@
 using Content.Shared._DwarfMC.Medical.DwarfMed;
 using Content.Shared._RMC14.Atmos;
+using Content.Shared._RMC14.Explosion;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
 using Content.Shared.Damage;
+using Content.Shared.Explosion;
 using Content.Shared.FixedPoint;
 using Robust.Shared.Network;
 using Robust.Shared.Random;
@@ -19,11 +21,32 @@ public sealed class DwarfBodyPartDamageSystem : EntitySystem
     [Dependency] private readonly INetManager _net = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
 
+    private readonly HashSet<EntityUid> _pendingExplosionDamage = new();
+
     public override void Initialize()
     {
         base.Initialize();
 
         SubscribeLocalEvent<DwarfAnatomyComponent, DamageChangedEvent>(OnDamageChanged);
+        SubscribeLocalEvent<DwarfAnatomyComponent, BeforeExplodeEvent>(OnBeforeExplode);
+        SubscribeLocalEvent<DwarfAnatomyComponent, ExplosionReceivedEvent>(OnExplosionReceived);
+        SubscribeLocalEvent<DwarfAnatomyComponent, EntityTerminatingEvent>(OnTerminating);
+    }
+
+    private void OnBeforeExplode(Entity<DwarfAnatomyComponent> ent, ref BeforeExplodeEvent args)
+    {
+        if (ent.Comp.Enabled)
+            _pendingExplosionDamage.Add(ent.Owner);
+    }
+
+    private void OnExplosionReceived(Entity<DwarfAnatomyComponent> ent, ref ExplosionReceivedEvent args)
+    {
+        _pendingExplosionDamage.Remove(ent.Owner);
+    }
+
+    private void OnTerminating(Entity<DwarfAnatomyComponent> ent, ref EntityTerminatingEvent args)
+    {
+        _pendingExplosionDamage.Remove(ent.Owner);
     }
 
     private void OnDamageChanged(Entity<DwarfAnatomyComponent> ent, ref DamageChangedEvent args)
@@ -68,6 +91,12 @@ public sealed class DwarfBodyPartDamageSystem : EntitySystem
             return;
         }
 
+        if (_pendingExplosionDamage.Remove(ent.Owner))
+        {
+            ApplyExplosionLimbDamage(ent, slash, brute, burn, args);
+            return;
+        }
+
         BodyZone zone;
         EntityUid partId;
         if (args.Origin is { } origin &&
@@ -93,6 +122,26 @@ public sealed class DwarfBodyPartDamageSystem : EntitySystem
 
         ApplyLimbDamage(ent, partId, selectedPart, slash, brute, burn,
             DwarfSeverReason.Damage, args, zone);
+    }
+
+    private void ApplyExplosionLimbDamage(
+        Entity<DwarfAnatomyComponent> ent,
+        FixedPoint2 slash,
+        FixedPoint2 brute,
+        FixedPoint2 burn,
+        DamageChangedEvent args)
+    {
+        foreach (var (partId, part) in _body.GetBodyChildren(ent.Owner))
+        {
+            if (!TryComp<DwarfBodyPartComponent>(partId, out var bodyPart))
+                continue;
+
+            if (!BodyZoneSystem.TryGetZoneForPart(part, out var zone))
+                zone = BodyZone.Chest;
+
+            ApplyLimbDamage(ent, partId, bodyPart, slash, brute, burn,
+                DwarfSeverReason.Damage, args, zone);
+        }
     }
 
     private void ApplyLimbDamage(

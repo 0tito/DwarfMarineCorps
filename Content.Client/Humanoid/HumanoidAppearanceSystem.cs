@@ -68,10 +68,14 @@ public sealed class HumanoidAppearanceSystem : SharedHumanoidAppearanceSystem
 
         IRMCHumanoidAppearance appearance = humanoid;
         if (_rmcHumanoid.TryGetLocalHiddenAppearance(entity, out var hidden))
+        {
             appearance = hidden;
 
-        if (hidden != null)
-        {
+            // The hidden appearance is a snapshot taken at spawn. Keep its layer
+            // visibility in sync with the real body so delimbing/reattachment shows.
+            hidden.PermanentlyHidden = new HashSet<HumanoidVisualLayers>(humanoid.PermanentlyHidden);
+            hidden.HiddenLayers = new Dictionary<HumanoidVisualLayers, SlotFlags>(humanoid.HiddenLayers);
+
             ClearAllMarkings(entity, hidden, sprite);
             foreach (var key in hidden.BaseLayers)
             {
