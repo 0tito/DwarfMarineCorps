@@ -5,6 +5,7 @@ using Content.Shared._RMC14.Radio;
 using Content.Shared._RMC14.Tracker;
 using Content.Shared._RMC14.Xenonids.Egg;
 using Content.Shared._RMC14.Xenonids.Evolution;
+using Content.Shared._RMC14.Xenonids;
 using Content.Shared._RMC14.Xenonids.Hive;
 using Content.Shared._RMC14.Xenonids.HiveTeam;
 using Content.Shared._RMC14.Xenonids.Pheromones;
@@ -61,6 +62,11 @@ public sealed class HiveLeaderSystem : EntitySystem
         SubscribeLocalEvent<HiveLeaderGranterComponent, XenoPheromonesActivatedEvent>(OnGranterPheromonesActivated);
         SubscribeLocalEvent<HiveLeaderGranterComponent, XenoPheromonesDeactivatedEvent>(OnGranterPheromonesDeactivated);
         SubscribeLocalEvent<HiveLeaderGranterComponent, XenoOvipositorChangedEvent>(OnGranterOvipositorChanged);
+
+        Subs.BuiEvents<XenoComponent>(XenoWatchUIKey.Key, subs =>
+        {
+            subs.Event<XenoWatchBuiLeaderMsg>(OnXenoWatchBuiLeader);
+        });
     }
 
     private void OnLeaderStatusChanged(Entity<HiveLeaderComponent> ent, ref HiveLeaderStatusChangedEvent args)
@@ -108,14 +114,12 @@ public sealed class HiveLeaderSystem : EntitySystem
 
     private void OnGranterAction(Entity<HiveLeaderGranterComponent> ent, ref HiveLeaderActionEvent args)
     {
-        string msg;
-        var leaders = ent.Comp.Leaders;
-        var max = ent.Comp.MaxLeaders;
         if (!_xenoWatch.TryGetWatched(ent.Owner, out var watching))
         {
+            var leaders = ent.Comp.Leaders;
             if (leaders.Count == 0)
             {
-                msg = "There are no Xenonid leaders. Overwatch a Xenonid to make it a leader.";
+                var msg = "There are no Xenonid leaders. Overwatch a Xenonid to make it a leader.";
                 _popup.PopupClient(msg, ent, ent, PopupType.MediumCaution);
                 return;
             }
@@ -130,47 +134,68 @@ public sealed class HiveLeaderSystem : EntitySystem
             return;
         }
 
-        if (ent.Owner == watching)
+        ToggleLeader(ent, watching);
+    }
+
+    private void OnXenoWatchBuiLeader(Entity<XenoComponent> xeno, ref XenoWatchBuiLeaderMsg args)
+    {
+        if (!TryGetEntity(args.Target, out var target) ||
+            !TryComp<HiveLeaderGranterComponent>(xeno, out var granter) ||
+            !_hive.FromSameHive(xeno.Owner, target.Value))
+        {
+            return;
+        }
+
+        ToggleLeader((xeno.Owner, granter), target.Value);
+    }
+
+    private void ToggleLeader(Entity<HiveLeaderGranterComponent> ent, EntityUid target)
+    {
+        if (ent.Owner == target)
             return;
 
-        if (!HasComp<HiveLeaderComponent>(watching) && leaders.Count >= max)
+        string msg;
+        var leaders = ent.Comp.Leaders;
+        var max = ent.Comp.MaxLeaders;
+
+        if (!HasComp<HiveLeaderComponent>(target) && leaders.Count >= max)
         {
             msg = $"You can't have more than {max} promoted leaders.";
-            _popup.PopupClient(msg, watching, ent, PopupType.MediumCaution);
+            _popup.PopupClient(msg, target, ent, PopupType.MediumCaution);
             return;
         }
 
-        if (EnsureComp<HiveLeaderComponent>(watching, out var leaderComp))
+        if (EnsureComp<HiveLeaderComponent>(target, out var leaderComp))
         {
-            RemCompDeferred<HiveLeaderComponent>(watching);
-            RemComp<RMCTrackableComponent>(watching);
-            ent.Comp.Leaders.Remove(watching);
+            RemCompDeferred<HiveLeaderComponent>(target);
+            RemComp<RMCTrackableComponent>(target);
+            ent.Comp.Leaders.Remove(target);
 
-            msg = $"You've demoted {Name(watching)} from Hive Leader.";
-            _popup.PopupClient(msg, watching, ent, PopupType.MediumCaution);
+            msg = $"You've demoted {Name(target)} from Hive Leader.";
+            _popup.PopupClient(msg, target, ent, PopupType.MediumCaution);
 
             msg = $"{Name(ent)} has demoted you from Hive Leader. Your leadership rights and abilities have waned.";
-            _popup.PopupEntity(msg, watching, watching, PopupType.MediumCaution);
-            _rmcChat.ChatMessageToOne(msg, watching);
+            _popup.PopupEntity(msg, target, target, PopupType.MediumCaution);
+            _rmcChat.ChatMessageToOne(msg, target);
             var evn = new HiveLeaderStatusChangedEvent(false);
-            RaiseLocalEvent(watching, ref evn);
+            RaiseLocalEvent(target, ref evn);
             return;
         }
 
-        AddLeader((watching, leaderComp), ent);
+        AddLeader((target, leaderComp), ent);
 
         leaderComp.Granter = ent;
-        Dirty(watching, leaderComp);
+        Dirty(target, leaderComp);
 
-        ent.Comp.Leaders.Add(watching);
+        ent.Comp.Leaders.Add(target);
         SyncPheromones(ent);
         Dirty(ent);
 
-        msg = $"You've selected {Name(watching)} as a Hive Leader.";
-        _popup.PopupClient(msg, watching, ent, PopupType.Medium);
+        msg = $"You've selected {Name(target)} as a Hive Leader.";
+        _popup.PopupClient(msg, target, ent, PopupType.Medium);
         msg = $"{Name(ent)} has selected you as a Hive Leader. The other Xenonids must listen to you. You will also act as a beacon for the Queen's pheromones.";
-        _popup.PopupClient(msg, watching, watching, PopupType.Medium);
-        _rmcChat.ChatMessageToOne(msg, watching);
+        _popup.PopupClient(msg, target, target, PopupType.Medium);
+        _rmcChat.ChatMessageToOne(msg, target);
     }
 
     private void OnGranterWatch(Entity<HiveLeaderGranterComponent> ent, ref HiveLeaderWatchEvent args)

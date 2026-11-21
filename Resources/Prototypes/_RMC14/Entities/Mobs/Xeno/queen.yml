@@ -55,6 +55,7 @@
     - FootstepSound
   - type: Xeno
     role: CMXenoQueen
+    showInWatchWindowCounts: false
     spawnAtLeaderPoint: true
     actionIds:
     - ActionXenoRest
@@ -251,6 +252,7 @@
   - type: ManageHive
   - type: HiveLeaderGranter
   - type: XenoHeal
+  - type: XenoRemoteTransferPlasma
   - type: StunOnExplosionReceived
     weak: false
   - type: XenoSpit
@@ -331,6 +333,7 @@
     name: rmc-xeno-maid-name
     description: rmc-xeno-maid-description
     popup: rmc-xeno-maid-popup
+    strainOf: CMXenoQueen
   - type: OwOAccent
   - type: Speech
     speechSounds: Cat
@@ -357,6 +360,7 @@
     name: rmc-xeno-magicalgirl-name
     description: rmc-xeno-magicalgirl-description
     popup: rmc-xeno-magicalgirl-popup
+    strainOf: CMXenoQueen
 
 - type: entity
   parent: StationAiHolo

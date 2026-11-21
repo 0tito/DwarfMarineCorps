@@ -62,6 +62,12 @@ public sealed partial class XenoComponent : Component
     [DataField, AutoNetworkedField]
     public bool MuteOnSpawn;
 
+    [DataField]
+    public bool Refresh = true;
+
+    [DataField]
+    public bool ShowInWatchWindowCounts = true;
+
     public EmoteSoundsPrototype? Sounds;
 
     [DataField, AutoNetworkedField]

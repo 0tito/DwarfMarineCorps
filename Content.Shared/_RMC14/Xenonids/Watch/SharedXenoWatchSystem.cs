@@ -19,10 +19,10 @@ public abstract class SharedXenoWatchSystem : EntitySystem
         SubscribeLocalEvent<XenoComponent, XenoWatchActionEvent>(OnXenoWatchAction);
         SubscribeLocalEvent<XenoWatchingComponent, MoveInputEvent>(OnXenoMoveInput);
 
-        Subs.BuiEvents<XenoComponent>(XenoWatchUIKey.Key,
-            subs =>
+        Subs.BuiEvents<XenoComponent>(XenoWatchUIKey.Key, subs =>
             {
                 subs.Event<XenoWatchBuiMsg>(OnXenoWatchBui);
+                subs.Event<XenoWatchBuiStopMsg>(OnXenoWatchBuiStop);
             });
     }
 
@@ -45,6 +45,17 @@ public abstract class SharedXenoWatchSystem : EntitySystem
             return;
 
         Watch(xeno.Owner, target.Value);
+    }
+
+    private void OnXenoWatchBuiStop(Entity<XenoComponent> xeno, ref XenoWatchBuiStopMsg args)
+    {
+        if (_net.IsClient || !HasComp<XenoWatchingComponent>(xeno.Owner))
+            return;
+
+        if (TryComp(xeno, out ActorComponent? actor))
+            Unwatch(xeno.Owner, actor.PlayerSession);
+        else if (TryComp(xeno, out QueenEyeComponent? eye) && TryComp(eye.Queen, out ActorComponent? eyeActor))
+            Unwatch(xeno.Owner, eyeActor.PlayerSession);
     }
 
     protected virtual void OnXenoWatchAction(Entity<XenoComponent> ent, ref XenoWatchActionEvent args)
