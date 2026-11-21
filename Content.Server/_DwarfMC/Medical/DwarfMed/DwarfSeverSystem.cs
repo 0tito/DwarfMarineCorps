@@ -1,8 +1,10 @@
+using Content.Server.Humanoid;
 using Content.Shared._DwarfMC.Medical.DwarfMed;
 using Content.Shared._RMC14.Medical.Unrevivable;
 using Content.Shared._RMC14.Medical.Wounds;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
+using Content.Shared.Humanoid;
 using Content.Shared.Popups;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
@@ -19,6 +21,7 @@ public sealed class DwarfSeverSystem : EntitySystem
 
     [Dependency] private readonly SharedAudioSystem _audio = default!;
     [Dependency] private readonly SharedBodySystem _body = default!;
+    [Dependency] private readonly HumanoidAppearanceSystem _humanoid = default!;
     [Dependency] private readonly SharedPhysicsSystem _physics = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
@@ -58,6 +61,21 @@ public sealed class DwarfSeverSystem : EntitySystem
 
         args.Handled = true;
         var prosthetic = HasComp<DwarfProstheticComponent>(args.Part);
+
+        if (TryComp(ent.Owner, out HumanoidAppearanceComponent? humanoid))
+        {
+            foreach (var dropped in detached)
+            {
+                if (!TryComp(dropped, out BodyPartComponent? droppedPart) ||
+                    droppedPart.ToHumanoidLayers() is not { } layer)
+                {
+                    continue;
+                }
+
+                var layers = HumanoidVisualLayersExtension.Sublayers(layer);
+                _humanoid.SetLayersVisibility((ent.Owner, humanoid), layers, visible: false);
+            }
+        }
 
         if (!prosthetic && parent is { } parentPart)
         {

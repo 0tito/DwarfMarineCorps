@@ -95,13 +95,14 @@ public sealed class RMCHumanoidAppearanceSystem : EntitySystem
     {
         appearance = null;
         if (!TryComp(ent, out HiddenAppearanceComponent? hiddenComp) ||
-            hiddenComp.Appearance == null)
+            hiddenComp.Appearance == null ||
+            _player.LocalEntity is not { } player ||
+            !_entityWhitelist.IsWhitelistPass(hiddenComp.Whitelist, player))
         {
             return false;
         }
 
         appearance = hiddenComp.Appearance;
-        return _player.LocalEntity is { } player &&
-               _entityWhitelist.IsWhitelistPass(hiddenComp.Whitelist, player);
+        return true;
     }
 }
