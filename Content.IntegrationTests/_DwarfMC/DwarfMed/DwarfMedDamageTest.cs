@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Server.Explosion.EntitySystems;
 using Content.Shared._DwarfMC.Medical.DwarfMed;
 using Content.Shared._RMC14.Atmos;
 using Content.Shared.Body.Components;
@@ -494,6 +495,97 @@ public sealed class DwarfMedDamageTest
                 Assert.That(entMan.EntityExists(arm), Is.False);
                 Assert.That(entMan.EntityExists(hand), Is.False);
             });
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task ExplosionDamagesEveryLimbZone()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.ResolveDependency<IEntityManager>();
+        var bodySystem = entMan.System<SharedBodySystem>();
+        var explosionSystem = entMan.System<ExplosionSystem>();
+        var map = await pair.CreateTestMap();
+
+        EntityUid dwarf = default;
+        await server.WaitAssertion(() => dwarf = entMan.SpawnEntity("CMMobDwarf", map.MapCoords));
+        await server.WaitRunTicks(1);
+        await server.WaitAssertion(() => explosionSystem.QueueExplosion(
+            dwarf,
+            "RMC",
+            50f,
+            5f,
+            10f,
+            tileBreakScale: 0f,
+            canCreateVacuum: false));
+        await server.WaitRunTicks(10);
+
+        await server.WaitAssertion(() =>
+        {
+            var parts = bodySystem.GetBodyChildren(dwarf).ToArray();
+            Assert.That(parts, Is.Not.Empty);
+
+            foreach (var (partId, _) in parts)
+            {
+                Assert.That(entMan.TryGetComponent<DwarfBodyPartComponent>(partId, out var part), Is.True);
+                Assert.That(
+                    part!.SlashDamage + part.BruteDamage + part.BurnDamage,
+                    Is.GreaterThan(FixedPoint2.Zero),
+                    $"Part {partId} did not receive explosion damage");
+            }
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task ExplosionDamagesOrgansThroughLimbTrauma()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var entMan = server.ResolveDependency<IEntityManager>();
+        var bodySystem = entMan.System<SharedBodySystem>();
+        var explosionSystem = entMan.System<ExplosionSystem>();
+        var map = await pair.CreateTestMap();
+
+        EntityUid dwarf = default;
+        await server.WaitAssertion(() =>
+        {
+            dwarf = entMan.SpawnEntity("CMMobDwarf", map.MapCoords);
+
+            foreach (var (partId, _) in bodySystem.GetBodyChildren(dwarf))
+            {
+                if (!entMan.TryGetComponent<DwarfBodyPartComponent>(partId, out var part))
+                    continue;
+
+                part.OrganDamageThreshold = 1;
+                part.OrganDamageChanceMultiplier = 1000;
+                part.OrganDamageRateMultiplier = 100;
+            }
+        });
+        await server.WaitRunTicks(1);
+        await server.WaitAssertion(() => explosionSystem.QueueExplosion(
+            dwarf,
+            "RMC",
+            50f,
+            5f,
+            10f,
+            tileBreakScale: 0f,
+            canCreateVacuum: false));
+        await server.WaitRunTicks(10);
+
+        await server.WaitAssertion(() =>
+        {
+            var damaged = bodySystem
+                .GetBodyOrgans(dwarf)
+                .Any(organ =>
+                    entMan.TryGetComponent<DwarfOrganHealthComponent>(organ.Id, out var health) &&
+                    (health.Damage > FixedPoint2.Zero || health.Ruptured));
+
+            Assert.That(damaged, Is.True);
         });
 
         await pair.CleanReturnAsync();
