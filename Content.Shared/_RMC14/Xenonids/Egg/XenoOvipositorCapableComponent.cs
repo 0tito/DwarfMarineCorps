@@ -24,7 +24,7 @@ public sealed partial class XenoOvipositorCapableComponent : Component
     public EntProtoId[] ActionIds =
     [
         "ActionXenoHeal", "ActionXenoTransferPlasmaQueen",
-        "ActionXenoQueenEye",
+        "ActionXenoQueenEye", "ActionXenoRemotePlasmaTransfer",
     ];
 
     [DataField, AutoNetworkedField]

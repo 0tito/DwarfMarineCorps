@@ -180,6 +180,7 @@
     name: rmc-xeno-valkyrie-name
     description: rmc-xeno-valkyrie-description
     popup: rmc-xeno-valkyrie-popup
+    strainOf: CMXenoPraetorian
   - type: XenoPheromones
     pheromonesMultiplier: 3
     pheroSuffix: strong
@@ -255,6 +256,7 @@
     name: rmc-xeno-dancer-name
     description: rmc-xeno-dancer-description
     popup: rmc-xeno-dancer-popup
+    strainOf: CMXenoPraetorian
   - type: CMArmor
     xenoArmor: 20
   - type: XenoClaws
@@ -305,6 +307,7 @@
     name: rmc-xeno-vanguard-name
     description: rmc-xeno-vanguard-description
     popup: rmc-xeno-vanguard-popup
+    strainOf: CMXenoPraetorian
   - type: XenoClaws
     clawType: Sharp
   - type: XenoShield
@@ -356,6 +359,7 @@
     name: rmc-xeno-oppressor-name
     description: rmc-xeno-oppressor-description
     popup: rmc-xeno-oppressor-popup
+    strainOf: CMXenoPraetorian
   - type: MovementSpeedModifier
     baseWalkSpeed: 2.2
     baseSprintSpeed: 3.5

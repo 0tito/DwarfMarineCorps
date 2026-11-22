@@ -9,6 +9,8 @@ using Content.Shared._RMC14.Xenonids.Hive;
 using Content.Shared._RMC14.Xenonids.Parasite;
 using Content.Shared._RMC14.Xenonids.Plasma;
 using Content.Shared._RMC14.Xenonids.Strain;
+using Content.Shared._RMC14.Xenonids.Watch;
+using Content.Shared.Actions;
 using Content.Shared.Body.Systems;
 using Content.Shared.Coordinates;
 using Content.Shared.Damage;
@@ -56,6 +58,8 @@ public abstract class SharedXenoHealSystem : EntitySystem
     [Dependency] private readonly XenoEnergySystem _xenoEnergy = default!;
     [Dependency] private readonly SharedXenoAnnounceSystem _xenoAnnounce = default!;
     [Dependency] private readonly XenoStrainSystem _xenoStrain = default!;
+    [Dependency] private readonly SharedActionsSystem _actions = default!;
+
     [Dependency] private readonly StatusEffectsSystem _status = default!;
     [Dependency] private readonly XenoSystem _xeno = default!;
 
@@ -70,6 +74,12 @@ public abstract class SharedXenoHealSystem : EntitySystem
         SubscribeLocalEvent<XenoHealComponent, XenoHealActionEvent>(OnXenoHealAction);
         SubscribeLocalEvent<XenoComponent, XenoApplySalveActionEvent>(OnXenoApplySalveAction);
         SubscribeLocalEvent<XenoComponent, XenoSacrificeHealActionEvent>(OnXenoSacrificeHealAction);
+
+        Subs.BuiEvents<XenoComponent>(XenoWatchUIKey.Key,
+            subs =>
+            {
+                subs.Event<XenoWatchBuiHealingMsg>(OnXenoBUIHealing);
+            });
     }
 
     private void OnXenoHealAction(Entity<XenoHealComponent> ent, ref XenoHealActionEvent args)
@@ -128,6 +138,22 @@ public abstract class SharedXenoHealSystem : EntitySystem
 
             if (_net.IsServer)
                 SpawnAttachedTo(ent.Comp.HealEffect, xeno.Owner.ToCoordinates());
+        }
+    }
+
+    private void OnXenoBUIHealing(Entity<XenoComponent> xeno, ref XenoWatchBuiHealingMsg args)
+    {
+        if (!TryGetEntity(args.Target, out var target))
+            return;
+
+        var ev = new XenoHealActionEvent { Target = target.Value.ToCoordinates() };
+
+        foreach (var action in _rmcActions.GetActionsWithEvent<XenoHealActionEvent>(xeno))
+        {
+            if (_actions.IsCooldownActive(action, _timing.CurTime))
+                continue;
+
+            _actions.PerformAction(xeno.Owner, action, ev);
         }
     }
 
