@@ -1,23 +1,13 @@
 using Content.Shared._RMC14.Actions;
-using Content.Shared._RMC14.Atmos;
-using Content.Shared._RMC14.Damage;
-using Content.Shared._RMC14.OrbitalCannon;
-using Content.Shared._RMC14.Xenonids.Announce;
 using Content.Shared._RMC14.Xenonids.Egg;
-using Content.Shared._RMC14.Xenonids.Energy;
 using Content.Shared._RMC14.Xenonids.Evolution;
-using Content.Shared._RMC14.Xenonids.Eye;
-using Content.Shared._RMC14.Xenonids.Hive;
-using Content.Shared._RMC14.Xenonids.Strain;
 using Content.Shared._RMC14.Xenonids.Watch;
 using Content.Shared.Actions;
 using Content.Shared.Alert;
 using Content.Shared.Coordinates;
 using Content.Shared.DoAfter;
 using Content.Shared.FixedPoint;
-using Content.Shared.Interaction;
 using Content.Shared.Jittering;
-using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
 using Content.Shared.Rejuvenate;
 using Content.Shared.Rounding;
@@ -36,9 +26,6 @@ public sealed class XenoPlasmaSystem : EntitySystem
     [Dependency] private readonly INetManager _net = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
     [Dependency] private readonly SharedJitteringSystem _jitter = default!;
-    [Dependency] private readonly SharedXenoHiveSystem _hive = default!;
-    [Dependency] private readonly MobStateSystem _mobState = default!;
-    [Dependency] private readonly QueenEyeSystem _queenEye = default!;
     [Dependency] private readonly SharedRMCActionsSystem _rmcActions = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly SharedActionsSystem _actions = default!;
@@ -56,13 +43,12 @@ public sealed class XenoPlasmaSystem : EntitySystem
         SubscribeLocalEvent<XenoPlasmaComponent, XenoTransferPlasmaDoAfterEvent>(OnXenoTransferDoAfter);
         SubscribeLocalEvent<XenoPlasmaComponent, NewXenoEvolvedEvent>(OnNewXenoEvolved);
         SubscribeLocalEvent<XenoPlasmaComponent, XenoDevolvedEvent>(OnXenoDevolved);
-        SubscribeLocalEvent<XenoPlasmaComponent, XenoRemoteTransferPlasmaActionEvent>(OnXenoRemoteTransferPlasmaAction);
         SubscribeLocalEvent<XenoActionPlasmaComponent, RMCActionUseAttemptEvent>(OnXenoActionEnergyUseAttempt);
         SubscribeLocalEvent<XenoActionPlasmaComponent, RMCActionUseEvent>(OnXenoActionEnergyUse);
 
         Subs.BuiEvents<XenoPlasmaComponent>(XenoWatchUIKey.Key, subs =>
         {
-            subs.Event<XenoWatchBuiTransferPlasmaMsg>(OnXenoBUIRemoteTransfer);
+            subs.Event<XenoWatchBuiTransferPlasmaMsg>(OnXenoBUITransferPlasma);
         });
     }
 
@@ -81,56 +67,21 @@ public sealed class XenoPlasmaSystem : EntitySystem
         RegenPlasma((xeno, xeno), xeno.Comp.MaxPlasma);
     }
 
-    private void OnXenoRemoteTransferPlasmaAction(Entity<XenoPlasmaComponent> ent, ref XenoRemoteTransferPlasmaActionEvent args)
-    {
-        if (args.Handled)
-            return;
-
-        if (args.Target == args.Performer)
-            return;
-
-        if(!TryComp<XenoRemoteTransferPlasmaComponent>(args.Performer, out var transfercomp))
-            return;
-
-        if (_queenEye.IsInQueenEye(ent.Owner) &&
-            !_queenEye.CanSeeTarget(ent.Owner, args.Target))
-            return;
-
-        if (!_hive.FromSameHive(args.Performer, args.Target))
-            return;
-
-        if (!_rmcActions.TryUseAction(args))
-            return;
-
-        args.Handled = true;
-
-        var msg = "We channel our plasma and transfer it to a sister.";
-        _popup.PopupClient(msg, args.Target, ent, PopupType.Large);
-
-        if (_mobState.IsDead(args.Target))
-            return;
-
-        if (TryComp<XenoPlasmaComponent>(args.Target, out var plasmacomp))
-        {
-            RegenPlasma(args.Target, (plasmacomp.MaxPlasma * transfercomp.PlasmaPercentage));
-
-            _jitter.DoJitter(args.Target, TimeSpan.FromSeconds(1), true, 80, 8, true);
-        }
-    }
-
-    private void OnXenoBUIRemoteTransfer(Entity<XenoPlasmaComponent> ent, ref XenoWatchBuiTransferPlasmaMsg args)
+    private void OnXenoBUITransferPlasma(Entity<XenoPlasmaComponent> ent, ref XenoWatchBuiTransferPlasmaMsg args)
     {
         if (!TryGetEntity(args.Target, out var target))
             return;
 
-        var ev = new XenoRemoteTransferPlasmaActionEvent { Target = target.Value };
-
-        foreach (var action in _rmcActions.GetActionsWithEvent<XenoRemoteTransferPlasmaActionEvent>(ent))
+        foreach (var action in _rmcActions.GetActionsWithEvent<XenoTransferPlasmaActionEvent>(ent))
         {
             if (_actions.IsCooldownActive(action, _timing.CurTime))
                 continue;
 
-            _actions.PerformAction(ent.Owner, action, ev);
+            if (!_actions.SetEventTarget(action, target.Value))
+                continue;
+
+            _actions.PerformAction(ent.Owner, action);
+            break;
         }
     }
 

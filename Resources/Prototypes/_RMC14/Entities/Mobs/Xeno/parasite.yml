@@ -188,7 +188,6 @@
     name: rmc-xeno-watcher-name
     description: rmc-xeno-watcher-description
     popup: rmc-xeno-watcher-popup
-    strainOf: CMXenoParasite
   - type: Sprite
     sprite: _RMC14/Mobs/Xenonids/Parasite/watcher_parasite.rsi
   - type: XenoZoom

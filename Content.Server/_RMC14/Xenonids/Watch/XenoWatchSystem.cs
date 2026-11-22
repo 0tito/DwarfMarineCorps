@@ -2,12 +2,12 @@
 using Content.Server.Popups;
 using Content.Shared._RMC14.CCVar;
 using Content.Shared._RMC14.Xenonids;
+using Content.Shared._RMC14.Xenonids.Destrain;
 using Content.Shared._RMC14.Xenonids.Egg;
 using Content.Shared._RMC14.Xenonids.Evolution;
 using Content.Shared._RMC14.Xenonids.Hive;
 using Content.Shared._RMC14.Xenonids.HiveLeader;
 using Content.Shared._RMC14.Xenonids.Plasma;
-using Content.Shared._RMC14.Xenonids.Strain;
 using Content.Shared._RMC14.Xenonids.Watch;
 using Content.Shared.Damage;
 using Content.Shared.FixedPoint;
@@ -192,8 +192,8 @@ public sealed class XenoWatchSystem : SharedXenoWatchSystem
             var isKing = comp.Role.Id == "RMCXenoKing";
 
             EntProtoId? strainOf = null;
-            if (TryComp<XenoStrainComponent>(uid, out var strainComp))
-                strainOf = strainComp.StrainOf;
+            if (TryComp<XenoDestrainComponent>(uid, out var destrainComp))
+                strainOf = destrainComp.DestrainTo;
 
             FixedPoint2 evo = 0;
             if (TryComp<XenoEvolutionComponent>(uid, out var evoComp))
@@ -221,8 +221,7 @@ public sealed class XenoWatchSystem : SharedXenoWatchSystem
 
         xenos.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
 
-        var burrowed = Math.Min(Math.Sqrt(hive.Comp.BurrowedLarva * hive.Comp.BurrowedLarvaSlotFactor), hive.Comp.BurrowedLarva);
-        FixedPoint2 total = burrowed + counted.Count;
+        FixedPoint2 total = hive.Comp.BurrowedLarva + counted.Count;
 
         return new XenoWatchBuiState(xenos,
             hive.Comp.BurrowedLarva,

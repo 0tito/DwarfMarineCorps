@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Content.Client._RMC14.Xenonids.UI;
 using Content.Client.Stylesheets;
 using Content.Shared._RMC14.Xenonids;
+using Content.Shared._RMC14.Xenonids.Destrain;
 using Content.Shared._RMC14.Xenonids.Strain;
 using Content.Shared._RMC14.Xenonids.Watch;
 using Content.Shared.FixedPoint;
@@ -418,8 +419,8 @@ public sealed class XenoWatchBui : BoundUserInterface
 
     private string GetCasteId(EntityPrototype prototype)
     {
-        if (prototype.TryGetComponent<XenoStrainComponent>(out var strain, _compFactory))
-            return strain.StrainOf.Id;
+        if (prototype.TryGetComponent<XenoDestrainComponent>(out var destrain, _compFactory))
+            return destrain.DestrainTo.Id;
 
         var current = prototype;
         while (FindConcreteXenoAncestor(current) is { } ancestor)
