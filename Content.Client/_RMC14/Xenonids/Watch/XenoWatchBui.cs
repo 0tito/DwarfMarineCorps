@@ -37,6 +37,9 @@ public sealed class XenoWatchBui : BoundUserInterface
     private readonly Dictionary<string, string> _casteOf = new();
     private readonly Dictionary<string, bool> _shownXenos = new();
     private readonly Dictionary<string, int> _xenoCounts = new();
+    private readonly Dictionary<NetEntity, XenoChoiceControl> _controls = new();
+    private readonly Dictionary<string, Texture?> _textures = new();
+    private Texture? _leaderIconTexture;
 
     private bool _usingSearchBar;
     private string _searchBarText = string.Empty;
@@ -128,23 +131,41 @@ public sealed class XenoWatchBui : BoundUserInterface
         _window = EnsureWindow();
         _window.BurrowedLarvaLabel.Text = $"Burrowed Larva: {s.BurrowedLarva}";
         _window.XenoCount.Text = $"Total Sisters: {s.XenoCount}";
-        _window.XenoContainer.DisposeAllChildren();
-
-        var icon = new SpriteSpecifier.Rsi(new ResPath("/Textures/_RMC14/Interface/xeno_leader.rsi/"), "hudxenoleader");
-        var iconTexture = _sprite.Frame0(icon);
 
         foreach (var key in _xenoCounts.Keys)
         {
             _xenoCounts[key] = 0;
         }
 
+        var seen = new HashSet<NetEntity>();
+        var ordered = new List<XenoChoiceControl>(s.Xenos.Count);
         foreach (var xeno in s.Xenos.OrderByDescending(x => x.Queen).ThenByDescending(x => x.King).ThenByDescending(x => x.Leader))
         {
-            Texture? texture = null;
-            if (xeno.Id is { } id && _prototype.TryIndex(id, out var evolution))
-                texture = _sprite.Frame0(evolution);
+            seen.Add(xeno.Entity);
 
-            var control = new XenoChoiceControl();
+            if (!_controls.TryGetValue(xeno.Entity, out var control))
+            {
+                var entity = xeno.Entity;
+                control = new XenoChoiceControl();
+                control.Button.OnPressed += _ => SendPredictedMessage(new XenoWatchBuiMsg(entity));
+                control.HealButton.OnPressed += _ => SendPredictedMessage(new XenoWatchBuiHealingMsg(entity));
+                control.PlasmaButton.OnPressed += _ => SendPredictedMessage(new XenoWatchBuiTransferPlasmaMsg(entity));
+                control.LeaderButton.OnPressed += _ => SendMessage(new XenoWatchBuiLeaderMsg(entity));
+                _controls.Add(entity, control);
+            }
+
+            Texture? texture = null;
+            if (xeno.Id is { } id)
+            {
+                if (!_textures.TryGetValue(id.Id, out texture))
+                {
+                    if (_prototype.TryIndex(id, out var evolution))
+                        texture = _sprite.Frame0(evolution);
+
+                    _textures[id.Id] = texture;
+                }
+            }
+
             var rawId = xeno.Id?.Id;
             var caste = rawId != null && _casteOf.TryGetValue(rawId, out var mapped)
                 ? mapped
@@ -160,31 +181,63 @@ public sealed class XenoWatchBui : BoundUserInterface
             control.SetPlasma((float) xeno.Plasma);
             control.SetEvo((int) xeno.Evo);
 
-            if (xeno.Queen)
-                control.SetQueenBar();
-            else if (xeno.King)
-                control.SetKingBar();
-            else if (xeno.Leader)
-                control.SetLeader(iconTexture);
+            control.SetRank(xeno.Queen, xeno.King, xeno.Leader, _leaderIconTexture);
 
-            control.Button.OnPressed += _ => SendPredictedMessage(new XenoWatchBuiMsg(xeno.Entity));
-            control.HealButton.OnPressed += _ => SendPredictedMessage(new XenoWatchBuiHealingMsg(xeno.Entity));
-            control.PlasmaButton.OnPressed += _ => SendPredictedMessage(new XenoWatchBuiTransferPlasmaMsg(xeno.Entity));
+            control.QueenButtons.Visible = s.CanSetLeader;
+            control.LeaderButton.Visible = s.CanSetLeader;
+            control.HealPlasmaButtons.Visible = s.IsQueen;
+            control.SetLeaderButton(xeno.Leader);
 
             if (s.CanSetLeader)
             {
-                control.QueenButtons.Visible = true;
-                control.LeaderButton.Visible = true;
-                control.HealPlasmaButtons.Visible = s.IsQueen;
-                control.SetLeaderButton(xeno.Leader);
-                control.LeaderButton.OnPressed += _ => SendMessage(new XenoWatchBuiLeaderMsg(xeno.Entity));
-
                 var nameWidth = _window.Width - 310;
-                if (float.IsFinite(nameWidth) && nameWidth > 0)
+                if (float.IsFinite(nameWidth) && nameWidth > 0 && control.NameLabel.MinWidth != nameWidth)
                     control.NameLabel.SetWidth = nameWidth;
             }
 
-            _window.XenoContainer.AddChild(control);
+            ordered.Add(control);
+        }
+
+        List<NetEntity>? stale = null;
+        foreach (var key in _controls.Keys)
+        {
+            if (seen.Contains(key))
+                continue;
+
+            stale ??= new List<NetEntity>();
+            stale.Add(key);
+        }
+
+        if (stale != null)
+        {
+            foreach (var key in stale)
+            {
+                _controls[key].Orphan();
+                _controls.Remove(key);
+            }
+        }
+
+        var reorder = _window.XenoContainer.ChildCount != ordered.Count;
+        if (!reorder)
+        {
+            var i = 0;
+            foreach (var child in _window.XenoContainer.Children)
+            {
+                if (!ReferenceEquals(child, ordered[i]))
+                {
+                    reorder = true;
+                    break;
+                }
+
+                i++;
+            }
+        }
+
+        if (reorder)
+        {
+            _window.XenoContainer.RemoveAllChildren();
+            foreach (var control in ordered)
+                _window.XenoContainer.AddChild(control);
         }
 
         foreach (var child in _window.RowContainer.Children)
@@ -230,6 +283,7 @@ public sealed class XenoWatchBui : BoundUserInterface
         _window = this.CreateWindow<XenoWatchWindow>();
         _window.SearchBar.OnTextChanged += OnSearchBarChanged;
         _window.StopWatchingButton.OnPressed += _ => SendMessage(new XenoWatchBuiStopMsg());
+        _leaderIconTexture ??= _sprite.Frame0(new SpriteSpecifier.Rsi(new ResPath("/Textures/_RMC14/Interface/xeno_leader.rsi/"), "hudxenoleader"));
         return _window;
     }
 

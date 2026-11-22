@@ -20,11 +20,19 @@ public partial class XenoChoiceControl : Control
     private static readonly Color HealColor = Color.FromHex("#236C40");
     private static readonly Color HealHighlightColor = Color.FromHex("#36A964");
 
+    private static readonly StyleBoxFlat PlasmaForeground = new(Color.LightSkyBlue);
+    private static readonly StyleBoxFlat HealthForeground = new(Color.LimeGreen);
+    private static readonly StyleBoxFlat HealthOkBackground = new(Color.Gray);
+    private static readonly StyleBoxFlat HealthLowBackground = new(Color.Red);
+
+    private string? _name;
+    private int _evo = int.MinValue;
+
     public XenoChoiceControl()
     {
         RobustXamlLoader.Load(this);
-        Plasma.ForegroundStyleBoxOverride = new StyleBoxFlat(Color.LightSkyBlue);
-        Health.ForegroundStyleBoxOverride = new StyleBoxFlat(Color.LimeGreen);
+        Plasma.ForegroundStyleBoxOverride = PlasmaForeground;
+        Health.ForegroundStyleBoxOverride = HealthForeground;
         LeaderBox.ModulateSelfOverride = LeaderColor;
         LeaderButton.ModulateSelfOverride = LeaderButtonColor;
 
@@ -38,8 +46,14 @@ public partial class XenoChoiceControl : Control
 
     public void Set(string name, Texture? texture)
     {
-        NameLabel.SetMessage(name);
-        Texture.Texture = texture;
+        if (_name != name)
+        {
+            _name = name;
+            NameLabel.SetMessage(name);
+        }
+
+        if (Texture.Texture != texture)
+            Texture.Texture = texture;
     }
 
     public void Set(FormattedMessage msg, Texture? texture)
@@ -50,57 +64,63 @@ public partial class XenoChoiceControl : Control
 
     public void SetName(string name)
     {
-        Button.Name = name;
+        if (Button.Name != name)
+            Button.Name = name;
     }
 
-    public void SetLeader(Texture? texture)
+    public void SetRank(bool queen, bool king, bool leader, Texture? leaderTexture)
     {
-        LeaderStar.Texture = texture;
-        LeaderStar.Visible = true;
-        LeaderBox.Visible = true;
-        LeaderBar.Visible = true;
+        LeaderStar.Visible = leader;
+        if (leader)
+            LeaderStar.Texture = leaderTexture;
+
+        var hasBar = queen || king || leader;
+        LeaderBar.Visible = hasBar;
+        LeaderBox.Visible = hasBar;
+        LeaderBox.ModulateSelfOverride = queen ? QueenColor : king ? KingColor : LeaderColor;
     }
 
     public void SetLeaderButton(bool leader)
     {
-        LeaderButton.Text = leader ? "Remove Leader" : "Set Leader";
-    }
-
-    public void SetQueenBar()
-    {
-        LeaderBox.ModulateSelfOverride = QueenColor;
-        LeaderBox.Visible = true;
-        LeaderBar.Visible = true;
-    }
-
-    public void SetKingBar()
-    {
-        LeaderBox.ModulateSelfOverride = KingColor;
-        LeaderBox.Visible = true;
-        LeaderBar.Visible = true;
+        var text = leader ? "Remove Leader" : "Set Leader";
+        if (LeaderButton.Text != text)
+            LeaderButton.Text = text;
     }
 
     public void SetHealth(float health)
     {
-        Health.Value = health;
-        if (health <= 0)
-            Health.BackgroundStyleBoxOverride = new StyleBoxFlat(Color.Red);
-        else
-            Health.BackgroundStyleBoxOverride = new StyleBoxFlat(Color.Gray);
+        var value = Math.Clamp(health, 0f, 1f);
+        if (Math.Abs(Health.Value - value) > 0.0001f)
+            Health.Value = value;
 
-        Health.Visible = true;
+        var background = value <= 0 ? HealthLowBackground : HealthOkBackground;
+        if (Health.BackgroundStyleBoxOverride != background)
+            Health.BackgroundStyleBoxOverride = background;
+
+        if (!Health.Visible)
+            Health.Visible = true;
     }
 
     public void SetPlasma(float plasma)
     {
-        Plasma.Value = plasma;
-        Plasma.Visible = true;
+        var value = Math.Clamp(plasma, 0f, 1f);
+        if (Math.Abs(Plasma.Value - value) > 0.0001f)
+            Plasma.Value = value;
+
+        if (!Plasma.Visible)
+            Plasma.Visible = true;
     }
 
     public void SetEvo(int evo)
     {
-        EvoPoints.Text = $"Evo: {evo}";
-        EvoPoints.Visible = true;
+        if (_evo != evo)
+        {
+            _evo = evo;
+            EvoPoints.Text = $"Evo: {evo}";
+        }
+
+        if (!EvoPoints.Visible)
+            EvoPoints.Visible = true;
     }
 
 
