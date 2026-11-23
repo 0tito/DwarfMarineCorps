@@ -1,0 +1,10 @@
+Entries:
+- author: otito
+  changes:
+  - message: Split the changelog into separate RMC14 (upstream) and DwarfMC (fork)
+      tabs.
+    type: Add
+  id: 1
+  time: '2026-11-23T20:34:32.0000000+00:00'
+Name: DwarfMC
+Order: 0
