@@ -1,0 +1,290 @@
+- type: entity
+  parent: BaseItem
+  id: DwarfDebugWeaponBase
+  abstract: true
+  categories: [ Debug, HideSpawnMenu ]
+  components:
+  - type: Tag
+    tags:
+    - Debug
+  - type: Sprite
+    sprite: Objects/Weapons/Melee/debug.rsi
+    state: icon
+  - type: Item
+    size: Tiny
+    sprite: Objects/Weapons/Melee/debug.rsi
+
+- type: entity
+  parent: DwarfDebugWeaponBase
+  id: DwarfDebugSlash
+  name: DwarfMed debug slash stick
+  description: Deals slash damage for testing limb accumulators, fractures, and delimbing.
+  suffix: DEBUG
+  components:
+  - type: Sprite
+    color: "#ff6666"
+  - type: MeleeWeapon
+    damage:
+      types:
+        Slash: 80
+
+- type: entity
+  parent: DwarfDebugWeaponBase
+  id: DwarfDebugBlunt
+  name: DwarfMed debug blunt stick
+  description: Deals blunt damage for testing brute accumulators, fractures, and internal bleeding.
+  suffix: DEBUG
+  components:
+  - type: Sprite
+    color: "#6699ff"
+  - type: MeleeWeapon
+    damage:
+      types:
+        Blunt: 80
+
+- type: entity
+  parent: DwarfDebugWeaponBase
+  id: DwarfDebugPiercing
+  name: DwarfMed debug piercing stick
+  description: Deals piercing damage for testing brute accumulators with a non-blunt type.
+  suffix: DEBUG
+  components:
+  - type: Sprite
+    color: "#66e0ff"
+  - type: MeleeWeapon
+    damage:
+      types:
+        Piercing: 80
+
+- type: entity
+  parent: DwarfDebugWeaponBase
+  id: DwarfDebugBurn
+  name: DwarfMed debug burn stick
+  description: Deals heat damage for testing burn accumulators. Burn never fractures.
+  suffix: DEBUG
+  components:
+  - type: Sprite
+    color: "#ff9933"
+  - type: MeleeWeapon
+    damage:
+      types:
+        Heat: 80
+
+- type: entity
+  parent: DwarfDebugWeaponBase
+  id: DwarfDebugFire
+  name: DwarfMed debug fire stick
+  description: Deals heat damage and sets the target on fire for testing fire delimbing and ashing.
+  suffix: DEBUG
+  components:
+  - type: Sprite
+    color: "#ff4400"
+  - type: MeleeWeapon
+    damage:
+      types:
+        Heat: 80
+  - type: DwarfDebugHit
+    ignite: true
+
+- type: entity
+  parent: DwarfDebugWeaponBase
+  id: DwarfDebugDelimb
+  name: DwarfMed debug delimb stick
+  description: Severs the selected body zone on hit without dealing damage. Chest and groin cannot be severed.
+  suffix: DEBUG
+  components:
+  - type: Sprite
+    color: "#cc66ff"
+  - type: MeleeWeapon
+    damage: {}
+  - type: DwarfDebugHit
+    sever: true
+
+- type: entity
+  parent: DwarfDebugWeaponBase
+  id: DwarfDebugFracture
+  name: DwarfMed debug fracture stick
+  description: Fractures the selected body zone on hit without dealing damage.
+  suffix: DEBUG
+  components:
+  - type: Sprite
+    color: "#ffff66"
+  - type: MeleeWeapon
+    damage: {}
+  - type: DwarfDebugHit
+    fracture: true
+
+- type: entity
+  parent: DwarfDebugWeaponBase
+  id: DwarfDebugInternalBleeding
+  name: DwarfMed debug internal bleeding stick
+  description: Gives the selected body zone internal bleeding on hit without dealing damage.
+  suffix: DEBUG
+  components:
+  - type: Sprite
+    color: "#aa2222"
+  - type: MeleeWeapon
+    damage: {}
+  - type: DwarfDebugHit
+    internalBleeding: true
+
+- type: entity
+  parent: DwarfDebugWeaponBase
+  id: DwarfDebugOrganDamage
+  name: DwarfMed debug organ damage stick
+  description: Damages one random organ in the selected body zone on hit.
+  suffix: DEBUG
+  components:
+  - type: Sprite
+    color: "#55ddaa"
+  - type: MeleeWeapon
+    damage: {}
+  - type: DwarfDebugHit
+    organDamage: 25
+
+- type: entity
+  parent: DwarfDebugWeaponBase
+  id: DwarfDebugOrganRupture
+  name: DwarfMed debug organ rupture stick
+  description: Ruptures one random organ in the selected body zone on hit.
+  suffix: DEBUG
+  components:
+  - type: Sprite
+    color: "#22aa66"
+  - type: MeleeWeapon
+    damage: {}
+  - type: DwarfDebugHit
+    organRupture: true
+
+- type: entity
+  parent: DwarfDebugWeaponBase
+  id: DwarfDebugStumpBleeding
+  name: DwarfMed debug stump bleeding stick
+  description: Gives the selected body zone stump bleeding on hit without dealing damage.
+  suffix: DEBUG
+  components:
+  - type: Sprite
+    color: "#996633"
+  - type: MeleeWeapon
+    damage: {}
+  - type: DwarfDebugHit
+    stumpBleeding: true
+
+- type: entity
+  parent: CMHealthAnalyzer
+  id: DwarfDebugHealthAnalyzer
+  name: DwarfMed debug health analyzer
+  description: A health analyzer with no do-after or use delay, for faster DwarfMed testing.
+  suffix: DEBUG
+  components:
+  - type: Sprite
+    state: golden_health
+  - type: HealthScanner
+    detailLevel: Full
+  - type: MedicallyUnskilledDoAfter
+    min: 0
+  - type: UseDelay
+    delay: 0
+
+- type: entity
+  parent: RMCCrateMedical
+  id: DwarfMedDebugWeaponsCrate
+  name: DwarfMed debug weapons crate
+  suffix: DEBUG
+  description: DwarfMed debug damage, delimb, fracture, bleeding, and organ sticks.
+  categories: [ Debug ]
+  components:
+  - type: EntityStorage
+    capacity: 20
+  - type: StorageFill
+    contents:
+    - id: DwarfDebugSlash
+    - id: DwarfDebugBlunt
+    - id: DwarfDebugPiercing
+    - id: DwarfDebugBurn
+    - id: DwarfDebugFire
+    - id: DwarfDebugDelimb
+    - id: DwarfDebugFracture
+    - id: DwarfDebugInternalBleeding
+    - id: DwarfDebugStumpBleeding
+    - id: DwarfDebugOrganDamage
+    - id: DwarfDebugOrganRupture
+
+- type: entity
+  parent: RMCCrateMedical
+  id: DwarfMedDebugSurgeryCrate
+  name: DwarfMed debug surgery crate
+  suffix: DEBUG
+  description: DwarfMed surgery tools, gels, and autodoc upgrade disks.
+  categories: [ Debug ]
+  components:
+  - type: EntityStorage
+    capacity: 30
+  - type: StorageFill
+    contents:
+    - id: DwarfGelInserter
+    - id: DwarfBoneGelVial
+    - id: DwarfHeartGelVial
+    - id: DwarfLungGelVial
+    - id: DwarfBrainGelVial
+    - id: DwarfEyeGelVial
+    - id: DwarfKidneyGelVial
+    - id: DwarfLiverGelVial
+    - id: DwarfStomachGelVial
+    - id: CMSurgicalLine
+    - id: RMCFixOVein
+    - id: CMScalpel
+    - id: CMHemostat
+    - id: CMRetractor
+    - id: CMBonesetter
+    - id: CMCircularSaw
+    - id: CMCautery
+    - id: RMCResearchUpgradeAutodocInternalBleeding
+    - id: RMCResearchUpgradeAutodocBrokenBone
+    - id: RMCResearchUpgradeAutodocOrganDamage
+
+- type: entity
+  parent: RMCCrateMedical
+  id: DwarfMedDebugMedicineCrate
+  name: DwarfMed debug medicine crate
+  suffix: DEBUG
+  description: DwarfMed topicals, splints, analyzers, and field equipment.
+  categories: [ Debug ]
+  components:
+  - type: EntityStorage
+    capacity: 20
+  - type: StorageFill
+    contents:
+    - id: RMCSplint10
+    - id: CMGauze10
+    - id: CMOintment10
+    - id: CMTraumaKit10
+    - id: CMBurnKit10
+    - id: CMHealthAnalyzer
+    - id: DwarfDebugHealthAnalyzer
+    - id: CMDefibrillatorInfinite
+    - id: CMPortableSurgicalBedSpawnFolded
+    - id: CMStasisBagFolded
+
+- type: entity
+  parent: RMCCrateMedical
+  id: DwarfMedDebugProstheticsCrate
+  name: DwarfMed debug prosthetics crate
+  suffix: DEBUG
+  description: DwarfMed prosthetic limbs and repair tools.
+  categories: [ Debug ]
+  components:
+  - type: EntityStorage
+    capacity: 12
+  - type: StorageFill
+    contents:
+    - id: DwarfProstheticLeftArm
+    - id: DwarfProstheticRightArm
+    - id: DwarfProstheticLeftHand
+    - id: DwarfProstheticRightHand
+    - id: DwarfProstheticLeftLeg
+    - id: DwarfProstheticRightLeg
+    - id: DwarfProstheticLeftFoot
+    - id: DwarfProstheticRightFoot
+    - id: CMWelder
+    - id: RMCCableCoil30
