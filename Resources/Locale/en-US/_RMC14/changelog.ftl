@@ -1,1 +1,1 @@
-﻿changelog-tab-title-RMC14 = DwarfMC
+﻿changelog-tab-title-RMC14 = RMC14

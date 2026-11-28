@@ -4,4 +4,10 @@
   name: Fix-O-Vein
   description: A surgical tool used to repair internal bleeding.
   components:
+  - type: Sprite
+    sprite: _DwarfMC/Objects/Medical/fix_o_vein.rsi
+    state: fix_o_vein
+  - type: Item
+    sprite: _DwarfMC/Objects/Medical/fix_o_vein.rsi
+    heldPrefix: fix_o_vein
   - type: CMFixOVein

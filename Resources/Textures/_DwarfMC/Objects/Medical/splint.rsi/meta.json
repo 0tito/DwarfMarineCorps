@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Splint sprite by 0tito. In-hand sprites edited (darkened) by 0tito from the gauze in-hand sprites in /Textures/_RMC14/Objects/Medical/medical.rsi, taken from cmss13.",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "splint"
+    },
+    {
+      "name": "splint-inhand-left",
+      "directions": 4
+    },
+    {
+      "name": "splint-inhand-right",
+      "directions": 4
+    }
+  ]
+}
