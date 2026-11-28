@@ -81,6 +81,8 @@
   priority: 2
   name: "Medical"
   text: "/ServerInfo/Guidebook/_RMC14/Guides/RMCMedical.xml"
+  children:
+  - RMCGuideDwarfMedical
 
 - type: guideEntry
   parent: RMC

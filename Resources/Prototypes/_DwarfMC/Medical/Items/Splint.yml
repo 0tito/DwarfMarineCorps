@@ -6,9 +6,11 @@
   suffix: Ten
   components:
   - type: Sprite
-    state: gauze
+    sprite: _DwarfMC/Objects/Medical/splint.rsi
+    state: splint
   - type: Item
-    heldPrefix: gauze
+    sprite: _DwarfMC/Objects/Medical/splint.rsi
+    heldPrefix: splint
   - type: DwarfSplint
   - type: Stack
     stackType: RMCSplint

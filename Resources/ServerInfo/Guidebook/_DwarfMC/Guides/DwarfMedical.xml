@@ -1,0 +1,123 @@
+<Document>
+
+  #Dwarf Medicine
+
+  Dwarfs use a more detailed medical system called DwarfMed. If you are playing a dwarf, this page is for you. If you are not a dwarf, most of this does not apply.
+
+  Your body is split into zones, and each zone can be hurt, broken, or lost separately. Your overall health still decides whether you are alive, critical, or dead.
+
+  <Box>
+    <GuideEntityEmbed Entity="CMHealthAnalyzer"/>
+    <GuideEntityEmbed Entity="CMTraumaKit10"/>
+    <GuideEntityEmbed Entity="CMBurnKit10"/>
+    <GuideEntityEmbed Entity="RMCSplint10"/>
+  </Box>
+
+  ##The three rules
+  - [bold]Your body takes all the damage.[/bold] A limb is not extra health and does not protect you.
+  - [bold]The body selector chooses the zone.[/bold] It is in the bottom right. It starts on Chest. It decides where your attacks land and where your treatments go.
+  - [bold]Limb damage and body damage are different.[/bold] Body damage can kill you. Limb damage can break a bone or take the limb off.
+
+  ##Health and limb trauma
+  - You become [bold]Critical at 100 total damage[/bold] and [bold]die at 200[/bold].
+  - When you are hit, your body takes the full hit. The selected zone also records [bold]half of that hit[/bold] as limb trauma.
+  - Slash, blunt/piercing, and burn trauma are tracked separately.
+  - When a zone has taken enough of one kind of trauma, it can be [bold]severed[/bold].
+  - Chest and Groin cannot be severed. Everything else can.
+  - Losing a limb does not directly damage you, but the stump bleeds and you lose the use of that limb.
+  - Fire and explosions can damage several zones at once. Fire can burn a limb off completely.
+
+  ##The body selector
+  - Click a zone on the bottom-right body to select it: Head, Chest, Groin, arms, hands, legs, or feet.
+  - Your selected zone is where [bold]your[/bold] attacks land.
+  - If you are a medic, your selected zone is also the zone you treat with kits, splints, and limb healing.
+  - If the selected part is missing, the game falls back to the nearest part: hand to arm, foot to leg, then chest.
+  - [bold]Check your selector.[/bold] If it is stuck on Left Hand, you will keep aiming at left hands.
+
+  ##Fractures
+  - Caused by slash and blunt damage. Burn does not fracture.
+  - Signs: a crack sound, dropping your weapon, or moving slowly.
+  - A splint stops the bad effects but [bold]does not heal the fracture[/bold].
+  - Only Bone Repair surgery fixes a fracture.
+  - Do not run on an unsplinted broken leg. It can start internal bleeding.
+
+  ##Internal bleeding
+  - Caused by heavy blunt damage to the head, chest, or groin, or by moving on an unsplinted fracture.
+  - Signs: a deep, wet pain and ongoing blood loss.
+  - Gauze, ointment, and trauma kits [bold]do not stop it[/bold].
+  - Only Internal Bleeding surgery with a Fix-O-Vein stops it.
+
+  ##Stump bleeding
+  - Happens when a limb is severed.
+  - Pack the stump with gauze or a trauma kit to slow it down.
+  - Packing [bold]does not stop it[/bold]. Only Seal Stump surgery stops it.
+  - Ignored stump bleeding will kill you.
+
+  ##Organ damage
+  - Organs are in the head, chest, and groin. Big hits to those zones, explosions, and poison can damage them.
+  - Damage is tracked per organ. A badly damaged organ can [bold]rupture[/bold].
+  - [bold]Heart:[/bold] causes breathlessness and blood loss. A ruptured heart blocks defibrillation until it is repaired.
+  - [bold]Lungs:[/bold] causes suffocation. A ruptured lung suffocates you quickly.
+  - [bold]Brain:[/bold] causes stuttering, jittering, and knockout. A ruptured or missing brain makes you unrevivable.
+  - [bold]Eyes:[/bold] blur your vision, then blind you.
+  - [bold]Kidneys and liver:[/bold] poison you over time.
+  - [bold]Stomach:[/bold] slows how fast food and drink work.
+  - Chems do not repair organs. Organ Repair surgery with the matching gel does.
+
+  ##Checking injuries
+  - Click the body status alert to check yourself. It reports each zone, for example: "Your left arm is fractured and bleeding internally."
+  - Use a [bold]health analyzer[/bold] on a patient. The body map shows damage, fractures, and bleeding.
+  - The body scanner and medical records also report fractures, internal bleeding, and organ damage.
+  - Tell your medic which zone hurts. It saves time.
+
+  ##If you are the patient
+  - Tell the medic what hit you and which zone hurts.
+  - Stay still while being treated. Most treatments are do-afters and cancel if you move.
+  - Do not run on a fractured leg or foot.
+  - If a limb comes off, keep it if you can. It can be reattached later.
+  - Do not expect chems to fix a limb, a fracture, or an organ.
+  - A defibrillator is not free: each defib adds heart damage. A ruptured heart or a dead brain cannot be defibbed.
+
+  ##If you are the medic
+  - [bold]1.[/bold] Select the zone you want to treat on your body selector.
+  - [bold]2.[/bold] Scan the patient and read the injured zones.
+  - [bold]3.[/bold] Treat limb trauma with a trauma kit for slash/blunt or a burn kit for burn.
+  - [bold]4.[/bold] Splint fractures. Pack bleeding stumps.
+  - [bold]5.[/bold] Do surgery for fractures, internal bleeding, stump bleeding, and organ damage.
+  - [bold]6.[/bold] Reattach a severed limb or install a prosthetic when the patient is stable.
+  - An [bold]autodoc[/bold] can handle internal bleeding, broken bones, organ damage, and limb trauma if it has the right upgrades.
+
+  ##Surgery basics
+  - Most DwarfMed surgeries follow the same pattern: open with a scalpel, clamp with a hemostat, retract with a retractor, do the special step, then close with a cautery.
+  - [bold]Bone Repair:[/bold] apply bone gel with a gel inserter, then use a bone setter.
+  - [bold]Internal Bleeding:[/bold] use a Fix-O-Vein.
+  - [bold]Seal Stump:[/bold] use a Fix-O-Vein.
+  - [bold]Organ Repair:[/bold] apply 5u of the matching organ gel with a gel inserter.
+  - [bold]Amputation:[/bold] use a circular saw. This also drops the hand or foot below the limb.
+  - [bold]Limb Reattachment:[/bold] hold the severed limb during the reattachment step.
+  - [bold]Prosthetic Install:[/bold] hold the matching prosthetic during the install step.
+  - Surgery uses the surgery menu's part selection. It does not use your body selector.
+
+  ##Gels
+  - The gel inserter holds 5u.
+  - Organ repair needs [bold]exactly 5u of the one correct gel[/bold]. Mixed gels count as the wrong gel.
+  - Wrong organ gel consumes the gel, adds 5 organ damage, and poisons the patient.
+  - Wrong bone gel is wasted, but does not hurt the patient.
+  - Gels: bone, heart, lung, brain, eye, kidney, liver, and stomach.
+
+  ##Prosthetics
+  - Prosthetic limbs replace missing arms, hands, legs, and feet.
+  - They do not fracture, do not get internal bleeding, and do not bleed from stumps.
+  - Repair a prosthetic's brute damage with a blowtorch, and its burn damage with a cable coil.
+  - You cannot replace a brain. Brain removal is permanent.
+
+  ##Common mistakes
+  - Using chems on a limb and expecting the limb trauma to go down. Chems heal the body only.
+  - Splinting a fracture and thinking it is fixed. It is only braced.
+  - Packing a stump and thinking the bleeding is stopped. It is only slowed.
+  - Mixing gels. Use one gel at a time.
+  - Forgetting the body selector. It affects both attacks and treatment.
+  - Trying to amputate the chest or groin. They cannot be removed.
+  - Defibbing a patient with a ruptured heart or a dead brain. Repair the organ first, or do not expect a revive.
+
+</Document>
